@@ -1,10 +1,10 @@
 $(document).ready(function() {
-  var width = 600;
+  var width = 500;
   var height = 300;
-  var axisPadding = 30;
+  var axisPadding = 20;
   var xPadding = 1;
   var xScale = d3.scale.linear()
-    .domain([0, 750])
+    .domain([0, 1100])
     .range([0, width - axisPadding]);
   var xAxisScale = d3.scale.linear()
     .domain([0, 750])
@@ -62,17 +62,33 @@ $(document).ready(function() {
         .attr('height', function(d) {
           return yScale(parseFloat(d.editsPerLaunch));
         })
-        .attr('fill', 'maroon');
+        .attr('fill', '#667799');
 
-    svg.append('g')
-        .attr('class', 'axis')
-        .attr('transform', 'translate(0, ' + (height - axisPadding) + ')')
-      .call(xAxis);
-    svg.append('g')
-        .attr('class', 'axis')
-        .attr('transform', 'translate(' + axisPadding + ', 0)')
-      .call(yAxis);
+    // svg.append('g')
+    //     .attr('class', 'axis')
+    //     .attr('transform', 'translate(0, ' + (height - axisPadding) + ')')
+    //   .call(xAxis);
+    // svg.append('g')
+    //     .attr('class', 'axis')
+    //     .attr('transform', 'translate(' + axisPadding + ', 0)')
+    //   .call(yAxis);
   });
+
+  svg.append("text")
+    .attr('text-anchor', 'end')
+    .attr('font-size', 'small')
+    .attr('x', width)
+    .attr('y', height - 6)
+    .text('Time in minutes');
+
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr('font-size', 'small')
+    .attr("y", 0)
+    .attr('color', 'white')
+    .attr("dy", ".75em")
+    .attr("transform", "rotate(-90)")
+    .text('Edit size per launch');
 
   var svg2 = d3.select('#second-chart')
     .append('svg')
@@ -127,15 +143,30 @@ $(document).ready(function() {
         .attr('height', function(d) {
           return yScale(parseFloat(d.editsPerLaunch));
         })
-        .attr('fill', 'maroon');
+        .attr('fill', '#667799');
 
-    svg2.append('g')
-        .attr('class', 'axis')
-        .attr('transform', 'translate(0, ' + (height - axisPadding) + ')')
-      .call(xAxis);
-    svg2.append('g')
-        .attr('class', 'axis')
-        .attr('transform', 'translate(' + axisPadding + ', 0)')
-      .call(yAxis);
+    // svg2.append('g')
+    //     .attr('class', 'axis')
+    //     .attr('transform', 'translate(0, ' + (height - axisPadding) + ')')
+    //   .call(xAxis);
+    // svg2.append('g')
+    //     .attr('class', 'axis')
+    //     .attr('transform', 'translate(' + axisPadding + ', 0)')
+    //   .call(yAxis);
   });
+  svg2.append("text")
+    .attr('text-anchor', 'end')
+    .attr('font-size', 'small')
+    .attr('x', width)
+    .attr('y', height - 6)
+    .text('Time in minutes');
+
+  svg2.append("text")
+    .attr("text-anchor", "end")
+    .attr('font-size', 'small')
+    .attr("y", 0)
+    .attr('color', 'white')
+    .attr("dy", ".75em")
+    .attr("transform", "rotate(-90)")
+    .text('Edit size per launch');
 });
