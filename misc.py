@@ -64,4 +64,8 @@ def main(args):
         print("OR: ./misc.py [input_file] [fieldname]")
 
 if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print("Usage: ./misc.py sample [input_file] [projectIds,] [output_file]")
+        print("OR: ./misc.py [input_file] [fieldname]")
+        sys.exit()
     main(sys.argv[1:])
