@@ -44,7 +44,7 @@ def get_sample(infile, project_ids, outfile):
             headers = next(reader)
             writer.writerow(headers)
             for row in csv.reader(fin, delimiter=','):
-                if (repr(row[1]) in project_ids):
+                if (repr(row[0]) in project_ids):
                     writer.writerow(row)
     except FileNotFoundError as fnfe:
         print("Error! %s does not exist!" % infile)
