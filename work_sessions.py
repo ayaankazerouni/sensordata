@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import csv
+import sys
 
 def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
@@ -63,3 +64,17 @@ def get_work_sessions(infile, outfile):
             'assignment': prev_row['CASSIGNMENTNAME'], 'workSessionId': prev_row['workSessionId'], \
             'start_time': start_time, 'end_time': int(prev_row['time']), 'testLaunches': test_launches, \
             'normalLaunches': normal_launches, 'editSize': edit_size, 'editsPerLaunch': ratio })
+
+def main(args):
+    infile = args[0]
+    outfile = args[1]
+    try:
+        get_work_sessions(infile, outfile)
+    except FileNotFoundError as e:
+        print("Error! File %s does not exist." % infile)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: ./work_sessions.py [input_file] [output_file]')
+        sys.exit()
+    main(sys.argv[1:])

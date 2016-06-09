@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import csv
+import sys
 
 def get_time_spent(infile, outfile):
     """
@@ -34,3 +35,17 @@ def get_time_spent(infile, outfile):
 
         writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'assignment': row['assignment'],\
             'timeSpent': time_spent / 1080000 })
+
+def main(args):
+    infile = args[0]
+    outfile = args[1]
+    try:
+        get_time_spent(infile, outfile)
+    except FileNotFoundError as e:
+        print("Error! File %s does not exist." % infile)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: ./time_spent.py [input_file] [output_file]')
+        sys.exit()
+    main(sys.argv[1:])

@@ -2,6 +2,7 @@
 
 import csv
 import numpy as np
+import sys
 
 def get_launch_quartiles(infile, outfile):
     """
@@ -55,3 +56,17 @@ def get_launch_quartiles(infile, outfile):
         q3 = np.percentile(a, 75)
         high = np.percentile(a, 100)
         writer.writerow({'workSessionId': prev_ws, 'q1': q1, 'q2': median, 'q3': q3})
+
+def main(args):
+    infile = args[0]
+    outfile = args[1]
+    try:
+        get_launch_quartiles(infile, outfile)
+    except FileNotFoundError as e:
+        print("Error! File %s does not exist." % infile)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: ./quartiles.py [input_file] [output_file]')
+        sys.exit()
+    main(sys.argv[1:])

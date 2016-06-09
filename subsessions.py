@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import csv
+import sys
 
 def get_subsessions(infile, outfile):
     """
@@ -87,3 +88,17 @@ def get_subsessions(infile, outfile):
                 ws_start_time = row['time']
 
             prev_row = row
+
+def main(args):
+    infile = args[0]
+    outfile = args[1]
+    try:
+        get_subsessions(infile, outfile)
+    except FileNotFoundError as e:
+        print("Error! File %s does not exist." % infile)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: ./subsessions.py [input_file] [output_file]')
+        sys.exit()
+    main(sys.argv[1:])
