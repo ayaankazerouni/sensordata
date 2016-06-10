@@ -28,14 +28,14 @@ def print_distinct(infile, fieldname):
         print(thing)
 
 
-def get_sample(infile, project_ids, outfile):
+def get_sample(infile, col_index, vals, outfile):
     """
     Gets all raw sensordata for the project_ids in the specified list.
 
     Keyword arguments:
     outfile -- the file in which to put the sample.
     """
-    print("Sampling by given projectIds and putting them in %s..." % (outfile))
+    print("Sampling by given column values and putting them in %s..." % (outfile))
 
     try:
         with open(infile, 'r') as fin, open(outfile, 'w') as fout:
@@ -44,7 +44,7 @@ def get_sample(infile, project_ids, outfile):
             headers = next(reader)
             writer.writerow(headers)
             for row in csv.reader(fin, delimiter=','):
-                if (repr(row[0]) in project_ids):
+                if (repr(row[col_index]) in vals):
                     writer.writerow(row)
     except FileNotFoundError as fnfe:
         print("Error! %s does not exist!" % infile)
@@ -52,15 +52,16 @@ def get_sample(infile, project_ids, outfile):
 def main(args):
     if args[0] in 'sample':
         infile = args[1]
-        ids = [repr(x) for x in args[2:len(args) - 1]]
+        col_index = args[2]
+        vals = [repr(x) for x in args[3:len(args) - 1]]
         outfile = args[len(args) - 1]
-        get_sample(infile, ids, outfile)
+        get_sample(infile, int(col_index), vals, outfile)
     elif args[0] in 'dist':
         infile = args[1]
         fieldname = args[2]
         print_distinct(infile, fieldname)
     else:
-        print("Usage: ./misc.py sample [input_file] [projectIds,] [output_file]")
+        print("Usage: ./misc.py sample [input_file] [column_index] [projectIds,] [output_file]")
         print("OR: ./misc.py [input_file] [fieldname]")
 
 if __name__ == '__main__':

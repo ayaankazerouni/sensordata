@@ -75,6 +75,7 @@ def main(args):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print('Usage: ./work_sessions.py [input_file] [output_file]')
+        print('Collapses subsession data from infile into work session data in outfile.')
+        print('Usage:\n\t./work_sessions.py [input_file] [output_file]')
         sys.exit()
     main(sys.argv[1:])

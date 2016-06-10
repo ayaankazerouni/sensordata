@@ -67,6 +67,8 @@ def main(args):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
+        print('Splits a subsession data file into quartiles based on statements changed ' +
+            'per subsession.')
         print('Usage: ./quartiles.py [input_file] [output_file]')
         sys.exit()
     main(sys.argv[1:])
