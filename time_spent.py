@@ -45,7 +45,7 @@ def main(args):
         print("Error! File %s does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Takes in worksession data from the infile and gives back the time spent on a project for a student.')
         print('Usage:\n\t./time_spent.py [input_file] [output_file]')
         sys.exit()

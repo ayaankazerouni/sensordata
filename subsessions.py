@@ -16,8 +16,8 @@ def get_subsessions(infile, outfile):
     """
     print('Getting subsessions...')
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
-        reader = csv.DictReader(fin, delimiter  =',')
-        writer = csv.DictWriter(fout, delimiter =',', fieldnames=['projectId', 'userId', 'CASSIGNMENTNAME', 'time', \
+        reader = csv.DictReader(fin, delimiter=',')
+        writer = csv.DictWriter(fout, delimiter=',', fieldnames=['projectId', 'userId', 'CASSIGNMENTNAME', 'time', \
             'workSessionId', 'editSize', 'launchType', 'wsStartTime'])
 
         # Write headers first.
@@ -98,7 +98,7 @@ def main(args):
         print("Error! File %s does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Clusters data into work sessions and subsessions.\n\nSubsessions are separated by ' +
             'launch events. Work sessions are separated by a gap of 3 hours without activity.')
         print('Usage:\n\t./subsessions.py [input_file] [output_file]')

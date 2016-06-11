@@ -74,7 +74,7 @@ def main(args):
         print("Error! File %s does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Collapses subsession data from infile into work session data in outfile.')
         print('Usage:\n\t./work_sessions.py [input_file] [output_file]')
         sys.exit()

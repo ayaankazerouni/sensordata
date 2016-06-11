@@ -66,7 +66,7 @@ def main(args):
         print("Error! File %s does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Splits a subsession data file into quartiles based on statements changed ' +
             'per subsession.')
         print('Usage: ./quartiles.py [input_file] [output_file]')
