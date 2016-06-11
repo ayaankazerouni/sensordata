@@ -3,6 +3,18 @@
 import csv
 import sys
 
+def print_headers(infile):
+    """Prints all the headers in the infile"""
+    print('Prints CSV headers in %s data:' % infile)
+    headers = None
+
+    with open(infile, 'r') as fin:
+        reader = csv.reader(fin, delimiter=',')
+        headers = next(reader)
+
+    for thing in headers:
+        print(thing)
+
 def print_distinct(infile, fieldname):
     """
     Prints all distinct values found in given column.
@@ -51,22 +63,37 @@ def get_sample(infile, col_index, vals, outfile):
 
 def main(args):
     if args[0] in 'sample':
+        if len(args) < 4:
+            __print_usage()
+            sys.exit()
         infile = args[1]
         col_index = args[2]
         vals = [repr(x) for x in args[3:len(args) - 1]]
         outfile = args[len(args) - 1]
         get_sample(infile, int(col_index), vals, outfile)
     elif args[0] in 'dist':
+        if len(args) < 3:
+            __print_usage()
+            sys.exit()
         infile = args[1]
         fieldname = args[2]
         print_distinct(infile, fieldname)
+    elif args[0] in 'headers':
+        if len(args) < 2:
+            __print_usage()
+            sys.exit()
+        infile = args[1]
+        print_headers(infile)
     else:
         print("Usage: ./misc.py sample [input_file] [column_index] [projectIds,] [output_file]")
         print("OR: ./misc.py [input_file] [fieldname]")
 
+def __print_usage():
+    print("Usage: ./misc.py sample [input_file] [projectIds,] [output_file]")
+    print("OR: ./misc.py dist [input_file] [fieldname]")
+
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print("Usage: ./misc.py sample [input_file] [projectIds,] [output_file]")
-        print("OR: ./misc.py [input_file] [fieldname]")
+    if len(sys.argv) < 2:
+        __print_usage()
         sys.exit()
     main(sys.argv[1:])
