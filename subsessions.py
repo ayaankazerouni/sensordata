@@ -18,17 +18,24 @@ def get_subsessions(infile, outfile):
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=['projectId', 'userId', 'CASSIGNMENTNAME', 'time', \
-            'workSessionId', 'editSize', 'launchType', 'wsStartTime'])
+            'workSessionId', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods', 'testEditSizeMethods', \
+            'launchType', 'wsStartTime'])
 
         # Write headers first.
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
 
+        # Set initial values.
         prev_launch_type = None
         ws_id = 0
-        subs_edit_size = 0
-        file_sizes = {}
+        edit_size_stmts = 0
+        edit_size_methods = 0
+        test_edit_size_stmts = 0
+        test_edit_size_methods = 0
+        file_sizes_stmts = {}
+        file_sizes_methods = {}
+        test_file_sizes_stmts = {}
+        test_file_sizes_methods = {}
         ws_start_time = None
-
         prev_row = None
 
         for row in reader:
@@ -43,11 +50,20 @@ def get_subsessions(infile, outfile):
                 # before continuing.
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], 'CASSIGNMENTNAME': \
                     prev_row['CASSIGNMENTNAME'], 'time': prev_row['time'], 'workSessionId': ws_id, \
-                    'editSize': subs_edit_size, 'launchType': 'N/A', 'wsStartTime': ws_start_time })
+                    'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
+                    edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': 'N/A',\
+                    'wsStartTime': ws_start_time })
 
+                # Reset persistent values for next user or assignment.
                 ws_id = 0
-                subs_edit_size = 0
-                file_sizes = {}
+                edit_size_stmts = 0
+                edit_size_methods = 0
+                test_edit_size_stmts = 0
+                test_edit_size_methods = 0
+                file_sizes_stmts = {}
+                file_sizes_methods = {}
+                test_file_sizes_stmts = {}
+                test_file_sizes_methods = {}
                 ws_start_time = int(row['time'])
                 prev_row = row
 
@@ -60,10 +76,23 @@ def get_subsessions(infile, outfile):
                     # quick lookup the next time this file is edited.
                     class_name = repr(row['Class-Name'])
                     stmts = int(row['Current-Statements'])
-                    prev_size = file_sizes.get(class_name, 0)
-                    subs_edit_size += abs(stmts - prev_size)
-                    file_sizes[class_name] = stmts
-                    prev_launch_type = None
+                    methods = int(row['Current-Methods'])
+
+                    if (int(row['onTestCase']) == 1):
+                        test_prev_size_stmts = test_file_sizes_stmts.get(class_name, 0)
+                        test_edit_size_stmts += abs(stmts - test_prev_size_stmts)
+                        test_file_sizes_stmts[class_name] = stmts
+                        test_prev_size_methods = test_file_sizes_methods.get(class_name, 0)
+                        test_edit_size_methods += abs(methods - test_prev_size_methods)
+                        test_file_sizes_methods[class_name] = methods
+                    else:
+                        prev_size_stmts = file_sizes_stmts.get(class_name, 0)
+                        edit_size_stmts += abs(stmts - prev_size_stmts)
+                        file_sizes_stmts[class_name] = stmts
+                        prev_size_methods = file_sizes_methods.get(class_name, 0)
+                        edit_size_methods += abs(methods - prev_size_methods)
+                        file_sizes_methods[class_name] = methods
+                        prev_launch_type = None
 
                 elif (repr(row['Type']) == repr('Launch')):
                     # A launch occured, so we break into another 'subsession',
@@ -71,20 +100,33 @@ def get_subsessions(infile, outfile):
                     launch_type = row['LaunchType']
                     if (repr(prev_launch_type) != repr(launch_type)):
                         writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'CASSIGNMENTNAME': \
-                            row['CASSIGNMENTNAME'], 'time': row['time'], 'workSessionId': ws_id, 'editSize': \
-                            subs_edit_size, 'launchType': launch_type, 'wsStartTime': ws_start_time })
-                        subs_edit_size = 0
-                        file_sizes = {}
+                            row['CASSIGNMENTNAME'], 'time': row['time'], 'workSessionId': ws_id, 'editSizeStmts': \
+                            edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
+                            edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': \
+                            launch_type, 'wsStartTime': ws_start_time })
+
+                        edit_size_stmts = 0
+                        edit_size_methods = 0
+                        test_edit_size_stmts = 0
+                        test_edit_size_methods = 0
+                        file_sizes_stmts = {}
+                        file_sizes_methods = {}
+                        test_file_sizes_stmts = {}
+                        test_file_sizes_methods = {}
                     prev_launch_type = launch_type
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
                     'CASSIGNMENTNAME': row['CASSIGNMENTNAME'], 'time': prev_row['time'], 'workSessionId': ws_id, \
-                    'editSize': subs_edit_size, 'launchType': 'N/A', 'wsStartTime': ws_start_time })
+                    'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
+                    edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': 'N/A',\
+                    'wsStartTime': ws_start_time })
                 ws_id += 1
-                subs_edit_size = 0
-                file_sizes = {}
+                edit_size_stmts = 0
+                edit_size_methods = 0
+                file_sizes_stmts = {}
+                file_sizes_methods = {}
                 ws_start_time = row['time']
 
             prev_row = row

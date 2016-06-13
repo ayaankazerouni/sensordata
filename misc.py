@@ -88,9 +88,9 @@ def main(args):
         print_usage()
 
 def print_usage():
-    print("Usage: ./misc.py sample [input_file] [col_index] c[projectIds,] [output_file]")
+    print("Usage: ./misc.py sample [input_file] [col_index] [vals,] [output_file]")
     print("OR: ./misc.py dist [input_file] [fieldname]")
-    print("OR: ./misc.py headers")
+    print("OR: ./misc.py headers [input_file]")
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
