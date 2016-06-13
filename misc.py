@@ -64,7 +64,7 @@ def get_sample(infile, col_index, vals, outfile):
 def main(args):
     if args[0] in 'sample':
         if len(args) < 4:
-            __print_usage()
+            print_usage()
             sys.exit()
         infile = args[1]
         col_index = args[2]
@@ -73,27 +73,27 @@ def main(args):
         get_sample(infile, int(col_index), vals, outfile)
     elif args[0] in 'dist':
         if len(args) < 3:
-            __print_usage()
+            print_usage()
             sys.exit()
         infile = args[1]
         fieldname = args[2]
         print_distinct(infile, fieldname)
     elif args[0] in 'headers':
         if len(args) < 2:
-            __print_usage()
+            print_usage()
             sys.exit()
         infile = args[1]
         print_headers(infile)
     else:
-        print("Usage: ./misc.py sample [input_file] [column_index] [projectIds,] [output_file]")
-        print("OR: ./misc.py [input_file] [fieldname]")
+        print_usage()
 
-def __print_usage():
-    print("Usage: ./misc.py sample [input_file] [projectIds,] [output_file]")
+def print_usage():
+    print("Usage: ./misc.py sample [input_file] [col_index] c[projectIds,] [output_file]")
     print("OR: ./misc.py dist [input_file] [fieldname]")
+    print("OR: ./misc.py headers")
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        __print_usage()
+        print_usage()
         sys.exit()
     main(sys.argv[1:])
