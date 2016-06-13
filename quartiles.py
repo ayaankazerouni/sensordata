@@ -16,7 +16,7 @@ def get_launch_quartiles(infile, outfile):
     print('Getting edits-per-launch quartiles...')
     fieldnames = ['workSessionId', 'q1', 'q2', 'q3']
 
-    edit_sizes = []
+    edit_sizes_stmts = []
     prev_row = None
 
 
@@ -31,12 +31,13 @@ def get_launch_quartiles(infile, outfile):
             prev_row = prev_row or row
             if (row['workSessionId'] == prev_row['workSessionId'] \
                 and row['projectId'] == prev_row['projectId']):
-                    edit_sizes.append(int(row['editSize']))
+                    edit_size_stmts = int(row['editSizeStmts']) + int(row['testEditSizeStmts'])
+                    edit_sizes_stmts.append(edit_size_stmts)
 
                     prev_row = row
             else:
                 prev_ws = int(prev_row['workSessionId'])
-                a = np.array(edit_sizes)
+                a = np.array(edit_sizes_stmts)
                 low = np.percentile(a, 0)
                 q1 = np.percentile(a, 25)
                 median = np.percentile(a, 50)
@@ -44,12 +45,13 @@ def get_launch_quartiles(infile, outfile):
                 high = np.percentile(a, 100)
                 writer.writerow({'workSessionId': prev_ws, 'q1': q1, 'q2': median, 'q3': q3})
 
-                edit_sizes = []
-                edit_sizes.append(int(row['editSize']))
+                edit_sizes_stmts = []
+                edit_size_stmts = int(row['editSizeStmts']) + int(row['testEditSizeStmts'])
+                edit_sizes_stmts.append(edit_size_stmts)
                 prev_row = row
 
         prev_ws = int(prev_row['workSessionId'])
-        a = np.array(edit_sizes)
+        a = np.array(edit_sizes_stmts)
         low = np.percentile(a, 0)
         q1 = np.percentile(a, 25)
         median = np.percentile(a, 50)
