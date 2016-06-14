@@ -29,12 +29,12 @@ def get_time_spent(infile, outfile):
                 prev_row = row
             else:
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'assignment': prev_row['assignment'], 'timeSpent': time_spent / 1080000})
+                    'assignment': prev_row['cleaned_assignment'], 'timeSpent': time_spent / 1080000})
                 time_spent = int(row['end_time']) - int(row['start_time'])
                 prev_row = row
 
-        writer.writerow({ 'userId': row['userId'], 'projectId': row['projectId'], 'assignment': row['assignment'],\
-            'timeSpent': time_spent / 1080000 })
+        writer.writerow({ 'userId': row['userId'], 'projectId': row['projectId'], 'assignment':\
+            row['cleaned_assignment'], 'timeSpent': time_spent / 1080000 })
 
 def main(args):
     infile = args[0]

@@ -17,8 +17,7 @@ def clean_assignment_names(infile, outfile):
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
         headers = list((fn) for fn in reader.fieldnames)
-        headers.append('clean?')
-        headers.append('cleaned?')
+        headers.append('cleaned_assignment')
 
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=headers)
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
@@ -29,27 +28,21 @@ def clean_assignment_names(infile, outfile):
             assignment_name = squashed_assignment_name(row['CASSIGNMENTNAME'])
             uri = row['uri']
             project_id = row['projectId']
-            clean = 1
-            cleaned = 0
             project_dir = project_dir_from_uri(uri)
 
             if project_dir is None:
-                clean = 0
-                cleaned = 0
+                index = len(assignment_name) - 1
+                row['cleaned_assignment'] = assignment_name[:index] + ' ' + assignment_name[index:]
             elif assignment_name != project_dir:
                 assignment_name = project_dir
                 index = len(assignment_name) - 1
                 assignment_name = assignment_name[:index] + ' ' + assignment_name[index:]
-                cleaned = 1
-                row['CASSIGNMENTNAME'] = assignment_name
+                row['cleaned_assignment'] = assignment_name
+            else:
+                index = len(assignment_name) - 1
+                row['cleaned_assignment'] = assignment_name[:index] + ' ' + assignment_name[index:]
 
-            row['clean?'] = clean
-            row['cleaned?'] = cleaned
             writer.writerow(row)
-
-
-
-
 
 def squashed_assignment_name(assignment):
     split = assignment.split()

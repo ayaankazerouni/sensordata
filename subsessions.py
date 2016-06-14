@@ -17,7 +17,7 @@ def get_subsessions(infile, outfile):
     print('Getting subsessions...')
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
-        writer = csv.DictWriter(fout, delimiter=',', fieldnames=['projectId', 'userId', 'CASSIGNMENTNAME', 'time', \
+        writer = csv.DictWriter(fout, delimiter=',', fieldnames=['projectId', 'userId', 'cleaned_assignment', 'time', \
             'workSessionId', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods', 'testEditSizeMethods', \
             'launchType', 'wsStartTime'])
 
@@ -48,11 +48,11 @@ def get_subsessions(infile, outfile):
             if (row['userId'] != prev_row['userId'] or row['projectId'] != prev_row['projectId']):
                 # Started events for the next user or assignment, so write out aggregate data of prev user
                 # before continuing.
-                writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], 'CASSIGNMENTNAME': \
-                    prev_row['CASSIGNMENTNAME'], 'time': prev_row['time'], 'workSessionId': ws_id, \
-                    'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
-                    edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': 'N/A',\
-                    'wsStartTime': ws_start_time })
+                writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
+                    'cleaned_assignment': prev_row['cleaned_assignment'], 'time': prev_row['time'], 'workSessionId': \
+                    ws_id, 'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, \
+                    'editSizeMethods': edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, \
+                    'launchType': 'N/A', 'wsStartTime': ws_start_time })
 
                 # Reset persistent values for next user or assignment.
                 ws_id = 0
@@ -99,8 +99,8 @@ def get_subsessions(infile, outfile):
                     # writing out aggregate data and resetting values.
                     launch_type = row['LaunchType']
                     if (repr(prev_launch_type) != repr(launch_type)):
-                        writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'CASSIGNMENTNAME': \
-                            row['CASSIGNMENTNAME'], 'time': row['time'], 'workSessionId': ws_id, 'editSizeStmts': \
+                        writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'cleaned_assignment': \
+                            row['cleaned_assignment'], 'time': row['time'], 'workSessionId': ws_id, 'editSizeStmts': \
                             edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
                             edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': \
                             launch_type, 'wsStartTime': ws_start_time })
@@ -118,7 +118,7 @@ def get_subsessions(infile, outfile):
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
                 writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'CASSIGNMENTNAME': row['CASSIGNMENTNAME'], 'time': prev_row['time'], 'workSessionId': ws_id, \
+                    'cleaned_assignment': row['cleaned_assignment'], 'time': prev_row['time'], 'workSessionId': ws_id, \
                     'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
                     edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': 'N/A',\
                     'wsStartTime': ws_start_time })

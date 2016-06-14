@@ -7,8 +7,9 @@ def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
     print('Getting work sessions...')
 
-    fieldnames = ['projectId', 'userId', 'assignment', 'workSessionId', 'start_time', 'end_time', 'normalLaunches',\
-        'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods', 'testEditSizeMethods']
+    fieldnames = ['projectId', 'userId', 'cleaned_assignment', 'workSessionId', 'start_time', 'end_time',\
+        'normalLaunches', 'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods',\
+        'testEditSizeMethods']
 
     prev_row = None
     ws = None
@@ -45,7 +46,7 @@ def get_work_sessions(infile, outfile):
                     prev_row = row
             else:
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'assignment': prev_row['CASSIGNMENTNAME'], 'workSessionId': prev_row['workSessionId'],\
+                    'cleaned_assignment': prev_row['cleaned_assignment'], 'workSessionId': prev_row['workSessionId'],\
                     'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': \
                     normal_launches, 'testLaunches': test_launches, 'editSizeStmts': \
                     edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': edit_size_methods, \
@@ -69,7 +70,7 @@ def get_work_sessions(infile, outfile):
                 prev_row = row
 
         writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-            'assignment': prev_row['CASSIGNMENTNAME'], 'workSessionId': prev_row['workSessionId'], \
+            'cleaned_assignment': prev_row['cleaned_assignment'], 'workSessionId': prev_row['workSessionId'], \
             'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': normal_launches, \
             'testLaunches': test_launches, 'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts,\
             'editSizeMethods': edit_size_methods, 'testEditSizeMethods': test_edit_size_methods })
