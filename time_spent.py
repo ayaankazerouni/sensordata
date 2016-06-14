@@ -33,7 +33,7 @@ def get_time_spent(infile, outfile):
                 time_spent = int(row['end_time']) - int(row['start_time'])
                 prev_row = row
 
-        writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'assignment': row['assignment'],\
+        writer.writerow({ 'userId': row['userId'], 'projectId': row['projectId'], 'assignment': row['assignment'],\
             'timeSpent': time_spent / 1080000 })
 
 def main(args):

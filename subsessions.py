@@ -117,7 +117,7 @@ def get_subsessions(infile, outfile):
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
-                writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
+                writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
                     'CASSIGNMENTNAME': row['CASSIGNMENTNAME'], 'time': prev_row['time'], 'workSessionId': ws_id, \
                     'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
                     edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': 'N/A',\

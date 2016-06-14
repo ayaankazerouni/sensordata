@@ -68,7 +68,7 @@ def get_work_sessions(infile, outfile):
 
                 prev_row = row
 
-        writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
+        writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
             'assignment': prev_row['CASSIGNMENTNAME'], 'workSessionId': prev_row['workSessionId'], \
             'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': normal_launches, \
             'testLaunches': test_launches, 'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts,\
