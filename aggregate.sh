@@ -11,7 +11,7 @@ else
     ./subsessions.py [sensordatafile] {generates subsessions.csv}
     ./work_sessions.py subsessions.csv work_sessions.csv {generates work_sessions.csv}
     ./time_spent.py work_sessions.csv time_spent.csv  {generates time_spent.csv}"
-  echo "After execution, you will have information about subsession data, work_session data, the time spent on each\
-  project, and the number of edits-per-launch organised into quartiles."
+  echo "After execution, you will have information about subsession data, work_session data, and the time spent on each\
+  project."
   echo "Usage: ./aggregate.sh [filename]"
 fi
