@@ -71,7 +71,7 @@ def get_launch_totals(infile, outfile):
     print('Getting launch totals...')
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
-        fieldnames = ['userId', 'projectId', 'assignment', 'normalLaunches', 'testLaunches']
+        fieldnames = ['userId', 'projectId', 'cleaned_assignment', 'normalLaunches', 'testLaunches']
         reader = csv.DictReader(fin, delimiter=',')
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=fieldnames)
 
@@ -86,12 +86,12 @@ def get_launch_totals(infile, outfile):
             prev_row = prev_row or row
 
             if row['userId'] == prev_row['userId'] and row['projectId'] == prev_row['projectId'] \
-                and row['assignment'] == prev_row['assignment']:
+                and row['cleaned_assignment'] == prev_row['cleaned_assignment']:
                     normal_launches += int(row['normalLaunches'])
                     test_launches += int(row['testLaunches'])
             else:
                 writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'assignment': prev_row['assignment'], 'normalLaunches': normal_launches, \
+                    'cleaned_assignment': prev_row['cleaned_assignment'], 'normalLaunches': normal_launches, \
                     'testLaunches': test_launches })
 
                 normal_launches = 0
@@ -113,9 +113,12 @@ def main(args):
         print("Error! File %s does not exist." % infile)
 
 def print_usage():
-    print('Splits a subsession data file into quartiles based on statements changed ' +
-        'per subsession.')
+    print('Outputs launch stats from the provided input file. Stats are either ' +
+        ' the quartiled number of statements added before each launch, or the ' +
+        ' the total number of solution/test statements/methods changed before each ' +
+        ' solution/test launch.')
     print('Usage: ./launch_stats.py (quartiles|totals) [input_file] [output_file]')
+    print('NOTE: To get quartiles, use subsession data as input. To get totals, use worksession data.')
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
