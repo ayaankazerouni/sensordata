@@ -1,3 +1,3 @@
 # sensordata
 
-Data aggregation scripts and tentative d3 visualisations.
+Data aggregation scripts. Sensordata (not included) are required to run these scripts.
