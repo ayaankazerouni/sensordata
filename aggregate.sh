@@ -3,9 +3,11 @@
 if [ $# -gt 0 ]; then
   echo "Aggregating sensor data from" $1 "to give subsessions, work sessions, and the time_spent on each project by a student."
 
-  ./subsessions.py $1 subsessions.csv
-  ./work_sessions.py subsessions.csv work_sessions.csv
-  ./time_spent.py work_sessions.csv time_spent.csv
+  mkdir -p results
+
+  ./subsessions.py $1 ./results/subsessions.csv
+  ./work_sessions.py ./results/subsessions.csv ./results/work_sessions.csv
+  ./time_spent.py ./results/work_sessions.csv ./results/time_spent.csv
 else
   echo "Does a complete aggregation of sensordata in the provided sensordata file, by running the following processes:
     ./subsessions.py [sensordatafile] {generates subsessions.csv}
