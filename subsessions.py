@@ -2,6 +2,7 @@
 
 import csv
 import sys
+import traceback
 
 def get_subsessions(infile, outfile):
     """
@@ -138,6 +139,13 @@ def main(args):
         get_subsessions(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File %s does not exist." % infile)
+    except KeyError as e:
+        cause = e.args[0]
+        if (cause == 'cleaned_assignment'):
+            print("Key Error! Are you using a cleaned data file? Please run ./clean.py on the data file and use " +
+                "the resulting file as input.")
+        else:
+            traceback.print_exc()
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

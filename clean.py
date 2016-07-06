@@ -5,25 +5,25 @@ import sys
 
 def clean_assignment_names(infile, outfile):
     """
-    Makes an attempt to clean sensordata. Marks lines that we are not sure of.
-    Focuses on making sure assignment names are properly assigned to student
-    events.
+    Assigns cleaned assignment names to each row, making an educated guess
+    by looking at the URI for that sensordata event.
 
     Keyword arguments:
     infile  -- the file containing the unclean sensordata
-    outfile -- the file containing the clean sensordata, with an added column 'clean?'
-        to indicate whether the event has been cleaned or not.
+    outfile -- the file containing the clean sensordata, with an added
+        column 'cleaned_assignment'. This column is used for other aggregation
+        operations (subsessions, work_sessions, etc.).
     """
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
         headers = list((fn) for fn in reader.fieldnames)
         headers.append('cleaned_assignment')
+        headers.append('cleaned?')
 
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=headers)
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
 
         assignment_name = None
-        project_dirs = {}
         for row in reader:
             assignment_name = squashed_assignment_name(row['CASSIGNMENTNAME'])
             uri = row['uri']
@@ -33,14 +33,17 @@ def clean_assignment_names(infile, outfile):
             if project_dir is None:
                 index = len(assignment_name) - 1
                 row['cleaned_assignment'] = assignment_name[:index] + ' ' + assignment_name[index:]
+                row['cleaned?'] = 0
             elif assignment_name != project_dir:
                 assignment_name = project_dir
                 index = len(assignment_name) - 1
                 assignment_name = assignment_name[:index] + ' ' + assignment_name[index:]
                 row['cleaned_assignment'] = assignment_name
+                row['cleaned?'] = 1
             else:
                 index = len(assignment_name) - 1
                 row['cleaned_assignment'] = assignment_name[:index] + ' ' + assignment_name[index:]
+                row['cleaned?'] = 1
 
             writer.writerow(row)
 

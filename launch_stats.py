@@ -19,7 +19,6 @@ def get_launch_quartiles(infile, outfile):
     edit_sizes_stmts = []
     prev_row = None
 
-
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=fieldnames)

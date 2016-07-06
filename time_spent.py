@@ -9,7 +9,7 @@ def get_time_spent(infile, outfile):
     the time spent on a project for a student.
     """
     print('Getting time spent on project...')
-    fieldnames = ['userId', 'projectId', 'assignment', 'timeSpent']
+    fieldnames = ['userId', 'projectId', 'assignment', 'start_time', 'timeSpent']
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
@@ -20,21 +20,25 @@ def get_time_spent(infile, outfile):
 
         prev_row = None
         time_spent = 0
+        start_time = None
 
         for row in reader:
             prev_row = prev_row or row
+            start_time = start_time or int(row['start_time'])
 
             if (row['projectId'] == prev_row['projectId'] and row['userId'] == prev_row['userId']):
                 time_spent += int(row['end_time']) - int(row['start_time'])
                 prev_row = row
             else:
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'assignment': prev_row['cleaned_assignment'], 'timeSpent': time_spent / 1080000})
+                    'assignment': prev_row['cleaned_assignment'], 'start_time': start_time, \
+                    'timeSpent': time_spent / 1080000})
                 time_spent = int(row['end_time']) - int(row['start_time'])
+                start_time = int(row['start_time'])
                 prev_row = row
 
         writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], 'assignment':\
-            prev_row['cleaned_assignment'], 'timeSpent': time_spent / 1080000 })
+            prev_row['cleaned_assignment'], 'start_time': start_time, 'timeSpent': time_spent / 1080000 })
 
 def main(args):
     infile = args[0]
