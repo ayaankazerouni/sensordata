@@ -51,6 +51,6 @@ def main(args):
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         print('Takes in worksession data from the infile and gives back the time spent on a project for a student.')
-        print('Usage:\n\t./time_spent.py [input_file] [output_file]')
+        print('Usage:\n\t./time_spent.py <input_file> <output_file>')
         sys.exit()
     main(sys.argv[1:])

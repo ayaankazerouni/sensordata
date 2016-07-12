@@ -151,6 +151,6 @@ if __name__ == '__main__':
     if len(sys.argv) < 3:
         print('Clusters data into work sessions and subsessions.\n\nSubsessions are separated by ' +
             'launch events. Work sessions are separated by a gap of 3 hours without activity.')
-        print('Usage:\n\t./subsessions.py [input_file] [output_file]')
+        print('Usage:\n\t./subsessions.py <input_file> <output_file>')
         sys.exit()
     main(sys.argv[1:])

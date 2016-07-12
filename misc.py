@@ -15,7 +15,7 @@ def print_headers(infile):
     for thing in headers:
         print(thing)
 
-def print_distinct(infile, fieldname):
+def print_distinct(infile, fieldname, limit=None):
     """
     Prints all distinct values found in given column.
 
@@ -23,13 +23,18 @@ def print_distinct(infile, fieldname):
     infile    -- the input data file (CSV)
     fieldname -- the name of the column.
     """
-    print("Printing all distinct values from column %s." % fieldname)
+    limstr = "all" if limit is None else str(limit)
+    print("Printing %s distinct values from column '%s'." % (limstr, fieldname))
+    limit = limit or sys.maxsize
     values = []
     try:
         with open(infile, 'r') as fin:
             for row in csv.DictReader(fin, delimiter=','):
-                if (repr(row[fieldname]) not in values):
+                if len(values) < limit and repr(row[fieldname]) not in values:
                     values.append(repr(row[fieldname]))
+                elif len(values) >= limit:
+                    break
+
     except FileNotFoundError as fnfe:
         print("Error! %s does not exist!" % infile)
     except KeyError as ke:
@@ -77,7 +82,10 @@ def main(args):
             sys.exit()
         infile = args[1]
         fieldname = args[2]
-        print_distinct(infile, fieldname)
+        if len(args) == 4:
+            print_distinct(infile, fieldname, int(args[3]))
+        else:
+            print_distinct(infile, fieldname)
     elif args[0] in 'headers':
         if len(args) < 2:
             print_usage()
@@ -88,11 +96,11 @@ def main(args):
         print_usage()
 
 def print_usage():
-    print("Get a sample from, all the headers in, or all distinct values for a field - from the " + 
+    print("Get a sample from, all the headers in, or all distinct values for a field - from the " +
         "given data file.")
-    print("Usage: ./misc.py sample [input_file] [col_index] [vals,] [output_file]")
-    print("OR: ./misc.py dist [input_file] [fieldname]")
-    print("OR: ./misc.py headers [input_file]")
+    print("Usage: ./misc.py sample <input_file> <col_index> <vals,> <output_file>")
+    print("OR: ./misc.py dist <input_file> <fieldname> [limit]")
+    print("OR: ./misc.py headers <input_file>")
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

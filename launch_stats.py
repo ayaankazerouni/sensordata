@@ -116,7 +116,7 @@ def print_usage():
         ' the quartiled number of statements added before each launch, or the ' +
         ' the total number of solution/test statements/methods changed before each ' +
         ' solution/test launch.')
-    print('Usage: ./launch_stats.py (quartiles|totals) [input_file] [output_file]')
+    print('Usage: ./launch_stats.py (quartiles|totals) <input_file> <output_file>')
     print('NOTE: To get quartiles, use subsession data as input. To get totals, use worksession data.')
 
 if __name__ == '__main__':

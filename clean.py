@@ -69,6 +69,6 @@ def main(args):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print('Usage:\n\t./clean.py [input_file] [output_file]')
+        print('Usage:\n\t./clean.py <input_file> <output_file>')
         sys.exit()
     main(sys.argv[1:])
