@@ -138,7 +138,7 @@ def main(args):
     try:
         get_subsessions(infile, outfile)
     except FileNotFoundError as e:
-        print("Error! File %s does not exist." % infile)
+        print("Error! File '%s' does not exist." % infile)
     except KeyError as e:
         cause = e.args[0]
         if (cause == 'cleaned_assignment'):

@@ -96,7 +96,7 @@ def main(args):
         print_usage()
 
 def print_usage():
-    print("Get a sample from, all the headers in, or all distinct values for a field - from the " +
+    print("Get a sample, all the headers, or all distinct values for a field - from the " +
         "given data file.")
     print("Usage: ./misc.py sample <input_file> <col_index> <vals,> <output_file>")
     print("OR: ./misc.py dist <input_file> <fieldname> [limit]")
