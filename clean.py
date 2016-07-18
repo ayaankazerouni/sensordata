@@ -2,6 +2,7 @@
 
 import csv
 import sys
+import re
 
 def clean_assignment_names(infile, outfile):
     """
@@ -31,18 +32,13 @@ def clean_assignment_names(infile, outfile):
             project_dir = project_dir_from_uri(uri)
 
             if project_dir is None:
-                index = len(assignment_name) - 1
-                row['cleaned_assignment'] = assignment_name[:index] + ' ' + assignment_name[index:]
+                row['cleaned_assignment'] = assignment_name
                 row['cleaned?'] = 0
             elif assignment_name != project_dir:
-                assignment_name = project_dir
-                index = len(assignment_name) - 1
-                assignment_name = assignment_name[:index] + ' ' + assignment_name[index:]
-                row['cleaned_assignment'] = assignment_name
+                row['cleaned_assignment'] = project_dir
                 row['cleaned?'] = 1
             else:
-                index = len(assignment_name) - 1
-                row['cleaned_assignment'] = assignment_name[:index] + ' ' + assignment_name[index:]
+                row['cleaned_assignment'] = assignment_name
                 row['cleaned?'] = 1
 
             writer.writerow(row)
@@ -54,9 +50,14 @@ def squashed_assignment_name(assignment):
 def project_dir_from_uri(uri):
     split = uri.split('/')
     for thing in split:
-        if thing.startswith('Assignment'):
-            return thing
-
+        if thing.startswith('Assignment') or thing.startswith('Project')\
+            or thing.startswith('Rectangle') or thing.startswith('Point')\
+            or thing.startswith('project'):
+                thing = thing.replace('%20', '')
+                nums = re.findall(r'\d+', thing)
+                for num in nums:
+                    if num in ['1', '2', '3', '4']:
+                        return 'Assignment' + num
     return None
 
 def main(args):
