@@ -93,7 +93,7 @@ def main(args):
         if method == 'raw':
             get_duplicated(infile, outfile)
         elif method == 'time':
-            get_duplicated_from_time(infile, outfile)
+            get_duplicated_from_time_spent(infile, outfile)
         else:
             print_usage()
     except FileNotFoundError as e:
