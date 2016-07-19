@@ -103,6 +103,8 @@ def print_usage():
     print("Get userId, projectId, uri, time, and Subtype for projects where " +
         " an Import event occurs at the same timestamp.")
     print("Usage:\n./duplicated.py <raw | time> <input_file> <output_file>")
+    print("When getting duplicates by time_spent, make sure the time_spent file " +
+        "is sorted by userId and projectId.")
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
