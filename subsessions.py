@@ -32,10 +32,10 @@ def get_subsessions(infile, outfile):
         edit_size_methods = 0
         test_edit_size_stmts = 0
         test_edit_size_methods = 0
-        file_sizes_stmts = {}
-        file_sizes_methods = {}
-        test_file_sizes_stmts = {}
-        test_file_sizes_methods = {}
+        curr_sizes_stmts = {}
+        curr_sizes_methods = {}
+        test_curr_sizes_stmts = {}
+        test_curr_sizes_methods = {}
         ws_start_time = None
         prev_row = None
 
@@ -61,10 +61,8 @@ def get_subsessions(infile, outfile):
                 edit_size_methods = 0
                 test_edit_size_stmts = 0
                 test_edit_size_methods = 0
-                file_sizes_stmts = {}
-                file_sizes_methods = {}
-                test_file_sizes_stmts = {}
-                test_file_sizes_methods = {}
+                curr_sizes_stmts = {}
+                curr_sizes_methods = {}
                 ws_start_time = int(row['time'])
                 prev_row = row
 
@@ -78,22 +76,18 @@ def get_subsessions(infile, outfile):
                     class_name = repr(row['Class-Name'])
                     stmts = int(row['Current-Statements'])
                     methods = int(row['Current-Methods'])
+                    prev_size_stmts = curr_sizes_stmts.get(class_name, 0)
+                    prev_size_methods = curr_sizes_methods.get(class_name, 0)
 
                     if (int(row['onTestCase']) == 1):
-                        test_prev_size_stmts = test_file_sizes_stmts.get(class_name, 0)
-                        test_edit_size_stmts += abs(stmts - test_prev_size_stmts)
-                        test_file_sizes_stmts[class_name] = stmts
-                        test_prev_size_methods = test_file_sizes_methods.get(class_name, 0)
-                        test_edit_size_methods += abs(methods - test_prev_size_methods)
-                        test_file_sizes_methods[class_name] = methods
+                        test_edit_size_stmts += abs(stmts - prev_size_stmts)
+                        test_edit_size_methods += abs(methods - prev_size_methods)
                     else:
-                        prev_size_stmts = file_sizes_stmts.get(class_name, 0)
                         edit_size_stmts += abs(stmts - prev_size_stmts)
-                        file_sizes_stmts[class_name] = stmts
-                        prev_size_methods = file_sizes_methods.get(class_name, 0)
                         edit_size_methods += abs(methods - prev_size_methods)
-                        file_sizes_methods[class_name] = methods
-                        prev_launch_type = None
+                    curr_sizes_stmts[class_name] = stmts
+                    curr_sizes_methods[class_name] = methods
+                    prev_launch_type = None
 
                 elif (repr(row['Type']) == repr('Launch')):
                     # A launch occured, so we break into another 'subsession',
@@ -110,10 +104,6 @@ def get_subsessions(infile, outfile):
                         edit_size_methods = 0
                         test_edit_size_stmts = 0
                         test_edit_size_methods = 0
-                        file_sizes_stmts = {}
-                        file_sizes_methods = {}
-                        test_file_sizes_stmts = {}
-                        test_file_sizes_methods = {}
                     prev_launch_type = launch_type
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
@@ -125,9 +115,9 @@ def get_subsessions(infile, outfile):
                     'wsStartTime': ws_start_time })
                 ws_id += 1
                 edit_size_stmts = 0
+                test_edit_size_stmts = 0
                 edit_size_methods = 0
-                file_sizes_stmts = {}
-                file_sizes_methods = {}
+                test_edit_size_methods = 0
                 ws_start_time = row['time']
 
             prev_row = row
