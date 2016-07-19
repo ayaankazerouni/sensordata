@@ -8,6 +8,8 @@ if [ $# -gt 0 ]; then
   ./subsessions.py $1 ./results/subsessions.csv
   ./work_sessions.py ./results/subsessions.csv ./results/work_sessions.csv
   ./time_spent.py ./results/work_sessions.csv ./results/time_spent.csv
+  ./launch_stats.py quartiles ./results/subsessions.csv ./results/launch_quartiles.csv
+  ./launch_stats.py totals ./results/work_sessions.csv ./results/launch_totals.csv
 else
   echo "Does a complete aggregation of sensordata in the provided sensordata file, by running the following processes:
     ./subsessions.py [sensordatafile] {generates subsessions.csv}

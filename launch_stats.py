@@ -6,15 +6,17 @@ import sys
 
 def get_launch_quartiles(infile, outfile):
     """
-    Splits a subsession data file into quartiles based on edits
-    per subsession for easier visualisations.
+    Splits a subsession data file into quartiles based on edits sizes
+    (statements) per subsession for easier visualisations.
+
+    The data generated here is on a per-student basis.
 
     Keyword arguments:
     infile  -- the name of the file containing subsession data
     outfile -- the name of the file in which to put quartile data
     """
     print('Getting edits-per-launch quartiles...')
-    fieldnames = ['workSessionId', 'q1', 'q2', 'q3']
+    fieldnames = ['userId', 'projectId', 'workSessionId', 'assignment', 'min', 'q1', 'q2', 'q3', 'max']
 
     edit_sizes_stmts = []
     prev_row = None
@@ -29,7 +31,8 @@ def get_launch_quartiles(infile, outfile):
         for row in reader:
             prev_row = prev_row or row
             if (row['workSessionId'] == prev_row['workSessionId'] \
-                and row['projectId'] == prev_row['projectId']):
+                and row['projectId'] == prev_row['projectId']
+                and row['userId'] == prev_row['userId']):
                     edit_size_stmts = int(row['editSizeStmts']) + int(row['testEditSizeStmts'])
                     edit_sizes_stmts.append(edit_size_stmts)
 
@@ -42,7 +45,9 @@ def get_launch_quartiles(infile, outfile):
                 median = np.percentile(a, 50)
                 q3 = np.percentile(a, 75)
                 high = np.percentile(a, 100)
-                writer.writerow({'workSessionId': prev_ws, 'q1': q1, 'q2': median, 'q3': q3})
+                writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
+                    'workSessionId': prev_ws, 'assignment': prev_row['cleaned_assignment'], \
+                    'min': low, 'q1': q1, 'q2': median, 'q3': q3, 'max': high })
 
                 edit_sizes_stmts = []
                 edit_size_stmts = int(row['editSizeStmts']) + int(row['testEditSizeStmts'])
@@ -117,7 +122,9 @@ def print_usage():
         ' the total number of solution/test statements/methods changed before each ' +
         ' solution/test launch.')
     print('Usage: ./launch_stats.py (quartiles|totals) <input_file> <output_file>')
-    print('NOTE: To get quartiles, use subsession data as input. To get totals, use worksession data.')
+    print("IMPORTANT")
+    print("* To get quartiles, use subsession data as input. To get totals, use worksession data.")
+    print("* Make sure to use data that was generated from a 'cleaned' data file.")
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
