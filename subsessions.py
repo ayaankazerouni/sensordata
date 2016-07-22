@@ -62,31 +62,32 @@ def get_subsessions(infile, outfile):
                 test_edit_size_stmts = 0
                 test_edit_size_methods = 0
                 curr_sizes_stmts = {}
-                curr_sizes_methods = {}
                 ws_start_time = int(row['time'])
                 prev_row = row
 
             if (abs(int(row['time']) - int(prev_row['time'])) < 10800000):
                 # Within the same work session, we add up numbers for edit sizes
                 # and keep track of file sizes.
-                if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
-                    # An edit took place, we we're going to store the current
-                    # size of the file (in statements) in a dictionary for
-                    # quick lookup the next time this file is edited.
-                    class_name = repr(row['Class-Name'])
-                    stmts = int(row['Current-Statements'])
-                    methods = int(row['Current-Methods'])
-                    prev_size_stmts = curr_sizes_stmts.get(class_name, 0)
-                    prev_size_methods = curr_sizes_methods.get(class_name, 0)
+                if (repr(row['Type']) == repr('Edit')):
+                    if(len(row['Class-Name']) > 0):
+                        # An edit took place, we we're going to store the current
+                        # size of the file (in statements) in a dictionary for
+                        # quick lookup the next time this file is edited.
+                        class_name = repr(row['Class-Name'])
+                        stmts = int(row['Current-Statements'])
+                        prev_size_stmts = curr_sizes_stmts.get(class_name, 0)
 
-                    if (int(row['onTestCase']) == 1):
-                        test_edit_size_stmts += abs(stmts - prev_size_stmts)
-                        test_edit_size_methods += abs(methods - prev_size_methods)
-                    else:
-                        edit_size_stmts += abs(stmts - prev_size_stmts)
-                        edit_size_methods += abs(methods - prev_size_methods)
-                    curr_sizes_stmts[class_name] = stmts
-                    curr_sizes_methods[class_name] = methods
+                        if (int(row['onTestCase']) == 1):
+                            test_edit_size_stmts += abs(stmts - prev_size_stmts)
+                        else:
+                            edit_size_stmts += abs(stmts - prev_size_stmts)
+                        curr_sizes_stmts[class_name] = stmts
+                    if(repr(row['Unit-Type']) == repr('Method')\
+                        and repr(row['Subsubtype']) in [repr('Add'), repr('Remove')]):
+                        if (int(row['onTestCase']) == 1):
+                            test_edit_size_methods += 1
+                        else:
+                            edit_size_methods += 1
                     prev_launch_type = None
 
                 elif (repr(row['Type']) == repr('Launch')):

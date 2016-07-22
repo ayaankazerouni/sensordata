@@ -4,8 +4,8 @@ import csv
 import sys
 
 def print_headers(infile):
-    """Prints all the headers in the infile"""
-    print('Prints CSV headers in %s data:' % infile)
+    """Prints all the headers in infile"""
+    print('Printing CSV headers in %s data:' % infile)
     headers = None
 
     with open(infile, 'r') as fin:

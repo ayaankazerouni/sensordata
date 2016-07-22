@@ -45,19 +45,18 @@ def clean_assignment_names(infile, outfile):
 
 def squashed_assignment_name(assignment):
     split = assignment.split()
-    return split[0] + split[1]
+    return split[0] + ' ' + split[1]
 
 def project_dir_from_uri(uri):
     split = uri.split('/')
+    assignment_keywords = [ 'assignment', 'project', 'rectangle', 'point' ]
     for thing in split:
-        if thing.startswith('Assignment') or thing.startswith('Project')\
-            or thing.startswith('Rectangle') or thing.startswith('Point')\
-            or thing.startswith('project'):
-                thing = thing.replace('%20', '')
-                nums = re.findall(r'\d+', thing)
-                for num in nums:
-                    if num in ['1', '2', '3', '4']:
-                        return 'Assignment' + num
+        thing = thing.replace('%20', '').lower()
+        if any(keyword in thing for keyword in assignment_keywords):
+            nums = re.findall(r'\d+', thing)
+            for num in nums:
+                if num in ['1', '2', '3', '4']:
+                    return 'Assignment ' + num
     return None
 
 def main(args):

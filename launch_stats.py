@@ -7,7 +7,7 @@ import sys
 def get_launch_quartiles(infile, outfile):
     """
     Splits a subsession data file into quartiles based on edits sizes
-    (statements) per subsession for easier visualisations.
+    (statements) per subsession within a work session for easier visualisations.
 
     The data generated here is on a per-student basis.
 
@@ -31,7 +31,7 @@ def get_launch_quartiles(infile, outfile):
         for row in reader:
             prev_row = prev_row or row
             if (row['workSessionId'] == prev_row['workSessionId'] \
-                and row['projectId'] == prev_row['projectId']
+                and row['projectId'] == prev_row['projectId'] \
                 and row['userId'] == prev_row['userId']):
                     edit_size_stmts = int(row['editSizeStmts']) + int(row['testEditSizeStmts'])
                     edit_sizes_stmts.append(edit_size_stmts)
