@@ -1,16 +1,26 @@
 #! /usr/bin/env bash
 
 if [ $# -gt 0 ]; then
-  echo "Aggregating sensor data from" $1 "to give subsessions, 
+  echo "Aggregating sensor data from" $1 "to give subsessions,
   work sessions, and the time_spent on each project by a student."
 
   mkdir -p results
 
-  ./subsessions.py $1 ./results/subsessions.csv
-  ./work_sessions.py ./results/subsessions.csv ./results/work_sessions.csv
-  ./time_spent.py ./results/work_sessions.csv ./results/time_spent.csv
-  ./launch_stats.py quartiles ./results/subsessions.csv ./results/launch_quartiles.csv
-  ./launch_stats.py totals ./results/work_sessions.csv ./results/launch_totals.csv
+  if [ ! -f './results/subsessions.csv' ]; then
+    ./subsessions.py $1 ./results/subsessions.csv
+  fi
+  if [ ! -f './results/work_sessions.csv' ]; then
+    ./work_sessions.py ./results/subsessions.csv ./results/work_sessions.csv
+  fi
+  if [ ! -f './results/time_spent.csv' ]; then
+    ./time_spent.py ./results/work_sessions.csv ./results/time_spent.csv
+  fi
+  if [ ! -f './results/launch_quartiles.csv' ]; then
+    ./launch_stats.py quartiles ./results/subsessions.csv ./results/launch_quartiles.csv
+  fi
+  if [ ! -f './results/launch_totals.csv' ]; then
+    ./launch_stats.py totals ./results/work_sessions.csv ./results/launch_totals.csv
+  fi
 else
   echo "Does a complete aggregation of sensordata in
   the provided sensordata file, by running the following processes:
