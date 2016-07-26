@@ -93,7 +93,7 @@ def get_subsessions(infile, outfile):
                 elif (repr(row['Type']) == repr('Launch')):
                     # A launch occured, so we break into another 'subsession',
                     # writing out aggregate data and resetting values.
-                    launch_type = row['LaunchType']
+                    launch_type = row['Subtype']
                     if (repr(prev_launch_type) != repr(launch_type)):
                         writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'cleaned_assignment': \
                             row['cleaned_assignment'], 'time': row['time'], 'workSessionId': ws_id, 'editSizeStmts': \

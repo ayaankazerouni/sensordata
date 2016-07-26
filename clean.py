@@ -20,8 +20,12 @@ def clean_assignment_names(infile, outfile):
         headers = list((fn) for fn in reader.fieldnames)
         headers.append('cleaned_assignment')
         headers.append('cleaned?')
+        headers.remove('LaunchType')
+        headers.remove('TerminationType')
 
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=headers)
+
+        # Write headers first
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
 
         assignment_name = None
@@ -40,6 +44,15 @@ def clean_assignment_names(infile, outfile):
             else:
                 row['cleaned_assignment'] = assignment_name
                 row['cleaned?'] = 1
+
+            # Stores launchtypes and terminationtypes less nonsensically.
+            if repr(row['Type']) == repr('Launch'):
+                row['Subtype'] = row['LaunchType']
+            elif repr(row['Type']) == repr('Termination'):
+                row['Subtype'] = row['TerminationType']
+
+            del row['LaunchType']
+            del row['TerminationType']
 
             writer.writerow(row)
 
