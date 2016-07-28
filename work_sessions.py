@@ -7,7 +7,8 @@ def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
     print('Getting work sessions...')
 
-    fieldnames = ['projectId', 'userId', 'cleaned_assignment', 'workSessionId', 'start_time', 'end_time',\
+    fieldnames = ['projectId', 'userId', 'cleaned_assignment', 'milestone1', 'milestone2', 'milestone3',
+        'earlyBonus', 'dueTime', 'workSessionId', 'start_time', 'end_time',\
         'normalLaunches', 'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods',\
         'testEditSizeMethods']
 
@@ -46,7 +47,9 @@ def get_work_sessions(infile, outfile):
                     prev_row = row
             else:
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'cleaned_assignment': prev_row['cleaned_assignment'], 'workSessionId': prev_row['workSessionId'],\
+                    'cleaned_assignment': prev_row['cleaned_assignment'], 'milestone1': prev_row['milestone1'],\
+                    'milestone2': prev_row['milestone2'], 'milestone3': prev_row['milestone3'], 'earlyBonus':\
+                    prev_row['earlyBonus'], 'dueTime': prev_row['dueTime'], 'workSessionId': prev_row['workSessionId'],\
                     'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': \
                     normal_launches, 'testLaunches': test_launches, 'editSizeStmts': \
                     edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': edit_size_methods, \
@@ -69,11 +72,14 @@ def get_work_sessions(infile, outfile):
 
                 prev_row = row
 
-        writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-            'cleaned_assignment': prev_row['cleaned_assignment'], 'workSessionId': prev_row['workSessionId'], \
-            'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': normal_launches, \
-            'testLaunches': test_launches, 'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts,\
-            'editSizeMethods': edit_size_methods, 'testEditSizeMethods': test_edit_size_methods })
+        writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
+            'cleaned_assignment': prev_row['cleaned_assignment'], 'milestone1': prev_row['milestone1'],\
+            'milestone2': prev_row['milestone2'], 'milestone3': prev_row['milestone3'], 'earlyBonus':\
+            prev_row['earlyBonus'], 'dueTime': prev_row['dueTime'], 'workSessionId': prev_row['workSessionId'],\
+            'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': \
+            normal_launches, 'testLaunches': test_launches, 'editSizeStmts': \
+            edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': edit_size_methods, \
+            'testEditSizeMethods': test_edit_size_methods })
 
 def main(args):
     infile = args[0]

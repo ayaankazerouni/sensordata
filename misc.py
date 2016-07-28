@@ -45,23 +45,23 @@ def print_distinct(infile, fieldname, limit=None):
         print(thing)
 
 
-def get_sample(infile, col_index, vals, outfile):
+def get_sample(infile, col, vals, outfile):
     """
     Gets all raw sensordata for the project_ids in the specified list.
 
     Keyword arguments:
     outfile -- the file in which to put the sample.
     """
-    print("Sampling by given column values and putting them in %s..." % (outfile))
+    print("Sampling by %s into %s..." % (col, outfile))
 
     try:
         with open(infile, 'r') as fin, open(outfile, 'w') as fout:
-            writer = csv.writer(fout, delimiter=',')
-            reader = csv.reader(fin, delimiter=',')
-            headers = next(reader)
-            writer.writerow(headers)
-            for row in csv.reader(fin, delimiter=','):
-                if (repr(row[col_index]) in vals):
+            reader = csv.DictReader(fin, delimiter=',')
+            writer = csv.DictWriter(fout, delimiter=',', fieldnames=reader.fieldnames)
+            # Write headers first.
+            writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
+            for row in reader:
+                if (repr(row[col]) in vals):
                     writer.writerow(row)
     except FileNotFoundError as fnfe:
         print("Error! %s does not exist!" % infile)
@@ -72,10 +72,10 @@ def main(args):
             print_usage()
             sys.exit()
         infile = args[1]
-        col_index = args[2]
+        col = args[2]
         vals = [repr(x) for x in args[3:len(args) - 1]]
         outfile = args[len(args) - 1]
-        get_sample(infile, int(col_index), vals, outfile)
+        get_sample(infile, col, vals, outfile)
     elif args[0] in 'dist':
         if len(args) < 3:
             print_usage()
@@ -98,7 +98,7 @@ def main(args):
 def print_usage():
     print("Get a sample, all the headers, or all distinct values for a field - from the " +
         "given data file.")
-    print("Usage: ./misc.py sample <input_file> <col_index> <vals,> <output_file>")
+    print("Usage: ./misc.py sample <input_file> <column_name> <vals,> <output_file>")
     print("OR: ./misc.py dist <input_file> <fieldname> [limit]")
     print("OR: ./misc.py headers <input_file>")
 
