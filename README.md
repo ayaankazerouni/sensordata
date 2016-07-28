@@ -1,11 +1,11 @@
-# sensordata
+# sensordata (Notes for research team)
 
 Data aggregation and visualisation scripts. Sensordata (not included) are required to run these scripts.
 
-### Workflow (Assuming you have the data required to do anything)
+### Workflow
 1. ```git clone https://github.com/ayaankazerouni/sensordata.git```
 2. ```cd sensordata```
-3. ```./clean.py <your data file> <output file>``` To clean messed up assignment names, add some columns for visualisation, etc.
+3. ```./clean.py <sensordata file> <output file>``` To clean messed up assignment names, add some columns for visualisation, etc.
 4. ```./aggregate.sh <output file from previous step>``` This will generate subsessions, worksessions, time spent, and launch stats for each project.
 
 ### misc.py
