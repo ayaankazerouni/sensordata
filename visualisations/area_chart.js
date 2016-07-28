@@ -33,12 +33,37 @@
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  d3.csv("ws_126.csv", function(error, data) {
+  d3.csv("ws_1316.csv", function(error, data) {
     if (error) throw error;
+
+    var ms1 = -1,
+        ms2 = -1,
+        ms3 = -1,
+        earlyBonus = -1,
+        dueTime = -1;
 
     data.forEach((d) => {
       d.start_time = new Date(+d.start_time);
       d.edits = +d.editSizeStmts + +d.testEditSizeStmts;
+      if (ms1 === -1) {
+        ms1 = +d.milestone1;
+      }
+
+      if (ms2 === -1) {
+        ms2 = +d.milestone2;
+      }
+
+      if (ms3 === -1) {
+        ms3 = +d.milestone3;
+      }
+
+      if (earlyBonus === -1) {
+        earlyBonus = +d.earlyBonus;
+      }
+
+      if (dueTime === -1) {
+        dueTime = +d.dueTime;
+      }
     });
 
     x.domain(d3.extent(data, (d) => d.start_time));  // extent finds the min and max in an array. Useful for dates.
@@ -64,7 +89,17 @@
         .style("text-anchor", "end")
         .text("Edit size in statements");
 
-    lineData = [{"x": x(new Date(1458183600000)), "y": height}, {"x": x(new Date(1458183600000)), "y": 0}];
+    var dueX = x(new Date(dueTime));
+    var ms1X = x(new Date(ms1));
+    var ms2X = x(new Date(ms2));
+    var ms3X = x(new Date(ms3));
+    var earlyX = x(new Date(earlyBonus));
+
+    ms1Line = [{ "x": ms1X, "y": height }, { "x": ms1X, "y": 0 }];
+    ms2Line = [{ "x": ms2X, "y": height }, { "x": ms2X, "y": 0 }];
+    ms3Line = [{ "x": ms3X, "y": height }, { "x": ms3X, "y": 0 }];
+    earlyLine = [{ "x": earlyX, "y": height }, { "x": earlyX, "y": 0 }];
+    dueTimeLine = [{ "x": dueX, "y": height }, { "x": dueX, "y": 0 }];
 
     line = d3.svg.line()
         .x((d) => d.x)
@@ -72,7 +107,24 @@
         .interpolate('linear');
 
     svg.append("path")
-        .attr('class', 'due-date')
-        .attr('d', line(lineData));
+        .attr('class', 'date-line')
+        .attr('stroke', 'green')
+        .attr('d', line(ms1Line));
+    svg.append("path")
+        .attr('class', 'date-line')
+        .attr('stroke', 'green')
+        .attr('d', line(ms2Line));
+    svg.append("path")
+        .attr('class', 'date-line')
+        .attr('stroke', 'green')
+        .attr('d', line(ms3Line));
+    svg.append("path")
+        .attr('class', 'date-line')
+        .attr('stroke', 'orange')
+        .attr('d', line(earlyLine));
+    svg.append("path")
+        .attr('class', 'date-line')
+        .attr('stroke', 'red')
+        .attr('d', line(dueTimeLine));
   });
 })(window.jQuery, window, document);
