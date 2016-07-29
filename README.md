@@ -10,8 +10,9 @@ Data aggregation and visualisation scripts. Sensordata (not included) are requir
 
 ### misc.py
 Miscellaneous functions.
-* ```./misc.py dist <data file> <column name> [limit]``` gets you all distinct values for a column.
-* ```./misc.py sample <data file> <column name> <vals,> <output file>``` Gets you all rows where the given column has one of the given values. Not terribly useful unless you want a small subset of the data (like all events for a student, or a student's project, or Assignment 1) For more complex querying, import the csv file into a SQL client. For MySQL, use the [LOAD DATA INFILE command](http://dev.mysql.com/doc/refman/5.7/en/load-data.html)
+* ```./misc.py dist <data file> <column name> [limit]``` Gets you all distinct values for a column.
+* ```./misc.py sample <data file> <column name> <vals,> <output file>``` Gets you all rows where the given column has one of the given values. Not terribly useful unless you want a small subset of the data (like all events for a student, or a student's project, or Assignment 1) For more complex querying, import the csv file into a SQL client. For MySQL, use the [LOAD DATA INFILE command](http://dev.mysql.com/doc/refman/5.7/en/load-data.html).
+* ```./misc.py headers <csv file name>``` Prints out the first row of the specified file.
 
 
 ### Tentative D3 visualisations
