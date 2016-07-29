@@ -52,21 +52,39 @@
 
     // Specify input domains for the scales.
     x.domain(d3.extent(data, (d) => d.start_time));  // extent finds the min and max in an array. Useful for dates.
-    y.domain([0, d3.max(data, (d) => d.edits)]); // using 0 as the min here because we know it already.
+    var editsMax = d3.max(data, (d) => d.edits);
+    var testEditsMax = d3.max(data, (d) => d.testEdits);
+    y.domain([0, Math.max(editsMax, testEditsMax)]); // using 0 as the min here because we know it already.
 
-    // Draw the area for regular edits using the editsArea function.
-    svg.append("path")
+    if (editsMax > testEditsMax) {
+      // Draw the area for regular edits using the editsArea function.
+      svg.append("path")
         .datum(data)
         .attr('data-legend', 'Solution Code')
-        .attr("class", "edits")
+        .attr("class", "edits solution-code")
         .attr("d", editsArea);
 
-    // Draw the area for test edits using the testEditsArea function.
-    svg.append("path")
+      // Draw the area for test edits using the testEditsArea function.
+      svg.append("path")
         .datum(data)
         .attr('data-legend', 'Test Code')
-        .attr("class", "test-edits")
+        .attr("class", "edits test-code")
         .attr("d", testEditsArea);
+    } else {
+      // Draw the area for test edits using the testEditsArea function.
+      svg.append("path")
+        .datum(data)
+        .attr('data-legend', 'Test Code')
+        .attr('class', 'edits test-code')
+        .attr("d", testEditsArea);
+
+      // Draw the area for regular edits using the editsArea function.
+      svg.append("path")
+        .datum(data)
+        .attr('data-legend', 'Solution Code')
+        .attr('class', 'edits solution-code')
+        .attr("d", editsArea);
+    }
 
     // Draw axes.
     svg.append("g")
@@ -86,7 +104,7 @@
 
     svg.append("g")
       .attr('class', 'legend')
-      .attr("transform","translate(" + (width - 140) + ",30)")
+      .attr("transform","translate(" + (width - 140) + "," + height / 2 + ")")
       .style('font-size', '12px')
       .call(d3.legend);
 

@@ -17,9 +17,11 @@ d3.legend = function(g) {
 
     svg.selectAll("[data-legend]").each(function() {
         var self = d3.select(this)
+        var selector = self.attr('data-legend').toLowerCase().replace(' ', '-');
         items[self.attr("data-legend")] = {
           pos : self.attr("data-legend-pos") || this.getBBox().y,
-          color : self.attr("data-legend-color") != undefined ? self.attr("data-legend-color") : self.style("fill") != 'none' ? self.style("fill") : self.style("stroke")
+          color : self.attr("data-legend-color") != undefined ? self.attr("data-legend-color") : self.style("fill") != 'none' ? self.style("fill") : self.style("stroke"),
+          selector: selector
         }
       })
 
@@ -32,6 +34,9 @@ d3.legend = function(g) {
         .call(function(d) { d.exit().remove()})
         .attr("y",function(d,i) { return i+"em"})
         .attr("x","1em")
+        .attr('class', 'legend-item')
+        .on('mouseover', (d) => { hoverOn(d) })
+        .on('mouseout', (d) => { hoverOff(d) })
         .text(function(d) { ;return d.key})
 
     li.selectAll("circle")
@@ -41,7 +46,19 @@ d3.legend = function(g) {
         .attr("cy",function(d,i) { return i-0.25+"em"})
         .attr("cx",0)
         .attr("r","0.4em")
-        .style("fill",function(d) { console.log(d.value.color);return d.value.color})
+        .attr('class', 'legend-item')
+        .on('mouseover', (d) => { hoverOn(d) })
+        .on('mouseout', (d) => { hoverOff(d) })
+        .style("fill",function(d) { return d.value.color})
+
+    var hoverOn = function(d) {
+      svg.selectAll('path.edits').style('opacity', '0');
+      svg.selectAll('path.' + d.value.selector).style('opacity', '1');
+    };
+
+    var hoverOff = function(d) {
+      svg.selectAll('path.edits').style('opacity', '0.8');
+    }
 
     // Reposition and resize the box
     var lbbox = li[0][0].getBBox()
