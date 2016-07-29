@@ -14,9 +14,12 @@ Miscellaneous functions.
 * ```./misc.py sample <data file> <column name> <vals,> <output file>``` Gets you all rows where the given column has one of the given values. Not terribly useful unless you want a small subset of the data (like all events for a student, or a student's project, or Assignment 1) For more complex querying, import the csv file into a SQL client. For MySQL, use the [LOAD DATA INFILE command](http://dev.mysql.com/doc/refman/5.7/en/load-data.html)
 
 
-### Tentative D3 visualisations TODO
+### Tentative D3 visualisations
+
+#### Area chart showing programming in a work session:
 * ~~Barchart with a student's code-editing activity on a project.~~
-* Reflect regular code editing activity vs test code editing activity.
+* ~~Reflect regular code editing activity as separate from test code editing activity.~~
+* Reflect launching activity during programming.
 * Reflect regular and test launches as *events* interspersed within editing activity.
 
 Virginia Tech 2016
