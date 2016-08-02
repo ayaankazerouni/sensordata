@@ -53,11 +53,13 @@ d3.legend = function(g) {
 
     var hoverOn = function(d) {
       svg.selectAll('path.edits').style('opacity', '0');
+      svg.selectAll('path.launches').style('opacity', '0');
       svg.selectAll('path.' + d.value.selector).style('opacity', '1');
     };
 
     var hoverOff = function(d) {
       svg.selectAll('path.edits').style('opacity', '0.8');
+      svg.selectAll('path.launches').style('opacity', '0.5');
     }
 
     // Reposition and resize the box

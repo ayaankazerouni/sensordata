@@ -31,6 +31,13 @@ body {
   fill: #ffff66;
 }
 
+.launches {
+  stroke: seagreen;
+  stroke-width: 2px;
+  fill: springgreen;
+  opacity: 0.5;
+}
+
 .date-line {
   stroke-width: 1px;
 }
