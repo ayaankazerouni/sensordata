@@ -20,15 +20,15 @@ body {
 }
 
 .solution-code {
-  stroke: steelblue;
+  stroke: #6699ff;
   stroke-width: 2px;
-  fill: lightsteelblue;
+  fill: #99ccff;
 }
 
 .test-code {
-  stroke: seagreen;
+  stroke: #ffcc00;
   stroke-width: 2px;
-  fill: springgreen;
+  fill: #ffff66;
 }
 
 .date-line {

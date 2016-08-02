@@ -33,7 +33,7 @@
       .y0(height)
       .y1((d) => y(d.testEdits));
 
-  var svg = d3.select("body").append("svg")
+  var svg = d3.select('div.chart-area').append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -142,7 +142,7 @@
       .attr("id", "group-ms-1");
     ms1G.append("path")
       .attr('class', 'date-line')
-      .attr('stroke', 'green')
+      .attr('stroke', '#336699')
       .attr('d', line(ms1Line))
     ms1G.append("text")
       .attr("transform", "rotate(-90)")
@@ -150,13 +150,13 @@
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Milestone 1 Due")
-      .attr("fill", 'green');
+      .attr("fill", '#336699');
 
     ms2G = svg.append("g")
       .attr("id", "group-ms-2");
     ms2G.append("path")
       .attr('class', 'date-line')
-      .attr('stroke', 'green')
+      .attr('stroke', '#336699')
       .attr('d', line(ms2Line));
     ms2G.append("text")
       .attr("transform", "rotate(-90)")
@@ -164,13 +164,13 @@
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Milestone 2 Due")
-      .attr("fill", 'green');
+      .attr("fill", '#336699');
 
     ms3G = svg.append("g")
       .attr("id", "group-ms-3");
     ms3G.append("path")
       .attr('class', 'date-line')
-      .attr('stroke', 'green')
+      .attr('stroke', '#336699')
       .attr('d', line(ms3Line));
     ms3G.append("text")
       .attr("transform", "rotate(-90)")
@@ -178,21 +178,21 @@
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Milestone 3 Due")
-      .attr("fill", 'green');
+      .attr("fill", '#336699');
 
     earlyG = svg.append("g")
       .attr("id", "group-early")
     earlyG.append("path")
       .attr('class', 'date-line')
-      .attr('stroke', 'orange')
+      .attr('stroke', '#cc6600')
       .attr('d', line(earlyLine));
-    ms3G.append("text")
+    earlyG.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", earlyX + 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Early Bonus Deadline")
-      .attr("fill", 'orange');
+      .attr("fill", '#cc6600');
 
     dueG = svg.append("g")
       .attr("id", "group-due");

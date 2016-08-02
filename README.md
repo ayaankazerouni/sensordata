@@ -18,9 +18,9 @@ Miscellaneous functions.
 ### Tentative D3 visualisations
 
 #### Area chart showing programming in a work session:
-* ~~Barchart with a student's code-editing activity on a project.~~
+* ~~Area chart with a student's code-editing activity on a project.~~
 * ~~Reflect regular code editing activity as separate from test code editing activity.~~
 * Reflect launching activity during programming.
-* Reflect regular and test launches as *events* interspersed within editing activity.
+* Reflect Web-CAT reference tests passed over time.
 
 Virginia Tech 2016
