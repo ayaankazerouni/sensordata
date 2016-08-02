@@ -39,7 +39,7 @@
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  d3.csv("ws_1012.csv", function(error, data) {
+  d3.csv("ws_1010.csv", function(error, data) {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,

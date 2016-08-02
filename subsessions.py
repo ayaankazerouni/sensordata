@@ -50,14 +50,24 @@ def get_subsessions(infile, outfile):
             if (row['userId'] != prev_row['userId'] or row['projectId'] != prev_row['projectId']):
                 # Started events for the next user or assignment, so write out aggregate data of prev user
                 # before continuing.
-                writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'cleaned_assignment': prev_row['cleaned_assignment'], 'milestone1': prev_row['milestone1'],\
-                    'milestone2': prev_row['milestone2'], 'milestone3': prev_row['milestone3'], 'earlyBonus':\
-                    prev_row['earlyBonus'], 'dueTime': prev_row['dueTime'], \
-                    'time': prev_row['time'], 'workSessionId': \
-                    ws_id, 'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, \
-                    'editSizeMethods': edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, \
-                    'launchType': 'N/A', 'wsStartTime': ws_start_time })
+                to_write = {
+                    'userId': prev_row['userId'],
+                    'projectId': prev_row['projectId'],
+                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'milestone1': prev_row['milestone1'],
+                    'milestone2': prev_row['milestone2'],
+                    'milestone3': prev_row['milestone3'],
+                    'earlyBonus': prev_row['earlyBonus'],
+                    'dueTime': prev_row['dueTime'],
+                    'time': prev_row['time'],
+                    'workSessionId': ws_id,
+                    'editSizeStmts': edit_size_stmts,
+                    'testEditSizeStmts': test_edit_size_stmts,
+                    'editSizeMethods': test_edit_size_methods,
+                    'launchType': 'N/A',
+                    'wsStartTime': ws_start_time
+                }
+                writer.writerow(to_write)
 
                 # Reset persistent values for next user or assignment.
                 ws_id = 0
@@ -99,13 +109,24 @@ def get_subsessions(infile, outfile):
                     # writing out aggregate data and resetting values.
                     launch_type = row['Subtype']
                     if (repr(prev_launch_type) != repr(launch_type)):
-                        writer.writerow({'userId': row['userId'], 'projectId': row['projectId'], 'cleaned_assignment': \
-                            row['cleaned_assignment'], 'milestone1': row['milestone1'], 'milestone2': \
-                            row['milestone2'], 'milestone3': row['milestone3'], 'earlyBonus': row['earlyBonus'],\
-                            'dueTime': row['dueTime'], 'time': row['time'], 'workSessionId': ws_id, 'editSizeStmts': \
-                            edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
-                            edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': \
-                            launch_type, 'wsStartTime': ws_start_time })
+                        to_write = {
+                            'userId': row['userId'],
+                            'projectId': row['projectId'],
+                            'cleaned_assignment': row['cleaned_assignment'],
+                            'milestone1': row['milestone1'],
+                            'milestone2': row['milestone2'],
+                            'milestone3': row['milestone3'],
+                            'earlyBonus': row['earlyBonus'],
+                            'dueTime': row['dueTime'],
+                            'time': row['time'],
+                            'workSessionId': ws_id,
+                            'editSizeStmts': edit_size_stmts,
+                            'testEditSizeStmts': test_edit_size_stmts,
+                            'editSizeMethods': test_edit_size_methods,
+                            'launchType': launch_type,
+                            'wsStartTime': ws_start_time
+                        }
+                        writer.writerow(to_write)
 
                         edit_size_stmts = 0
                         edit_size_methods = 0
@@ -115,14 +136,24 @@ def get_subsessions(infile, outfile):
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
-                writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'cleaned_assignment': row['cleaned_assignment'], 'milestone1': prev_row['milestone1'],\
-                    'milestone2': prev_row['milestone2'], 'milestone3': prev_row['milestone3'], 'earlyBonus':\
-                    prev_row['earlyBonus'], 'dueTime': prev_row['dueTime'],\
-                    'time': prev_row['time'], 'workSessionId': ws_id, \
-                    'editSizeStmts': edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': \
-                    edit_size_methods, 'testEditSizeMethods': test_edit_size_methods, 'launchType': 'N/A',\
-                    'wsStartTime': ws_start_time })
+                to_write = {
+                    'userId': prev_row['userId'],
+                    'projectId': prev_row['projectId'],
+                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'milestone1': prev_row['milestone1'],
+                    'milestone2': prev_row['milestone2'],
+                    'milestone3': prev_row['milestone3'],
+                    'earlyBonus': prev_row['earlyBonus'],
+                    'dueTime': prev_row['dueTime'],
+                    'time': prev_row['time'],
+                    'workSessionId': ws_id,
+                    'editSizeStmts': edit_size_stmts,
+                    'testEditSizeStmts': test_edit_size_stmts,
+                    'editSizeMethods': test_edit_size_methods,
+                    'launchType': 'N/A',
+                    'wsStartTime': ws_start_time
+                }
+                writer.writerow(to_write)
                 ws_id += 1
                 edit_size_stmts = 0
                 test_edit_size_stmts = 0

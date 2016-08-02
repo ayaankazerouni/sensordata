@@ -46,14 +46,26 @@ def get_work_sessions(infile, outfile):
 
                     prev_row = row
             else:
-                writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-                    'cleaned_assignment': prev_row['cleaned_assignment'], 'milestone1': prev_row['milestone1'],\
-                    'milestone2': prev_row['milestone2'], 'milestone3': prev_row['milestone3'], 'earlyBonus':\
-                    prev_row['earlyBonus'], 'dueTime': prev_row['dueTime'], 'workSessionId': prev_row['workSessionId'],\
-                    'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': \
-                    normal_launches, 'testLaunches': test_launches, 'editSizeStmts': \
-                    edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': edit_size_methods, \
-                    'testEditSizeMethods': test_edit_size_methods })
+                to_write = {
+                    'userId': prev_row['userId'],
+                    'projectId': prev_row['projectId'],
+                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'milestone1': prev_row['milestone1'],
+                    'milestone2': prev_row['milestone2'],
+                    'milestone3': prev_row['milestone3'],
+                    'earlyBonus': prev_row['earlyBonus'],
+                    'dueTime': prev_row['dueTime'],
+                    'workSessionId': prev_row['workSessionId'],
+                    'start_time': start_time,
+                    'end_time': int(prev_row['time']),
+                    'normalLaunches': normal_launches,
+                    'testLaunches': test_launches,
+                    'editSizeStmts': edit_size_stmts,
+                    'testEditSizeStmts': test_edit_size_stmts,
+                    'editSizeMethods': edit_size_methods,
+                    'testEditSizeMethods': test_edit_size_methods
+                }
+                writer.writerow(to_write)
 
                 edit_size_stmts = int(row['editSizeStmts'])
                 test_edit_size_stmts = int(row['testEditSizeStmts'])
@@ -72,14 +84,26 @@ def get_work_sessions(infile, outfile):
 
                 prev_row = row
 
-        writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
-            'cleaned_assignment': prev_row['cleaned_assignment'], 'milestone1': prev_row['milestone1'],\
-            'milestone2': prev_row['milestone2'], 'milestone3': prev_row['milestone3'], 'earlyBonus':\
-            prev_row['earlyBonus'], 'dueTime': prev_row['dueTime'], 'workSessionId': prev_row['workSessionId'],\
-            'start_time': start_time, 'end_time': int(prev_row['time']), 'normalLaunches': \
-            normal_launches, 'testLaunches': test_launches, 'editSizeStmts': \
-            edit_size_stmts, 'testEditSizeStmts': test_edit_size_stmts, 'editSizeMethods': edit_size_methods, \
-            'testEditSizeMethods': test_edit_size_methods })
+        to_write = {
+            'userId': prev_row['userId'],
+            'projectId': prev_row['projectId'],
+            'cleaned_assignment': prev_row['cleaned_assignment'],
+            'milestone1': prev_row['milestone1'],
+            'milestone2': prev_row['milestone2'],
+            'milestone3': prev_row['milestone3'],
+            'earlyBonus': prev_row['earlyBonus'],
+            'dueTime': prev_row['dueTime'],
+            'workSessionId': prev_row['workSessionId'],
+            'start_time': start_time,
+            'end_time': int(prev_row['time']),
+            'normalLaunches': normal_launches,
+            'testLaunches': test_launches,
+            'editSizeStmts': edit_size_stmts,
+            'testEditSizeStmts': test_edit_size_stmts,
+            'editSizeMethods': edit_size_methods,
+            'testEditSizeMethods': test_edit_size_methods
+        }
+        writer.writerow(to_write)
 
 def main(args):
     infile = args[0]
