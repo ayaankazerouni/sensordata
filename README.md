@@ -2,6 +2,8 @@
 
 Data aggregation and visualisation scripts. Sensordata (not included) are required to run these scripts.
 
+---
+
 ## Aggregation scripts
 
 ### Workflow
@@ -63,6 +65,8 @@ Miscellaneous functions.
   import the csv file into a SQL client. For MySQL, use the [LOAD DATA INFILE
   command](http://dev.mysql.com/doc/refman/5.7/en/load-data.html).
 * `./misc.py headers <csv file name>` Prints out the first row of the specified file.
+
+---
 
 ## Tentative D3 visualisations
 
