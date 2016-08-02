@@ -75,6 +75,7 @@ Miscellaneous functions.
 * ~~Reflect regular code editing activity as separate from test code editing activity.~~
 * ~~Reflect launching activity during programming.~~
 * Tooltips for more detailed data for a point in time.
+* Bring areas to front when you hover over them.
 * Reflect Web-CAT reference tests passed over time.
 
 ### Visualisation for programming in a subsession:

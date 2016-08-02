@@ -53,7 +53,7 @@
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.csv('ws_1010.csv', function(error, data) {
+  d3.csv('ws_1012.csv', function(error, data) {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
@@ -73,43 +73,49 @@
 
     var editsMax = d3.max(data, (d) => d.edits);
     var testEditsMax = d3.max(data, (d) => d.testEdits);
-    y.domain([0, Math.max(editsMax, testEditsMax)]);
+    var launchMax = d3.max(data, (d) => d.launches);
+    y.domain([0, Math.max(editsMax, testEditsMax, launchMax)]);
 
-    if (editsMax > testEditsMax) {
-      // Draw the area for regular edits using the editsArea function.
-      svg.append('path')
-        .datum(data)
-        .attr('data-legend', 'Solution Code')
-        .attr('class', 'edits solution-code')
-        .attr('d', editsArea);
+    // Draw areas for solution code, test code, and launches. Draw them in order
+    // decreasing maximums, so the smallest area ends up in front, and visible.
+    var solutionCode = {
+      max: editsMax,
+      render: function() {
+        svg.append('path')
+          .datum(data)
+          .attr('data-legend', 'Solution Code')
+          .attr('class', 'edits solution-code')
+          .attr('d', editsArea);
+        }
+    };
 
-      // Draw the area for test edits using the testEditsArea function.
-      svg.append('path')
-        .datum(data)
-        .attr('data-legend', 'Test Code')
-        .attr('class', 'edits test-code')
-        .attr('d', testEditsArea);
-    } else {
-      // Draw the area for test edits using the testEditsArea function.
-      svg.append('path')
-        .datum(data)
-        .attr('data-legend', 'Test Code')
-        .attr('class', 'edits test-code')
-        .attr('d', testEditsArea);
+    var testCode = {
+      max: testEditsMax,
+      render: function() {
+        svg.append('path')
+          .datum(data)
+          .attr('data-legend', 'Test Code')
+          .attr('class', 'edits test-code')
+          .attr('d', testEditsArea);
+        }
+    };
 
-      // Draw the area for regular edits using the editsArea function.
-      svg.append('path')
-        .datum(data)
-        .attr('data-legend', 'Solution Code')
-        .attr('class', 'edits solution-code')
-        .attr('d', editsArea);
+    var launches = {
+      max: launchMax,
+      render: function() {
+        svg.append('path')
+          .datum(data)
+          .attr('data-legend', 'Launches')
+          .attr('class', 'launches')
+          .attr('d', launchesArea);
+        }
+    };
+
+    var areas = [ solutionCode, testCode, launches ].sort((a, b) => b.max - a.max);
+
+    for (var i = 0; i < areas.length; i++) {
+      areas[i].render();
     }
-
-    svg.append('path')
-      .datum(data)
-      .attr('data-legend', 'Launches')
-      .attr('class', 'launches')
-      .attr('d', launchesArea);
 
     // Draw axes.
     svg.append('g')
@@ -162,8 +168,7 @@
     ms1G = svg.append('g')
       .attr('id', 'group-ms-1');
     ms1G.append('path')
-      .attr('class', 'date-line')
-      .attr('stroke', '#336699')
+      .attr('class', 'date-line milestone')
       .attr('d', line(ms1Line))
     ms1G.append('text')
       .attr('transform', 'rotate(-90)')
@@ -176,8 +181,7 @@
     ms2G = svg.append('g')
       .attr('id', 'group-ms-2');
     ms2G.append('path')
-      .attr('class', 'date-line')
-      .attr('stroke', '#336699')
+      .attr('class', 'date-line milestone')
       .attr('d', line(ms2Line));
     ms2G.append('text')
       .attr('transform', 'rotate(-90)')
@@ -190,8 +194,7 @@
     ms3G = svg.append('g')
       .attr('id', 'group-ms-3');
     ms3G.append('path')
-      .attr('class', 'date-line')
-      .attr('stroke', '#336699')
+      .attr('class', 'date-line milestone')
       .attr('d', line(ms3Line));
     ms3G.append('text')
       .attr('transform', 'rotate(-90)')
@@ -204,8 +207,7 @@
     earlyG = svg.append('g')
       .attr('id', 'group-early')
     earlyG.append('path')
-      .attr('class', 'date-line')
-      .attr('stroke', '#cc6600')
+      .attr('class', 'date-line early')
       .attr('d', line(earlyLine));
     earlyG.append('text')
       .attr('transform', 'rotate(-90)')
@@ -218,8 +220,7 @@
     dueG = svg.append('g')
       .attr('id', 'group-due');
     dueG.append('path')
-      .attr('class', 'date-line')
-      .attr('stroke', 'red')
+      .attr('class', 'date-line due')
       .attr('d', line(dueTimeLine));
     dueG.append('text')
       .attr('transform', 'rotate(-90)')

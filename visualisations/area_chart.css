@@ -42,6 +42,19 @@ body {
   stroke-width: 1px;
 }
 
+.milestone {
+  stroke: #336699;
+}
+
+.early {
+  stroke: #cc6600;
+  text-anchor: end;
+}
+
+.due {
+  stroke: red;
+}
+
 .legend {
   fill: white;
   stroke: black;
