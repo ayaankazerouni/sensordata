@@ -22,21 +22,21 @@
       .orient('left');
 
   var editsArea = d3.svg.area()
-    .interpolate('basis')
+    .interpolate('step')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.edits));
 
   var testEditsArea = d3.svg.area()
-    .interpolate('basis')
+    .interpolate('step')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.testEdits));
 
   var launchesArea = d3.svg.area()
-    .interpolate('basis')
+    .interpolate('step')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
@@ -53,7 +53,7 @@
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.csv('ws_1012.csv', function(error, data) {
+  d3.csv('ws_1237.csv', function(error, data) {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
