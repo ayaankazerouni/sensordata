@@ -53,7 +53,7 @@
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.csv('ws_1237.csv', function(error, data) {
+  d3.csv('ws_119.csv', function(error, data) {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
@@ -158,14 +158,14 @@
 
     // Define end-points for each line. Basically top to bottom
     // at the appropriate date on the x-axis.
-    ms1Line = [{ 'x': ms1X, 'y': height }, { 'x': ms1X, 'y': 0 }];
-    ms2Line = [{ 'x': ms2X, 'y': height }, { 'x': ms2X, 'y': 0 }];
-    ms3Line = [{ 'x': ms3X, 'y': height }, { 'x': ms3X, 'y': 0 }];
-    earlyLine = [{ 'x': earlyX, 'y': height }, { 'x': earlyX, 'y': 0 }];
-    dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
+    var ms1Line = [{ 'x': ms1X, 'y': height }, { 'x': ms1X, 'y': 0 }];
+    var ms2Line = [{ 'x': ms2X, 'y': height }, { 'x': ms2X, 'y': 0 }];
+    var ms3Line = [{ 'x': ms3X, 'y': height }, { 'x': ms3X, 'y': 0 }];
+    var earlyLine = [{ 'x': earlyX, 'y': height }, { 'x': earlyX, 'y': 0 }];
+    var dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
 
     // Draw due date lines.
-    ms1G = svg.append('g')
+    var ms1G = svg.append('g')
       .attr('id', 'group-ms-1');
     ms1G.append('path')
       .attr('class', 'date-line milestone')
@@ -178,7 +178,7 @@
       .text('Milestone 1 Due')
       .attr('fill', '#336699');
 
-    ms2G = svg.append('g')
+    var ms2G = svg.append('g')
       .attr('id', 'group-ms-2');
     ms2G.append('path')
       .attr('class', 'date-line milestone')
@@ -191,7 +191,7 @@
       .text('Milestone 2 Due')
       .attr('fill', '#336699');
 
-    ms3G = svg.append('g')
+    var ms3G = svg.append('g')
       .attr('id', 'group-ms-3');
     ms3G.append('path')
       .attr('class', 'date-line milestone')
@@ -204,7 +204,7 @@
       .text('Milestone 3 Due')
       .attr('fill', '#336699');
 
-    earlyG = svg.append('g')
+    var earlyG = svg.append('g')
       .attr('id', 'group-early')
     earlyG.append('path')
       .attr('class', 'date-line early')
@@ -217,7 +217,7 @@
       .text('Early Bonus Deadline')
       .attr('fill', '#cc6600');
 
-    dueG = svg.append('g')
+    var dueG = svg.append('g')
       .attr('id', 'group-due');
     dueG.append('path')
       .attr('class', 'date-line due')
