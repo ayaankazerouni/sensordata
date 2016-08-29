@@ -63,9 +63,10 @@ def get_subsessions(infile, outfile):
                     'workSessionId': ws_id,
                     'editSizeStmts': edit_size_stmts,
                     'testEditSizeStmts': test_edit_size_stmts,
-                    'editSizeMethods': test_edit_size_methods,
-                    'launchType': 'N/A',
-                    'wsStartTime': ws_start_time
+                    'editSizeMethods': edit_size_methods,
+                    'testEditSizeMethods': test_edit_size_methods,
+                    'wsStartTime': ws_start_time,
+                    'launchType': 'N/A'
                 }
                 writer.writerow(to_write)
 
@@ -122,9 +123,10 @@ def get_subsessions(infile, outfile):
                             'workSessionId': ws_id,
                             'editSizeStmts': edit_size_stmts,
                             'testEditSizeStmts': test_edit_size_stmts,
-                            'editSizeMethods': test_edit_size_methods,
-                            'launchType': launch_type,
-                            'wsStartTime': ws_start_time
+                            'editSizeMethods': edit_size_methods,
+                            'testEditSizeMethods': test_edit_size_methods,
+                            'wsStartTime': ws_start_time,
+                            'launchType': launch_type
                         }
                         writer.writerow(to_write)
 
@@ -149,9 +151,10 @@ def get_subsessions(infile, outfile):
                     'workSessionId': ws_id,
                     'editSizeStmts': edit_size_stmts,
                     'testEditSizeStmts': test_edit_size_stmts,
-                    'editSizeMethods': test_edit_size_methods,
-                    'launchType': 'N/A',
-                    'wsStartTime': ws_start_time
+                    'editSizeMethods': edit_size_methods,
+                    'testEditSizeMethods': test_edit_size_methods,
+                    'wsStartTime': ws_start_time,
+                    'launchType': 'N/A'
                 }
                 writer.writerow(to_write)
                 ws_id += 1
