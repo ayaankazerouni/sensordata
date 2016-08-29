@@ -21,7 +21,7 @@ def get_subsessions(infile, outfile):
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=['projectId', 'userId', 'cleaned_assignment', \
             'milestone1', 'milestone2', 'milestone3', 'earlyBonus', 'dueTime', 'time', \
             'workSessionId', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods', 'testEditSizeMethods', \
-            'launchType', 'wsStartTime'])
+            'wsStartTime', 'launchType'])
 
         # Write headers first.
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
