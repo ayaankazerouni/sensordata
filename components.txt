@@ -1,0 +1,5 @@
+1. amount of solution code edited vs test code edited (per work session)
+2. amount of solution code edited per regular launch
+3. amount of solution code edited per (passing) test launch
+4. amount of test code edited per regular launch (?)
+5. amount of test code edited per test launch (caveat -- can't tell which tests are being run)
