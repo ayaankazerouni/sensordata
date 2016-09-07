@@ -39,7 +39,9 @@ def get_subsessions(infile, outfile):
         test_curr_sizes_methods = {}
         ws_start_time = None
         prev_row = None
-        last_written = {}
+        # Stacks to keep track of launches until terminations or session ends
+        recent_launches = []
+        recent_test_launches = []
 
         for row in reader:
             # Setting prev values to the first row's values
@@ -51,6 +53,13 @@ def get_subsessions(infile, outfile):
             if (row['userId'] != prev_row['userId'] or row['projectId'] != prev_row['projectId']):
                 # Started events for the next user or assignment, so write out aggregate data of prev user
                 # before continuing.
+                unwritten_launches = recent_launches + recent_test_launches
+                unwritten_launches = sorted(unwritten_launches, key=lambda k: k['time'])
+                for launch in unwritten_launches:
+                    writer.writerow(launch)
+                recent_launches = []
+                recent_test_launches = []
+
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
@@ -114,10 +123,6 @@ def get_subsessions(infile, outfile):
                     # writing out aggregate data and resetting values.
                     launch_type = row['Subtype']
                     if (repr(prev_launch_type) != repr(launch_type)):
-                        if (last_written):
-                            writer.writerow(last_written)
-                            last_written = {}
-
                         to_write = {
                             'userId': row['userId'],
                             'projectId': row['projectId'],
@@ -140,7 +145,10 @@ def get_subsessions(infile, outfile):
                             'errors': 0
                         }
                         # writer.writerow(to_write)
-                        last_written = to_write
+                        if (repr(launch_type) == repr('Test')):
+                            recent_test_launches.append(to_write)
+                        elif (repr(launch_type) == repr('Normal')):
+                            recent_launches.append(to_write)
 
                         edit_size_stmts = 0
                         edit_size_methods = 0
@@ -152,20 +160,26 @@ def get_subsessions(infile, outfile):
                         successes = row['TestSucesses']
                         failures = row['TestFailures']
                         errors = row['TestErrors']
-                    if (last_written):
-                        if (repr(last_written['launchType']) == repr('Test')):
-                            last_written['successes'] = successes
-                            last_written['failures'] = failures
-                            last_written['errors'] = errors
-                        else:
-                            last_written['successes'] = 0
-                            last_written['failures'] = 0
-                            last_written['errors'] = 0
-                        writer.writerow(last_written)
-                    last_written = {}
+
+                        if (recent_test_launches):
+                            to_write = recent_test_launches.pop()
+                            to_write['successes'] = successes
+                            to_write['failures'] = failures
+                            to_write['errors'] = errors
+                            writer.writerow(to_write)
+                    elif (repr(row['Subtype']) == repr('Normal')):
+                        if (recent_launches):
+                            to_write = recent_launches.pop()
+                            writer.writerow(to_write)
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
+                unwritten_launches = recent_launches + recent_test_launches
+                unwritten_launches = sorted(unwritten_launches, key=lambda k: k['time'])
+                for launch in unwritten_launches:
+                    writer.writerow(launch)
+                recent_launches = []
+                recent_test_launches = []
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
