@@ -16,12 +16,30 @@ def get_subsessions(infile, outfile):
     outfile -- the resultant file (CSV)
     """
     print('Getting subsessions...')
+    fieldnames = [
+        'projectId',
+        'userId',
+        'cleaned_assignment',
+        'milestone1',
+        'milestone2',
+        'milestone3',
+        'earlyBonus',
+        'dueTime',
+        'time',
+        'workSessionId',
+        'editSizeStmts',
+        'testEditSizeStmts',
+        'editSizeStmts',
+        'testEditSizeStmts',
+        'wsStartTime',
+        'launchType',
+        'successes',
+        'failures',
+        'errors'
+    ]
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
-        writer = csv.DictWriter(fout, delimiter=',', fieldnames=['projectId', 'userId', 'cleaned_assignment', \
-            'milestone1', 'milestone2', 'milestone3', 'earlyBonus', 'dueTime', 'time', \
-            'workSessionId', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods', 'testEditSizeMethods', \
-            'wsStartTime', 'launchType', 'successes', 'failures', 'errors'])
+        writer = csv.DictWriter(fout, delimiter=',', fieldnames=fieldnames)
 
         # Write headers first.
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
