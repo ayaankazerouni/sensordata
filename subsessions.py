@@ -29,8 +29,8 @@ def get_subsessions(infile, outfile):
         'workSessionId',
         'editSizeStmts',
         'testEditSizeStmts',
-        'editSizeStmts',
-        'testEditSizeStmts',
+        'editSizeMethods',
+        'testEditSizeMethods',
         'wsStartTime',
         'launchType',
         'successes',
@@ -128,13 +128,14 @@ def get_subsessions(infile, outfile):
                         else:
                             edit_size_stmts += abs(stmts - prev_size_stmts)
                         curr_sizes_stmts[class_name] = stmts
+                        prev_launch_type = None
                     if(repr(row['Unit-Type']) == repr('Method')\
                         and repr(row['Subsubtype']) in [repr('Add'), repr('Remove')]):
                         if (int(row['onTestCase']) == 1):
                             test_edit_size_methods += 1
                         else:
                             edit_size_methods += 1
-                    prev_launch_type = None
+                        prev_launch_type = None
 
                 elif (repr(row['Type']) == repr('Launch')):
                     # A launch occured, so we break into another 'subsession',

@@ -1,5 +1,6 @@
-#! /usr/env/python
+#! /usr/bin/env python3
 
+import sys
 import csv
 import datetime
 
@@ -79,4 +80,19 @@ def early_often_scores(infile, outfile, deadline):
             }
             writer.writerow(to_write)
 
-early_often_scores('results/assignment1.csv', 'results/assignment1_earlyoften.csv', 1455145200000)
+def main(args):
+    infile = args[0]
+    outfile = args[1]
+    deadline = args[2]
+    try:
+        early_often_scores(infile, outfile, deadline)
+    except FileNotFoundError as e:
+        print("Error! File '%s' does not exist." % infile)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        print('Calculates an early/often index for each student project for a given assignment.')
+        print('Early/often is the [sum of (editSize * daysToDeadline) / totalEditSize].')
+        print('Usage:\n\t./early_often.py <input file> <output file> <assignment deadline as a millisecond timestamp>')
+        sys.exit()
+    main(sys.argv[1:])

@@ -15,11 +15,11 @@ if [ $# -gt 0 ]; then
   if [ ! -f './results/time_spent.csv' ]; then
     ./time_spent.py ./results/work_sessions.csv ./results/time_spent.csv
   fi
-  if [ ! -f './results/launch_quartiles.csv' ]; then
-    ./launch_stats.py quartiles ./results/subsessions.csv ./results/launch_quartiles.csv
+  if [ ! -f './results/subsession_summaries.csv' ]; then
+    ./stats.py summary ./results/subsessions.csv ./results/subsession_summaries.csv
   fi
   if [ ! -f './results/launch_totals.csv' ]; then
-    ./launch_stats.py totals ./results/work_sessions.csv ./results/launch_totals.csv
+    ./stats.py launch_totals ./results/work_sessions.csv ./results/launch_totals.csv
   fi
 else
   echo "Does a complete aggregation of sensordata in
