@@ -83,7 +83,7 @@ def early_often_scores(infile, outfile, deadline):
 def main(args):
     infile = args[0]
     outfile = args[1]
-    deadline = args[2]
+    deadline = int(args[2])
     try:
         early_often_scores(infile, outfile, deadline)
     except FileNotFoundError as e:

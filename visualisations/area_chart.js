@@ -53,7 +53,7 @@
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.csv('ws_135.csv', function(error, data) {
+  d3.csv('ws_1010.csv', function(error, data) {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
@@ -80,7 +80,7 @@
     // decreasing maximums, so the smallest area ends up in front, and visible.
     var solutionCode = {
       max: editsMax,
-      render: function() {
+      render() {
         svg.append('path')
           .datum(data)
           .attr('data-legend', 'Solution Code')
@@ -91,7 +91,7 @@
 
     var testCode = {
       max: testEditsMax,
-      render: function() {
+      render() {
         svg.append('path')
           .datum(data)
           .attr('data-legend', 'Test Code')
@@ -102,7 +102,7 @@
 
     var launches = {
       max: launchMax,
-      render: function() {
+      render() {
         svg.append('path')
           .datum(data)
           .attr('data-legend', 'Launches')
