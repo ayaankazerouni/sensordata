@@ -25,7 +25,8 @@ def incremental_checking(infile, outfile):
         'solutionEditAnyLaunch',
         'solutionEditRegularLaunch',
         'solutionEditTestLaunch',
-        'testEditTestLaunch'
+        'testEditTestLaunch',
+        'testEditPerSolutionEdit'
     ]
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
@@ -132,10 +133,10 @@ def incremental_checking(infile, outfile):
                 a_test_test = np.array(weighted_test_edit_test_launch)
                 a_solution_test = np.array(weighted_sol_edit_test_launch)
 
-                mean_solution_any = np.mean(a_solution_any) if (len(weighted_sol_edit_any_launch) > 0) else 9999
-                mean_solution_regular = np.mean(a_solution_regular) if (len(weighted_sol_edit_reg_launch) > 0) else 9999
-                mean_solution_test = np.mean(a_solution_test) if (len(weighted_sol_edit_test_launch) > 0) else 9999
-                mean_test_test = np.mean(a_test_test) if (len(weighted_test_edit_test_launch) > 0) else 9999
+                mean_solution_any = np.mean(a_solution_any)
+                mean_solution_regular = np.mean(a_solution_regular)
+                mean_solution_test = np.mean(a_solution_test)
+                mean_test_test = np.mean(a_test_test)
 
                 to_write = {
                     'projectId': prev_row['projectId'],
@@ -144,7 +145,8 @@ def incremental_checking(infile, outfile):
                     'solutionEditAnyLaunch': mean_solution_any,
                     'solutionEditRegularLaunch': mean_solution_regular,
                     'solutionEditTestLaunch': mean_solution_test,
-                    'testEditTestLaunch': mean_test_test
+                    'testEditTestLaunch': mean_test_test,
+                    'testEditPerSolutionEdit': mean_test_test / mean_solution_test
                 }
 
                 writer.writerow(to_write)
@@ -165,10 +167,10 @@ def incremental_checking(infile, outfile):
             a_test_test = np.array(weighted_test_edit_test_launch)
             a_solution_test = np.array(weighted_sol_edit_test_launch)
 
-            mean_solution_any = np.mean(a_solution_any) if (len(weighted_sol_edit_any_launch) > 0) else 9999
-            mean_solution_regular = np.mean(a_solution_regular) if (len(weighted_sol_edit_reg_launch) > 0) else 9999
-            mean_solution_test = np.mean(a_solution_test) if (len(weighted_sol_edit_test_launch) > 0) else 9999
-            mean_test_test = np.mean(a_test_test) if (len(weighted_test_edit_test_launch) > 0) else 9999
+            mean_solution_any = np.mean(a_solution_any)
+            mean_solution_regular = np.mean(a_solution_regular)
+            mean_solution_test = np.mean(a_solution_test)
+            mean_test_test = np.mean(a_test_test)
 
             to_write = {
                 'projectId': prev_row['projectId'],
@@ -177,7 +179,8 @@ def incremental_checking(infile, outfile):
                 'solutionEditAnyLaunch': mean_solution_any,
                 'solutionEditRegularLaunch': mean_solution_regular,
                 'solutionEditTestLaunch': mean_solution_test,
-                'testEditTestLaunch': mean_test_test
+                'testEditTestLaunch': mean_test_test,
+                'testEditPerSolutionEdit': mean_test_test / mean_solution_test
             }
 
             writer.writerow(to_write)
