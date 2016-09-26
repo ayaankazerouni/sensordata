@@ -38,7 +38,7 @@ def clean_assignment_names(infile, outfile):
             assignment_name = squashed_assignment_name(row['CASSIGNMENTNAME'])
             uri = row['uri']
             project_id = row['projectId']
-            project_dir = project_dir_from_uri(uri)
+            project_dir = assignment_name_from_uri(uri)
 
             if project_dir is None:
                 row['cleaned_assignment'] = assignment_name
@@ -99,16 +99,19 @@ def squashed_assignment_name(assignment):
     split = assignment.split()
     return split[0] + ' ' + split[1]
 
-def project_dir_from_uri(uri):
+def assignment_name_from_uri(uri):
     split = uri.split('/')
-    assignment_keywords = [ 'assignment', 'project', 'rectangle', 'point' ]
+    assignment_keywords = [ 'assignment', 'project' ]
     for thing in split:
-        thing = thing.replace('%20', '').lower()
-        if any(keyword in thing for keyword in assignment_keywords):
+        thing = thing.replace('%20', '').replace('_', '').lower()
+        regexp = re.compile(r'p[1|2|3|4]')
+        if any(keyword in thing for keyword in assignment_keywords) or regexp.search(thing) is not None:
             nums = re.findall(r'\d+', thing)
             for num in nums:
                 if num in ['1', '2', '3', '4']:
                     return 'Assignment ' + num
+
+
     return None
 
 def main(args):
