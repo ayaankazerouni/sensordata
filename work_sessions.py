@@ -7,8 +7,7 @@ def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
     print('Getting work sessions...')
 
-    fieldnames = ['projectId', 'userId', 'cleaned_assignment', 'milestone1', 'milestone2', 'milestone3',
-        'earlyBonus', 'dueTime', 'workSessionId', 'start_time', 'end_time',\
+    fieldnames = ['projectId', 'userId', 'cleaned_assignment', 'workSessionId', 'start_time', 'end_time',\
         'normalLaunches', 'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods',\
         'testEditSizeMethods', 'greenZones']
 
@@ -57,11 +56,6 @@ def get_work_sessions(infile, outfile):
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
                     'cleaned_assignment': prev_row['cleaned_assignment'],
-                    'milestone1': prev_row['milestone1'],
-                    'milestone2': prev_row['milestone2'],
-                    'milestone3': prev_row['milestone3'],
-                    'earlyBonus': prev_row['earlyBonus'],
-                    'dueTime': prev_row['dueTime'],
                     'workSessionId': prev_row['workSessionId'],
                     'start_time': start_time,
                     'end_time': int(prev_row['time']),
@@ -102,11 +96,6 @@ def get_work_sessions(infile, outfile):
             'userId': prev_row['userId'],
             'projectId': prev_row['projectId'],
             'cleaned_assignment': prev_row['cleaned_assignment'],
-            'milestone1': prev_row['milestone1'],
-            'milestone2': prev_row['milestone2'],
-            'milestone3': prev_row['milestone3'],
-            'earlyBonus': prev_row['earlyBonus'],
-            'dueTime': prev_row['dueTime'],
             'workSessionId': prev_row['workSessionId'],
             'start_time': start_time,
             'end_time': int(prev_row['time']),

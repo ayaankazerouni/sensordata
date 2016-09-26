@@ -4,29 +4,29 @@ import csv
 import sys
 import re
 
-def clean_assignment_names(infile, outfile):
+def clean_assignment_names(infile, outfile, clean_launches=None):
     """
-    Assigns cleaned assignment names to each row, making an educated guess
-    by looking at the URI for that sensordata event.
+    * Assigns cleaned assignment names to each row, making an educated guess
+      by looking at the URI for that sensordata event.
+    * Stores Launch and Termination information in the Type and Subtype columns.
 
     Keyword arguments:
     infile  -- the file containing the unclean sensordata
     outfile -- the file containing the clean sensordata, with an added
         column 'cleaned_assignment'. This column is used for other aggregation
         operations (subsessions, work_sessions, etc.).
+    clean_launches -- true (or any non-None) value to indicate whether launches need to be
+        cleaned up or not.
     """
+    print("This could take a few minutes, depending on how large the input is.")
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
         headers = list((fn) for fn in reader.fieldnames)
-        headers.append('milestone1')
-        headers.append('milestone2')
-        headers.append('milestone3')
-        headers.append('earlyBonus')
-        headers.append('dueTime')
         headers.append('cleaned_assignment')
         headers.append('cleaned?')
-        headers.remove('LaunchType')
-        headers.remove('TerminationType')
+        if (clean_launches != None):
+            headers.remove('LaunchType')
+            headers.remove('TerminationType')
 
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=headers)
 
@@ -51,47 +51,15 @@ def clean_assignment_names(infile, outfile):
                 row['cleaned_assignment'] = assignment_name
                 row['cleaned?'] = 1
 
-            # Storing the due time for each assignment
-            if assignment_name == 'Assignment 1':
-                row['milestone1'] = 1453849200000
-                row['milestone2'] = 1454367600000
-                row['milestone3'] = 1454540400000
-                row['earlyBonus'] = 1455058800000
-                row['dueTime'] = 1455145200000
-            elif assignment_name == 'Assignment 2':
-                row['milestone1'] = 1455922800000
-                row['milestone2'] = 1456614000000
-                row['milestone3'] = 1457391600000
-                row['earlyBonus'] = 1458082800000
-                row['dueTime'] = 1458169200000
-            elif assignment_name == 'Assignment 3':
-                row['milestone1'] = -1
-                row['milestone2'] = -1
-                row['milestone3'] = -1
-                row['earlyBonus'] = 1459994400000
-                row['dueTime'] = 1460080800000
-            elif assignment_name == 'Assignment 4':
-                row['milestone1'] = 1461020400000
-                row['milestone2'] = 1461366000000
-                row['milestone3'] = 1461884400000
-                row['earlyBonus'] = 1462402800000
-                row['dueTime'] = 1462417200000
-            else:
-                row['milestone1'] = -1
-                row['milestone2'] = -1
-                row['milestone3'] = -1
-                row['earlyBonus'] = -1
-                row['dueTime'] = -1
-
-
             # Stores launchtypes and terminationtypes less nonsensically.
-            if repr(row['Type']) == repr('Launch'):
-                row['Subtype'] = row['LaunchType']
-            elif repr(row['Type']) == repr('Termination'):
-                row['Subtype'] = row['TerminationType']
+            if (clean_launches != None):
+                if repr(row['Type']) == repr('Launch'):
+                    row['Subtype'] = row['LaunchType']
+                elif repr(row['Type']) == repr('Termination'):
+                    row['Subtype'] = row['TerminationType']
 
-            del row['LaunchType']
-            del row['TerminationType']
+                del row['LaunchType']
+                del row['TerminationType']
 
             writer.writerow(row)
 
@@ -117,13 +85,16 @@ def assignment_name_from_uri(uri):
 def main(args):
     infile = args[0]
     outfile = args[1]
-    try:
+    try
+        if (len(args) == 3):
+            clean_launches = args[3]
+
         clean_assignment_names(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File %s does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print('Usage:\n\t./clean.py <input_file> <output_file>')
+    if len(sys.argv) < 4:
+        print('Usage:\n\t./clean.py <input_file> <output_file> [clean_launches]')
         sys.exit()
     main(sys.argv[1:])
