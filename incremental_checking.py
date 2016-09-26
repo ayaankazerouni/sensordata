@@ -41,6 +41,7 @@ def incremental_checking(infile, outfile):
         weighted_sol_edit_reg_launch = []
         weighted_sol_edit_test_launch = []
         weighted_test_edit_test_launch = []
+        weighted_test_per_solution_edits = []
 
         # Each edit has the format
         # {
@@ -96,12 +97,16 @@ def incremental_checking(infile, outfile):
                     solution_edits_per_any_launch = []
 
                     if (repr(launch_type) == repr('Test')):
+                        total_solution_edit_per_test_launch = 0
+                        total_test_edit_per_test_launch = 0
+
                         for edit in solution_edits_per_test_launch:
                             edit_time = edit['time']
                             size = edit['size']
 
                             hours = get_diff_in_hours(edit_time, launch_time)
                             weighted_sol_edit_test_launch.append(size * hours)
+                            total_solution_edit_per_test_launch += size * hours
                         if not solution_edits_per_test_launch:
                             weighted_sol_edit_test_launch.append(0)
                         solution_edits_per_test_launch = []
@@ -112,9 +117,14 @@ def incremental_checking(infile, outfile):
 
                             hours = get_diff_in_hours(edit_time, launch_time)
                             weighted_test_edit_test_launch.append(size * hours)
+                            total_test_edit_per_test_launch += size * hours
                         if not test_edits_per_test_launch:
                             weighted_test_edit_test_launch.append(0)
                         test_edits_per_test_launch = []
+
+                        if total_solution_edit_per_test_launch > 0:
+                            test_edits_per_solution_edits = total_test_edit_per_test_launch / total_solution_edit_per_test_launch
+                            weighted_test_per_solution_edits.append(test_edits_per_solution_edits)
                     else:
                         for edit in solution_edits_per_reg_launch:
                             edit_time = edit['time']
@@ -132,11 +142,13 @@ def incremental_checking(infile, outfile):
                 a_solution_regular = np.array(weighted_sol_edit_reg_launch)
                 a_test_test = np.array(weighted_test_edit_test_launch)
                 a_solution_test = np.array(weighted_sol_edit_test_launch)
+                a_test_per_solution_edits = np.array(weighted_test_per_solution_edits)
 
                 mean_solution_any = np.mean(a_solution_any)
                 mean_solution_regular = np.mean(a_solution_regular)
                 mean_solution_test = np.mean(a_solution_test)
                 mean_test_test = np.mean(a_test_test)
+                mean_test_per_solution_edits = np.mean(a_test_per_solution_edits)
 
                 to_write = {
                     'projectId': prev_row['projectId'],
@@ -146,7 +158,7 @@ def incremental_checking(infile, outfile):
                     'solutionEditRegularLaunch': mean_solution_regular,
                     'solutionEditTestLaunch': mean_solution_test,
                     'testEditTestLaunch': mean_test_test,
-                    'testEditPerSolutionEdit': mean_test_test / mean_solution_test
+                    'testEditPerSolutionEdit': mean_test_per_solution_edits
                 }
 
                 writer.writerow(to_write)
@@ -166,11 +178,13 @@ def incremental_checking(infile, outfile):
             a_solution_regular = np.array(weighted_sol_edit_reg_launch)
             a_test_test = np.array(weighted_test_edit_test_launch)
             a_solution_test = np.array(weighted_sol_edit_test_launch)
+            a_test_per_solution_edits = np.array(weighted_test_per_solution_edits)
 
             mean_solution_any = np.mean(a_solution_any)
             mean_solution_regular = np.mean(a_solution_regular)
             mean_solution_test = np.mean(a_solution_test)
             mean_test_test = np.mean(a_test_test)
+            mean_test_per_solution_edits = np.mean(a_test_per_solution_edits)
 
             to_write = {
                 'projectId': prev_row['projectId'],
@@ -180,7 +194,7 @@ def incremental_checking(infile, outfile):
                 'solutionEditRegularLaunch': mean_solution_regular,
                 'solutionEditTestLaunch': mean_solution_test,
                 'testEditTestLaunch': mean_test_test,
-                'testEditPerSolutionEdit': mean_test_test / mean_solution_test
+                'testEditPerSolutionEdit': mean_test_per_solution_edits
             }
 
             writer.writerow(to_write)
