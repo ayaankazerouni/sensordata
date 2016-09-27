@@ -92,8 +92,6 @@ def incremental_checking(infile, outfile):
 
                         hours = get_diff_in_hours(edit_time, launch_time)
                         weighted_sol_edit_any_launch.append(size * hours)
-                    if not solution_edits_per_any_launch:
-                        weighted_sol_edit_any_launch.append(0)
                     solution_edits_per_any_launch = []
 
                     if (repr(launch_type) == repr('Test')):
@@ -107,8 +105,6 @@ def incremental_checking(infile, outfile):
                             hours = get_diff_in_hours(edit_time, launch_time)
                             weighted_sol_edit_test_launch.append(size * hours)
                             total_solution_edit_per_test_launch += size * hours
-                        if not solution_edits_per_test_launch:
-                            weighted_sol_edit_test_launch.append(0)
                         solution_edits_per_test_launch = []
 
                         for edit in test_edits_per_test_launch:
@@ -118,11 +114,10 @@ def incremental_checking(infile, outfile):
                             hours = get_diff_in_hours(edit_time, launch_time)
                             weighted_test_edit_test_launch.append(size * hours)
                             total_test_edit_per_test_launch += size * hours
-                        if not test_edits_per_test_launch:
-                            weighted_test_edit_test_launch.append(0)
                         test_edits_per_test_launch = []
 
                         if total_solution_edit_per_test_launch > 0:
+                            # FIXME: Build two separate lists and add them up at the end
                             test_edits_per_solution_edits = total_test_edit_per_test_launch / total_solution_edit_per_test_launch
                             weighted_test_per_solution_edits.append(test_edits_per_solution_edits)
                     else:
@@ -132,8 +127,6 @@ def incremental_checking(infile, outfile):
 
                             hours = get_diff_in_hours(edit_time, launch_time)
                             weighted_sol_edit_reg_launch.append(size * hours)
-                        if not solution_edits_per_reg_launch:
-                            weighted_sol_edit_reg_launch.append(0)
                         solution_edits_per_reg_launch = []
 
                 prev_row = row

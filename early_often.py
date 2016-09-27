@@ -27,6 +27,7 @@ def early_often_scores(infile, outfile, deadline):
 
         curr_sizes = {}
 
+        # FIXME: Calculate index for test vs solution code weighted by days until deadline
         for row in reader:
             prev_row = prev_row or row
 

@@ -85,16 +85,16 @@ def assignment_name_from_uri(uri):
 def main(args):
     infile = args[0]
     outfile = args[1]
-    try
+    try:
         if (len(args) == 3):
-            clean_launches = args[3]
+            clean_launches = args[2]
 
         clean_assignment_names(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File %s does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print('Usage:\n\t./clean.py <input_file> <output_file> [clean_launches]')
         sys.exit()
     main(sys.argv[1:])
