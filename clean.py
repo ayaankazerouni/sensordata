@@ -88,8 +88,9 @@ def main(args):
     try:
         if (len(args) == 3):
             clean_launches = args[2]
-
-        clean_assignment_names(infile, outfile)
+            clean_assignment_names(infile, outfile, clean_launches)
+        else:
+            clean_assignment_names(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File %s does not exist." % infile)
 
