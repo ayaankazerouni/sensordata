@@ -10,6 +10,7 @@ def early_often_scores(infile, outfile, deadline):
         'userId',
         'cleaned_assignment',
         'earlyOftenIndex',
+        'testSolutionEditIndex'
     ]
 
     due_date = datetime.date.fromtimestamp(deadline / 1000)
@@ -24,6 +25,8 @@ def early_often_scores(infile, outfile, deadline):
         prev_row = None
         total_weighted_edit_size = 0
         total_edit_size = 0
+        total_weighted_solution_edits = 0
+        total_weighted_test_edits = 0
 
         curr_sizes = {}
 
@@ -45,16 +48,26 @@ def early_often_scores(infile, outfile, deadline):
                     total_weighted_edit_size += (edit_size * days_to_deadline)
                     total_edit_size += + edit_size
 
+                    if (int(row['onTestCase']) == 1):
+                        total_weighted_test_edits += (edit_size * days_to_deadline)
+                    else:
+                        total_weighted_solution_edits += (edit_size * days_to_deadline)
+
                     curr_sizes[class_name] = curr_size
                 prev_row = row
             else:
                 if (total_edit_size > 0):
                     early_often_index = total_weighted_edit_size / total_edit_size
+                    if  (total_weighted_solution_edits > 0):
+                        test_solution_edit_index = total_weighted_test_edits / total_weighted_solution_edits
+                    else:
+                        test_solution_edit_index = 'nan'
                     to_write = {
                         'projectId': prev_row['projectId'],
                         'userId': prev_row['userId'],
                         'cleaned_assignment': prev_row['cleaned_assignment'],
-                        'earlyOftenIndex': early_often_index
+                        'earlyOftenIndex': early_often_index,
+                        'testSolutionEditIndex': test_solution_edit_index
                     }
                     writer.writerow(to_write)
 
@@ -67,17 +80,28 @@ def early_often_scores(infile, outfile, deadline):
 
                     edit_size = abs(prev_size - curr_size)
                     total_weighted_edit_size = (edit_size * days_to_deadline)
+                    if (int(row['onTestCase']) == 1):
+                        total_weighted_test_edits = (edit_size * days_to_deadline)
+                    else:
+                        total_weighted_solution_edits = (edit_size * days_to_deadline)
                     total_edit_size = edit_size
+
+                    curr_sizes[class_name] = curr_size
 
                 prev_row = row
 
         if (total_edit_size > 0):
             early_often_index = total_weighted_edit_size / total_edit_size
+            if  (total_weighted_solution_edits > 0):
+                test_solution_edit_index = total_weighted_test_edits / total_weighted_solution_edits
+            else:
+                test_solution_edit_index = 'nan'
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
                 'cleaned_assignment': prev_row['cleaned_assignment'],
-                'earlyOftenIndex': early_often_index
+                'earlyOftenIndex': early_often_index,
+                'testSolutionEditIndex': test_solution_edit_index
             }
             writer.writerow(to_write)
 
