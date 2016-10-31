@@ -69,15 +69,15 @@ def squashed_assignment_name(assignment):
 
 def assignment_name_from_uri(uri):
     split = uri.split('/')
-    assignment_keywords = [ 'assignment', 'project' ]
+    assignment_keywords = [ 'assignment', 'project', 'program' ]
     for thing in split:
         thing = thing.replace('%20', '').replace('_', '').lower()
-        regexp = re.compile(r'p[1|2|3|4]')
+        regexp = re.compile(r'[p|P][1|2]')
         if any(keyword in thing for keyword in assignment_keywords) or regexp.search(thing) is not None:
             nums = re.findall(r'\d+', thing)
             for num in nums:
-                if num in ['1', '2', '3', '4']:
-                    return 'Assignment ' + num
+                if num in ['1', '2']:
+                    return 'Project ' + num
 
 
     return None
