@@ -25,5 +25,13 @@
       "earlyBonus": 1462402800000,
       "dueTime": 1462417200000
     }
+  },
+  "Fall-2016": {
+    "Assignment-1": {
+      "dueTime": 1473908430000
+    },
+    "Assignment-2": {
+      "dueTime": 1476482430000
+    }
   }
 }

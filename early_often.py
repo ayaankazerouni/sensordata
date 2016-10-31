@@ -8,6 +8,7 @@ def early_often_scores(infile, outfile, deadline):
     fieldnames = [
         'projectId',
         'userId',
+        'email',
         'cleaned_assignment',
         'earlyOftenIndex',
         'testSolutionEditIndex',
@@ -80,6 +81,7 @@ def early_often_scores(infile, outfile, deadline):
                     to_write = {
                         'projectId': prev_row['projectId'],
                         'userId': prev_row['userId'],
+                        'email': prev_row['email'],
                         'cleaned_assignment': prev_row['cleaned_assignment'],
                         'earlyOftenIndex': early_often_index,
                         'testSolutionEditIndex': test_solution_edit_index,
@@ -126,6 +128,7 @@ def early_often_scores(infile, outfile, deadline):
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
+                'email': prev_row['email'],
                 'cleaned_assignment': prev_row['cleaned_assignment'],
                 'earlyOftenIndex': early_often_index,
                 'testSolutionEditIndex': test_solution_edit_index,

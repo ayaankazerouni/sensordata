@@ -21,6 +21,7 @@ def incremental_checking(infile, outfile):
     fieldnames = [
         'projectId',
         'userId',
+        'email',
         'cleaned_assignment',
         'solutionEditAnyLaunch',
         'solutionEditRegularLaunch',
@@ -146,6 +147,7 @@ def incremental_checking(infile, outfile):
                 to_write = {
                     'projectId': prev_row['projectId'],
                     'userId': prev_row['userId'],
+                    'email': prev_row['email'],
                     'cleaned_assignment': prev_row['cleaned_assignment'],
                     'solutionEditAnyLaunch': mean_solution_any,
                     'solutionEditRegularLaunch': mean_solution_regular,
@@ -182,6 +184,7 @@ def incremental_checking(infile, outfile):
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
+                'email': prev_row['email'],
                 'cleaned_assignment': prev_row['cleaned_assignment'],
                 'solutionEditAnyLaunch': mean_solution_any,
                 'solutionEditRegularLaunch': mean_solution_regular,
@@ -197,10 +200,6 @@ def get_diff_in_hours(timestamp1, timestamp2):
     time2 = datetime.datetime.fromtimestamp(timestamp2 / 1000)
 
     delta = (time2 - time1).total_seconds()
-    if(delta < 0):
-        print(time1)
-        print(time2)
-        print('-------')
     hours = delta / 3600
 
     return hours
