@@ -21,7 +21,6 @@ def incremental_checking(infile, outfile):
     fieldnames = [
         'projectId',
         'userId',
-        'email',
         'cleaned_assignment',
         'solutionEditAnyLaunch',
         'solutionEditRegularLaunch',
@@ -147,7 +146,6 @@ def incremental_checking(infile, outfile):
                 to_write = {
                     'projectId': prev_row['projectId'],
                     'userId': prev_row['userId'],
-                    'email': prev_row['email'],
                     'cleaned_assignment': prev_row['cleaned_assignment'],
                     'solutionEditAnyLaunch': mean_solution_any,
                     'solutionEditRegularLaunch': mean_solution_regular,
@@ -184,7 +182,6 @@ def incremental_checking(infile, outfile):
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
-                'email': prev_row['email'],
                 'cleaned_assignment': prev_row['cleaned_assignment'],
                 'solutionEditAnyLaunch': mean_solution_any,
                 'solutionEditRegularLaunch': mean_solution_regular,
