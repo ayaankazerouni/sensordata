@@ -21,7 +21,8 @@ def incremental_checking(infile, outfile):
     fieldnames = [
         'projectId',
         'userId',
-        'cleaned_assignment',
+        'email',
+        'CASSIGNMENTNAME',
         'solutionEditAnyLaunch',
         'solutionEditRegularLaunch',
         'solutionEditTestLaunch',
@@ -59,7 +60,7 @@ def incremental_checking(infile, outfile):
         for row in reader:
             prev_row = prev_row or row
 
-            if (row['userId'] == prev_row['userId'] and row['projectId'] == prev_row['projectId']):
+            if (row['userId'] == prev_row['userId']):
                 if (repr(row['Type']) == repr('Edit')):
                     if (len(row['Class-Name']) > 0):
                         class_name = repr(row['Class-Name'])
@@ -117,7 +118,6 @@ def incremental_checking(infile, outfile):
                         test_edits_per_test_launch = []
 
                         if total_solution_edit_per_test_launch > 0:
-                            # FIXME: Build two separate lists and add them up at the end
                             test_edits_per_solution_edits = total_test_edit_per_test_launch / total_solution_edit_per_test_launch
                             weighted_test_per_solution_edits.append(test_edits_per_solution_edits)
                     else:
@@ -146,7 +146,8 @@ def incremental_checking(infile, outfile):
                 to_write = {
                     'projectId': prev_row['projectId'],
                     'userId': prev_row['userId'],
-                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'email': prev_row['email'],
+                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'solutionEditAnyLaunch': mean_solution_any,
                     'solutionEditRegularLaunch': mean_solution_regular,
                     'solutionEditTestLaunch': mean_solution_test,
@@ -182,7 +183,8 @@ def incremental_checking(infile, outfile):
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
-                'cleaned_assignment': prev_row['cleaned_assignment'],
+                'email': prev_row['email'],
+                'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                 'solutionEditAnyLaunch': mean_solution_any,
                 'solutionEditRegularLaunch': mean_solution_regular,
                 'solutionEditTestLaunch': mean_solution_test,
@@ -210,7 +212,7 @@ def main(args):
         print("Error! File '%s' does not exist." % infile)
     except KeyError as e:
         cause = e.args[0]
-        if (cause == 'cleaned_assignment'):
+        if (cause == 'CASSIGNMENTNAME'):
             print("Key Error! Are you using a cleaned data file? Please run ./clean.py on the data file and use " +
                 "the resulting file as input.")
         else:

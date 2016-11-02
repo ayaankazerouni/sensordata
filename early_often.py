@@ -8,7 +8,8 @@ def early_often_scores(infile, outfile, deadline):
     fieldnames = [
         'projectId',
         'userId',
-        'cleaned_assignment',
+        'email',
+        'CASSIGNMENTNAME',
         'earlyOftenIndex',
         'testSolutionEditIndex',
         'testSolutionMethodsIndex'
@@ -41,7 +42,7 @@ def early_often_scores(infile, outfile, deadline):
             date = datetime.date.fromtimestamp(time / 1000)
             days_to_deadline = (due_date - date).days
 
-            if (row['userId'] == prev_row['userId'] and row['projectId'] == prev_row['projectId']):
+            if (row['userId'] == prev_row['userId']):
                 if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
                     class_name = repr(row['Class-Name'])
                     curr_size = int(row['Current-Statements'])
@@ -69,18 +70,19 @@ def early_often_scores(infile, outfile, deadline):
             else:
                 if (total_edit_size > 0):
                     early_often_index = total_weighted_edit_size / total_edit_size
-                    if  (total_weighted_solution_edits > 0):
+                    if  (abs(total_weighted_solution_edits) > 0):
                         test_solution_edit_index = total_weighted_test_edits / total_weighted_solution_edits
                     else:
                         test_solution_edit_index = 'nan'
-                    if (total_weighted_solution_methods > 0):
+                    if (abs(total_weighted_solution_methods) > 0):
                         test_solution_methods_index = total_weighted_test_methods / total_weighted_solution_methods
                     else:
                         test_solution_methods_index = 'nan'
                     to_write = {
                         'projectId': prev_row['projectId'],
                         'userId': prev_row['userId'],
-                        'cleaned_assignment': prev_row['cleaned_assignment'],
+                        'email': prev_row['email'],
+                        'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                         'earlyOftenIndex': early_often_index,
                         'testSolutionEditIndex': test_solution_edit_index,
                         'testSolutionMethodsIndex': test_solution_methods_index
@@ -126,7 +128,8 @@ def early_often_scores(infile, outfile, deadline):
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
-                'cleaned_assignment': prev_row['cleaned_assignment'],
+                'email': prev_row['email'],
+                'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                 'earlyOftenIndex': early_often_index,
                 'testSolutionEditIndex': test_solution_edit_index,
                 'testSolutionMethodsIndex': test_solution_methods_index
