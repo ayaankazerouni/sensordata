@@ -11,8 +11,10 @@ def early_often_scores(infile, outfile, deadline):
         'email',
         'CASSIGNMENTNAME',
         'earlyOftenIndex',
-        'testSolutionEditIndex',
-        'testSolutionMethodsIndex'
+        'solutionStmtEarlyOftenIndex',
+        'solutionMethodsEarlyOftenIndex',
+        'testStmtsEarlyOftenIndex',
+        'testMethodsEarlyOftenIndex'
     ]
 
     due_date = datetime.date.fromtimestamp(deadline / 1000)
@@ -28,9 +30,13 @@ def early_often_scores(infile, outfile, deadline):
         total_weighted_edit_size = 0
         total_edit_size = 0
         total_weighted_solution_edits = 0
+        total_solution_edits = 0
         total_weighted_test_edits = 0
+        total_test_edits = 0
         total_weighted_solution_methods = 0
+        total_solution_methods = 0
         total_weighted_test_methods = 0
+        total_test_methods = 0
 
         curr_sizes = {}
         curr_sizes_methods = {}
@@ -59,10 +65,14 @@ def early_often_scores(infile, outfile, deadline):
 
                     if (int(row['onTestCase']) == 1):
                         total_weighted_test_edits += (edit_size * days_to_deadline)
+                        total_test_edits += edit_size
                         total_weighted_test_methods += (method_edit_size * days_to_deadline)
+                        total_test_methods += method_edit_size
                     else:
                         total_weighted_solution_edits += (edit_size * days_to_deadline)
+                        total_solution_edits += edit_size
                         total_weighted_solution_methods += (method_edit_size *  days_to_deadline)
+                        total_solution_methods += method_edit_size
 
                     curr_sizes[class_name] = curr_size
                     curr_sizes_methods[class_name] = curr_methods
@@ -70,22 +80,21 @@ def early_often_scores(infile, outfile, deadline):
             else:
                 if (total_edit_size > 0):
                     early_often_index = total_weighted_edit_size / total_edit_size
-                    if  (abs(total_weighted_solution_edits) > 0):
-                        test_solution_edit_index = total_weighted_test_edits / total_weighted_solution_edits
-                    else:
-                        test_solution_edit_index = 'nan'
-                    if (abs(total_weighted_solution_methods) > 0):
-                        test_solution_methods_index = total_weighted_test_methods / total_weighted_solution_methods
-                    else:
-                        test_solution_methods_index = 'nan'
+                    solution_stmt_early_often_index = total_weighted_solution_edits / total_solution_edits
+                    solution_meth_early_often_index = total_weighted_solution_methods / total_solution_methods
+                    test_stmt_early_often_index = total_weighted_test_edits / total_test_edits
+                    test_meth_early_often_index = total_weighted_test_methods / total_test_methods
+
                     to_write = {
                         'projectId': prev_row['projectId'],
                         'userId': prev_row['userId'],
                         'email': prev_row['email'],
                         'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                         'earlyOftenIndex': early_often_index,
-                        'testSolutionEditIndex': test_solution_edit_index,
-                        'testSolutionMethodsIndex': test_solution_methods_index
+                        'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
+                        'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
+                        'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
+                        'testMethodsEarlyOftenIndex': test_meth_early_often_index
                     }
                     writer.writerow(to_write)
 
@@ -104,10 +113,14 @@ def early_often_scores(infile, outfile, deadline):
 
                     if (int(row['onTestCase']) == 1):
                         total_weighted_test_edits = (edit_size * days_to_deadline)
+                        total_test_edits = edit_size
                         total_weighted_test_methods = (method_edit_size * days_to_deadline)
+                        total_test_methods = method_edit_size
                     else:
                         total_weighted_solution_edits = (edit_size * days_to_deadline)
-                        total_weighted_solution_methods = (method_edit_size * days_to_deadline)
+                        total_solution_edits = edit_size
+                        total_weighted_solution_methods = (method_edit_size *  days_to_deadline)
+                        total_solution_methods = method_edit_size
 
                     total_edit_size = edit_size
                     curr_sizes[class_name] = curr_size
@@ -117,22 +130,21 @@ def early_often_scores(infile, outfile, deadline):
 
         if (total_edit_size > 0):
             early_often_index = total_weighted_edit_size / total_edit_size
-            if  (total_weighted_solution_edits > 0):
-                test_solution_edit_index = total_weighted_test_edits / total_weighted_solution_edits
-            else:
-                test_solution_edit_index = 'nan'
-            if (total_weighted_solution_methods > 0):
-                test_solution_methods_index = total_weighted_test_methods / total_weighted_solution_methods
-            else:
-                test_solution_methods_index = 'nan'
+            solution_stmt_early_often_index = total_weighted_solution_edits / total_solution_edits
+            solution_meth_early_often_index = total_weighted_solution_methods / total_solution_methods
+            test_stmt_early_often_index = total_weighted_test_edits / total_test_edits
+            test_meth_early_often_index = total_weighted_test_methods / total_test_methods
+
             to_write = {
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
                 'email': prev_row['email'],
                 'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                 'earlyOftenIndex': early_often_index,
-                'testSolutionEditIndex': test_solution_edit_index,
-                'testSolutionMethodsIndex': test_solution_methods_index
+                'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
+                'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
+                'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
+                'testMethodsEarlyOftenIndex': test_meth_early_often_index
             }
             writer.writerow(to_write)
 
