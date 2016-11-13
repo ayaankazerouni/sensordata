@@ -8,7 +8,7 @@ import numpy as np
 import math
 import datetime
 
-df = pd.read_csv('~/Developer/sensordata/data/fall-2016/web-cat-students-with-sensordata.csv')
+df = pd.read_csv('data/fall-2016/web-cat-students-with-sensordata.csv')
 df.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0], inplace=True)
 df.head(2)
 
