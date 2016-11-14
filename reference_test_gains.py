@@ -1,23 +1,11 @@
+#! /usr/bin/env python3
 
-# coding: utf-8
-
-# In[1]:
-
+# In[]:
+import sys
 import pandas as pd
 import numpy as np
 import math
 import datetime
-
-df = pd.read_csv('data/fall-2016/web-cat-students-with-sensordata.csv')
-df.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0], inplace=True)
-df.head(2)
-
-
-# In[4]:
-
-# group data by unique values of ('assignment', 'userName'). So all the data
-# for a student's submisisons to one assignment will be together
-assignments = df.groupby(['assignment', 'userName'])
 
 def userdata(usergroup):
     """
@@ -74,15 +62,33 @@ def userdata(usergroup):
     }
     return pd.Series(results)
 
-results = assignments.apply(userdata)
-results
+def reference_test_gains(infile, outfile):
+    # In[]: Import data
+    df = pd.read_csv(infile)
+    df.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0], inplace=True)
+    df.head(2)
 
+    # In[]: Group data by unique values of ('assignment', 'userName'). So all the data
+    # for a student's submisisons to one assignment will be together
+    assignments = df.groupby(['assignment', 'userName'])
 
-# In[5]:
+    results = assignments.apply(userdata)
+    results
 
-results.describe()
+    # In[]: Write out
+    results.to_csv(outfile)
 
+def main(args):
+    infile = args[0]
+    outfile = args[1]
+    try:
+        reference_test_gains(infile, outfile)
+    except FileNotFoundError as e:
+        print('File not found. Please check that "%s" exists.' % s)
 
-# In[7]:
-
-results.to_csv('data/fall-2016/webcat-results.csv')
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print('Calculates Web-CAT reference test gain measures from the given student submission data.')
+        print('Usage:\n\t./reference_test_gains <input file> <output file>')
+        sys.exit()
+    main(sys.argv[1:])
