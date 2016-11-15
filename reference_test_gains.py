@@ -84,7 +84,7 @@ def main(args):
     try:
         reference_test_gains(infile, outfile)
     except FileNotFoundError as e:
-        print('File not found. Please check that "%s" exists.' % s)
+        print('File not found. Please check that "%s" exists.' % infile)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
