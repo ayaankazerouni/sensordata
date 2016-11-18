@@ -4,3 +4,4 @@
 results/
 .R*
 .ipynb_checkpoints/
+*.xlsx

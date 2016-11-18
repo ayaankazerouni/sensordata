@@ -6,12 +6,20 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import scale
 
+if (len(sys.argv) < 4):
+    print_usage()
+    sys.exit()
+
+if (sys.argv[1] not in ['kmeans']):
+    print_usage()
+    sys.exit()
+
+method = sys.argv[1]
+infile = sys.argv[2]
+outfile = sys.argv[3]
+
 # In[]:
-def kmeans(infile, outfile):
-    # In[]: Uncomment the following line and hard-code infile and run this as
-    # as a standalone cell
-    # infile =
-    data = get_data(infile, index_col=['CASSIGNMENTNAME', 'userId'])
+def kmeans(data, outfile):
     scaled = scale(data, copy=True)
     clusters = KMeans(n_clusters=4, random_state=10).fit_predict(scaled)
     data['cluster'] = clusters
@@ -29,7 +37,6 @@ def get_data(infile, index_col=None):
 def print_usage():
     print('Performs clustering based on raw incremental development metrics.')
     print('Usage:\n\t./cluster.py <cluster method> <input file> <output file>')
-    sys.exit()
 
 def main(args):
     method = args[0].lower()
