@@ -6,51 +6,47 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import scale
 
-if (len(sys.argv) < 4):
-    print_usage()
-    sys.exit()
-
-if (sys.argv[1] not in ['kmeans']):
-    print_usage()
-    sys.exit()
-
-method = sys.argv[1]
-infile = sys.argv[2]
-outfile = sys.argv[3]
-
 # In[]:
-def kmeans(data, outfile):
+def print_usage():
+    print('Performs clustering based on raw incremental development metrics.')
+    print('Usage:\n\t./cluster.py <cluster method> <input file> <output file>')
+
+def kmeans(data, outfile=None):
     scaled = scale(data, copy=True)
     clusters = KMeans(n_clusters=4, random_state=10).fit_predict(scaled)
     data['cluster'] = clusters
     data.head()
 
-    # In[]: Write out
-    data.to_csv(outfile)
+    described = data.groupby('cluster').apply(lambda x: x.describe())
+    described.drop('cluster', axis=1, inplace=True)
 
-def get_data(infile, index_col=None):
-    data = pd.read_csv(infile, index_col=index_col)
-    data = data.dropna(how='any').drop(['submissionCount', 'email'], 1)
-    data.head()
-    return data
+    if (outfile is not None):
+        described.to_csv(outfile)
 
-def print_usage():
-    print('Performs clustering based on raw incremental development metrics.')
-    print('Usage:\n\t./cluster.py <cluster method> <input file> <output file>')
+    return described
 
-def main(args):
-    method = args[0].lower()
-    infile = args[1]
-    outfile = args[2]
-    try:
-        if (method == 'kmeans'):
-            kmeans(infile, outfile)
-        else:
-            print_usage()
-    except FileNotFoundError as e:
-        print('File not found. Please check that "%s" exists.' % infile)
+# In[]:
+infile = 'data/fall-2016/incremental_checking.xlsx'
+method = 'kmeans'
+outfile = None
 
-if __name__ == '__main__':
-    if len(sys.argv) < 4:
+if ('ipykernel' not in sys.argv[0]):
+    if (len(sys.argv) < 4 or sys.argv[1] not in ['kmeans']):
         print_usage()
-    main(sys.argv[1:])
+        sys.exit()
+    else:
+        method = sys.argv[1]
+        infile = sys.argv[2]
+        outfile = sys.argv[3]
+
+# In[]:
+data = pd.read_excel(infile, header=5, parse_cols='A,B,C,E,G,I,K,M,O')
+data.set_index(['Assignment', 'userId'], inplace=True)
+data.drop('email', inplace=True, axis=1)
+data.head()
+
+# In[]:
+if (method == 'kmeans'):
+    clusters = kmeans(data, outfile)
+
+clusters
