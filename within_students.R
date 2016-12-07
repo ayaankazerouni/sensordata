@@ -1,11 +1,14 @@
-# webcat.data = read.csv('data/fall-2016/web-cat-students-with-sensordata.csv')
+webcat.data = read.csv('data/fall-2016/web-cat-students-with-sensordata.csv')
 webcat.data = webcat.data[, (names(webcat.data) %in% c('userName', 'assignment', 'submissionNo', 
-                                                       'score.correctness', 'max.score.correctness'))]
+                                                       'score.correctness', 'max.score.correctness',
+                                                       'elements', 'elementsCovered'))]
 webcat.data = webcat.data[order(webcat.data$assignment, webcat.data$userName, -webcat.data$submissionNo), ]
 
 # get the last submission from each user on each project
 last.submissions = webcat.data[!duplicated(data.frame(webcat.data$assignment, webcat.data$userName)), ]
 last.submissions$score.correctness = last.submissions$score.correctness / last.submissions$max.score.correctness
+last.submissions$elementsCovered = last.submissions$elementsCovered / last.submissions$elements
+last.submissions$score.reftest = last.submissions$score.correctness / last.submissions$elements
 
 discretise.scores = function(submissions, threshold=0.8) {
   if (is.null(threshold) | missing(threshold)) {
