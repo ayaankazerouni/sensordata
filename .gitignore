@@ -5,3 +5,5 @@ results/
 .R*
 .ipynb_checkpoints/
 *.xlsx
+.Rproj.user
+*.Rproj
