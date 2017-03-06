@@ -1,59 +1,61 @@
+const due_times = require('../due_times.json');
+
 (($, window, document) => {
-  var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+  const margin = {top: 20, right: 160, bottom: 30, left: 50}; // leaving space for the legend
+  const width = 960 - margin.left - margin.right;
+  const height = 500 - margin.top - margin.bottom;
 
-  var tickFormat = d3.time.format('%b %d');
+  const tickFormat = d3.time.format('%b %d');
 
-  var x = d3.time.scale()
+  const x = d3.time.scale()
       .range([0, width - 150]);
 
-  var y = d3.scale.linear()
+  const y = d3.scale.linear()
       .range([height, 0]);
 
-  var xAxis = d3.svg.axis()
+  const xAxis = d3.svg.axis()
       .scale(x)
       .ticks(d3.time.day, 3)
       .tickFormat(tickFormat)
       .orient('bottom');
 
-  var yAxis = d3.svg.axis()
+  const yAxis = d3.svg.axis()
       .scale(y)
       .orient('left');
 
-  var editsArea = d3.svg.area()
-    .interpolate('step')
+  let editsArea = d3.svg.area()
+    .interpolate('basis')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.edits));
 
-  var testEditsArea = d3.svg.area()
-    .interpolate('step')
+  let testEditsArea = d3.svg.area()
+    .interpolate('basis')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.testEdits));
 
-  var launchesArea = d3.svg.area()
-    .interpolate('step')
+  let launchesArea = d3.svg.area()
+    .interpolate('basis')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.launches));
 
   // Line function for due date lines.
-  var line = d3.svg.line()
+  let line = d3.svg.line()
       .x((d) => d.x)
       .y((d) => d.y);
 
-  var svg = d3.select('div.chart-area').append('svg')
+  let svg = d3.select('div.chart-area').append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.csv('ws_1010.csv', function(error, data) {
+  d3.csv('ws-2894.csv', (error, data) => {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
@@ -67,18 +69,18 @@
     });
 
     // Specify input domains for the scales.
-    var start_min = d3.min(data, (d) => d.start_time);
-    var end_max = d3.max(data, (d) => d.end_time);
+    let start_min = d3.min(data, (d) => d.start_time);
+    let end_max = d3.max(data, (d) => d.end_time);
     x.domain([start_min, end_max]);
 
-    var editsMax = d3.max(data, (d) => d.edits);
-    var testEditsMax = d3.max(data, (d) => d.testEdits);
-    var launchMax = d3.max(data, (d) => d.launches);
+    let editsMax = d3.max(data, (d) => d.edits);
+    let testEditsMax = d3.max(data, (d) => d.testEdits);
+    let launchMax = d3.max(data, (d) => d.launches);
     y.domain([0, Math.max(editsMax, testEditsMax, launchMax)]);
 
     // Draw areas for solution code, test code, and launches. Draw them in order
     // decreasing maximums, so the smallest area ends up in front, and visible.
-    var solutionCode = {
+    let solutionCode = {
       max: editsMax,
       render() {
         svg.append('path')
@@ -89,7 +91,7 @@
         }
     };
 
-    var testCode = {
+    let testCode = {
       max: testEditsMax,
       render() {
         svg.append('path')
@@ -100,7 +102,7 @@
         }
     };
 
-    var launches = {
+    let launches = {
       max: launchMax,
       render() {
         svg.append('path')
@@ -111,9 +113,9 @@
         }
     };
 
-    var areas = [ solutionCode, testCode, launches ].sort((a, b) => b.max - a.max);
+    let areas = [ solutionCode, testCode, launches ].sort((a, b) => b.max - a.max);
 
-    for (var i = 0; i < areas.length; i++) {
+    for (let i = 0; i < areas.length; i++) {
       areas[i].render();
     }
 
@@ -136,36 +138,35 @@
     // Draw legend
     svg.append('g')
       .attr('class', 'legend')
-      .attr('transform','translate(' + (width - 140) + ',' + height / 2 + ')')
+      .attr('transform','translate(' + (width) + ',' + height / 2 + ')')
       .style('font-size', '12px')
       .call(d3.legend);
 
     // Draw due date lines. Get raw due date info from first row
     // of data. It's the same for all the data in a work_session, anyway.
-    var first = data[0];
-    var ms1 = +first.milestone1;
-    var ms2 = +first.milestone2;
-    var ms3 = +first.milestone3;
-    var earlyBonus = +first.earlyBonus;
-    var dueTime = +first.dueTime;
+    let ms1 = +due_times['fall2016']['assignment1']['milestone1'];
+    let ms2 = +due_times['fall2016']['assignment1']['milestone2'];
+    let ms3 = +due_times['fall2016']['assignment1']['milestone3'];;
+    let earlyBonus = +due_times['fall2016']['assignment1']['earlyBonus'];
+    let dueTime = +due_times['fall2016']['assignment1']['dueTime'];;
 
     // Get x-positions scaled by the time scale.
-    var dueX = x(new Date(dueTime));
-    var ms1X = x(new Date(ms1));
-    var ms2X = x(new Date(ms2));
-    var ms3X = x(new Date(ms3));
-    var earlyX = x(new Date(earlyBonus));
+    let dueX = x(new Date(dueTime));
+    let ms1X = x(new Date(ms1));
+    let ms2X = x(new Date(ms2));
+    let ms3X = x(new Date(ms3));
+    let earlyX = x(new Date(earlyBonus));
 
     // Define end-points for each line. Basically top to bottom
     // at the appropriate date on the x-axis.
-    var ms1Line = [{ 'x': ms1X, 'y': height }, { 'x': ms1X, 'y': 0 }];
-    var ms2Line = [{ 'x': ms2X, 'y': height }, { 'x': ms2X, 'y': 0 }];
-    var ms3Line = [{ 'x': ms3X, 'y': height }, { 'x': ms3X, 'y': 0 }];
-    var earlyLine = [{ 'x': earlyX, 'y': height }, { 'x': earlyX, 'y': 0 }];
-    var dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
+    let ms1Line = [{ 'x': ms1X, 'y': height }, { 'x': ms1X, 'y': 0 }];
+    let ms2Line = [{ 'x': ms2X, 'y': height }, { 'x': ms2X, 'y': 0 }];
+    let ms3Line = [{ 'x': ms3X, 'y': height }, { 'x': ms3X, 'y': 0 }];
+    let earlyLine = [{ 'x': earlyX, 'y': height }, { 'x': earlyX, 'y': 0 }];
+    let dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
 
     // Draw due date lines.
-    var ms1G = svg.append('g')
+    let ms1G = svg.append('g')
       .attr('id', 'group-ms-1');
     ms1G.append('path')
       .attr('class', 'date-line milestone')
@@ -178,7 +179,7 @@
       .text('Milestone 1 Due')
       .attr('fill', '#336699');
 
-    var ms2G = svg.append('g')
+    let ms2G = svg.append('g')
       .attr('id', 'group-ms-2');
     ms2G.append('path')
       .attr('class', 'date-line milestone')
@@ -191,7 +192,7 @@
       .text('Milestone 2 Due')
       .attr('fill', '#336699');
 
-    var ms3G = svg.append('g')
+    let ms3G = svg.append('g')
       .attr('id', 'group-ms-3');
     ms3G.append('path')
       .attr('class', 'date-line milestone')
@@ -204,7 +205,7 @@
       .text('Milestone 3 Due')
       .attr('fill', '#336699');
 
-    var earlyG = svg.append('g')
+    let earlyG = svg.append('g')
       .attr('id', 'group-early')
     earlyG.append('path')
       .attr('class', 'date-line early')
@@ -217,7 +218,7 @@
       .text('Early Bonus Deadline')
       .attr('fill', '#cc6600');
 
-    var dueG = svg.append('g')
+    let dueG = svg.append('g')
       .attr('id', 'group-due');
     dueG.append('path')
       .attr('class', 'date-line due')

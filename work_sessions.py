@@ -7,7 +7,7 @@ def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
     print('Getting work sessions...')
 
-    fieldnames = ['projectId', 'userId', 'cleaned_assignment', 'workSessionId', 'start_time', 'end_time',\
+    fieldnames = ['projectId', 'userId', 'CASSIGNMENTNAME', 'workSessionId', 'start_time', 'end_time',\
         'normalLaunches', 'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods',\
         'testEditSizeMethods', 'greenZones']
 
@@ -55,7 +55,7 @@ def get_work_sessions(infile, outfile):
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
-                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'workSessionId': prev_row['workSessionId'],
                     'start_time': start_time,
                     'end_time': int(prev_row['time']),
@@ -95,7 +95,7 @@ def get_work_sessions(infile, outfile):
         to_write = {
             'userId': prev_row['userId'],
             'projectId': prev_row['projectId'],
-            'cleaned_assignment': prev_row['cleaned_assignment'],
+            'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
             'workSessionId': prev_row['workSessionId'],
             'start_time': start_time,
             'end_time': int(prev_row['time']),

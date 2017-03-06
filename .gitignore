@@ -8,3 +8,5 @@ results/
 .Rproj.user
 *.Rproj
 *.pdf
+*/node_modules/
+npm-debug.log

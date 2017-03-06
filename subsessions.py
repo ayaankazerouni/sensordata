@@ -19,7 +19,7 @@ def get_subsessions(infile, outfile):
     fieldnames = [
         'projectId',
         'userId',
-        'cleaned_assignment',
+        'CASSIGNMENTNAME',
         'time',
         'workSessionId',
         'editSizeStmts',
@@ -76,7 +76,7 @@ def get_subsessions(infile, outfile):
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
-                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'time': prev_row['time'],
                     'workSessionId': ws_id,
                     'editSizeStmts': edit_size_stmts,
@@ -135,7 +135,7 @@ def get_subsessions(infile, outfile):
                         to_write = {
                             'userId': row['userId'],
                             'projectId': row['projectId'],
-                            'cleaned_assignment': row['cleaned_assignment'],
+                            'CASSIGNMENTNAME': row['CASSIGNMENTNAME'],
                             'time': row['time'],
                             'workSessionId': ws_id,
                             'editSizeStmts': edit_size_stmts,
@@ -187,7 +187,7 @@ def get_subsessions(infile, outfile):
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
-                    'cleaned_assignment': prev_row['cleaned_assignment'],
+                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'time': prev_row['time'],
                     'workSessionId': ws_id,
                     'editSizeStmts': edit_size_stmts,
@@ -218,12 +218,7 @@ def main(args):
     except FileNotFoundError as e:
         print("Error! File '%s' does not exist." % infile)
     except KeyError as e:
-        cause = e.args[0]
-        if (cause == 'cleaned_assignment'):
-            print("Key Error! Are you using a cleaned data file? Please run ./clean.py on the data file and use " +
-                "the resulting file as input.")
-        else:
-            traceback.print_exc()
+        traceback.print_exc()
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
