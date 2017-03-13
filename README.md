@@ -13,13 +13,13 @@ The data has the following fields:
 * **userId** (*required*) - A unique identifier for a user
 * **projectId** (*required*) - A unique identifier for a user's project
 * **CASSIGNMENTNAME** (*recommended*) - The name of the assignment
-* **Class-Name** (*required for *Edit* events*) - The name of the class the event takes place on
+* **Class-Name** (*required for Edit events*) - The name of the class the event takes place on
 * **Unit-Type** - [ project, file, Class, Method, ... ] The type of unit affected in this event
 * **Unit-Name** - The name of the Unit affected in this event
 * **Type** (*required*) - [ Edit, Launch ] The type of event
-* **Subtype** (*required for *Launch* events*) - [ Test, Normal ]
-* **Subsubtype** (*required for *Unit-Type = Method* events*) - [ Add, Remove ] the action taken on the specified Unit
-* **onTestCase** (*required for *Edit* events*) - [ 0, 1 ]
+* **Subtype** (*required for Launch events*) - [ Test, Normal ]
+* **Subsubtype** (*required for Unit-Type = Method events*) - [ Add, Remove ] the action taken on the specified Unit
+* **onTestCase** (*required for Edit events*) - [ 0, 1 ]
 
 ### Description of Processes
 Some python files have not been described here, because you can perform their functions using any data-processing software. So they are not really useful.
