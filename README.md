@@ -32,3 +32,5 @@ Some python files have not been described here, because you can perform their fu
 
 [sensordata_utils.r](sensordata_utils.r) contains analysis processes rather specific to my research, so I haven't described it here.
 You may explore the source if you like.
+
+The [visualisations][visualisations] directory contains tentative D3 visualisations which will probably go away soon anyway.
