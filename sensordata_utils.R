@@ -6,13 +6,16 @@ getStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
     inc.path = 'data/fall-2016/scaled_inc.csv'
   }
   webcat.data = read.csv(webcat.path)
-  webcat.data = webcat.data[, (names(webcat.data) %in% c('userName', 'assignment', 'submissionNo', 
-                                                         'score.correctness', 'max.score.correctness',
-                                                         'elements', 'elementsCovered'))]
+  cols.of.interest = c('userName', 'assignment', 'submissionNo', 
+           'score.correctness', 'max.score.correctness',
+           'elements', 'elementsCovered')
+  webcat.data = webcat.data[, (names(webcat.data) %in% cols.of.interest)]
   webcat.data = webcat.data[order(webcat.data$assignment, webcat.data$userName, -webcat.data$submissionNo), ]
   
   # get the last submission from each user on each project
   last.submissions = webcat.data[!duplicated(data.frame(webcat.data$assignment, webcat.data$userName)), ]
+  
+  # calculate reftest correctness percentages
   last.submissions$score.correctness = last.submissions$score.correctness / last.submissions$max.score.correctness
   last.submissions$elementsCovered = last.submissions$elementsCovered / last.submissions$elements
   last.submissions$score.reftest = last.submissions$score.correctness / last.submissions$elementsCovered
@@ -21,32 +24,32 @@ getStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
   inc.data = read.csv(inc.path)
   inc.data = inc.data[, !(names(inc.data) %in% c('ref_test_gains'))] # drop unused metrics
   colnames(inc.data)[1] = 'userName'
-  inc.data$userName = gsub('.{7}$', '', inc.data$userName)
+  inc.data$userName = gsub('.{7}$', '', inc.data$userName) # 
   inc.data = inc.data[order(inc.data$assignment, inc.data$userName), ]
   inc.data$total_grade = (inc.data$early_often + inc.data$checking + inc.data$test_checking + inc.data$test_writing) / 4
   
   # merge incremental development scores and project grades
-  total = merge(last.submissions, inc.data, by=c('userName', 'assignment'))
-  total$userName = factor(total$userName)
+  merged = merge(last.submissions, inc.data, by=c('userName', 'assignment'))
+  merged$userName = factor(merged$userName)
   
   # discretise scores
-  total$grade.reftest = discretise(total$score.reftest)
-  total$grade.early_often = discretise(total$early_often)
-  total$grade.checking = discretise(total$checking)
-  total$grade.test_checking = discretise(total$test_checking)
-  total$grade.test_writing = discretise(total$test_writing)
+  merged$grade.reftest = discretise(merged$score.reftest)
+  merged$grade.early_often = discretise(merged$early_often)
+  merged$grade.checking = discretise(merged$checking)
+  merged$grade.test_checking = discretise(merged$test_checking)
+  merged$grade.test_writing = discretise(merged$test_writing)
 
   if (remove.consistent) {
     # remove students who got the same grade on all projects and
     # only keep students who attempted all projects
-    total = total[!duplicated(total[c('userName', 'grade.reftest')]), ]
-    num.projects = length(levels(total$assignment))
-    username.counts = table(total$userName)
+    merged = merged[!duplicated(merged[c('userName', 'grade.reftest')]), ]
+    num.projects = length(levels(merged$assignment))
+    username.counts = table(merged$userName)
     keep = names(username.counts[username.counts == num.projects])
-    total = total[total$userName %in% keep, ]
+    merged = merged[merged$userName %in% keep, ]
   }
   
-  return(total)
+  return(merged)
 }
 
 discretise = function(x) {
@@ -63,8 +66,8 @@ clust = kmeans(webcat.data[cols], 3)
 webcat.data$cluster = factor(clust$cluster)
 
 # PCA for visualisation
-pca = prcomp(webcat.data[cols])
-pcs = data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], cluster = factor(clust$cluster))
+# pca = prcomp(webcat.data[cols])
+pcs = data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], cluster = factor(webcat.data$cluster))
 palette(c('red', 'limegreen', 'blue', 'yellow', 'black', 'magenta'))
 plot(pcs$PC1, pcs$PC2, pch = 21, bg = pcs$cluster, main = 'PCA-Reduced Data in Clusters',
      xlab = 'PC 1', ylab = 'PC 2', bty = 'L')
