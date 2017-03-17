@@ -48,6 +48,10 @@ def early_often_scores(infile, outfile, deadline):
             date = datetime.date.fromtimestamp(time / 1000)
             days_to_deadline = (due_date - date).days
 
+            if days_to_deadline < -4:
+                prev_row = row
+                continue
+
             if (row['userId'] == prev_row['userId']):
                 if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
                     class_name = repr(row['Class-Name'])

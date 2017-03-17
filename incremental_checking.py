@@ -5,7 +5,7 @@ import sys
 import datetime
 import numpy as np
 
-def incremental_checking(infile, outfile):
+def incremental_checking(infile, outfile, deadline = None):
     """
     Calculates metrics for 'incremental checking'.
 
@@ -59,6 +59,15 @@ def incremental_checking(infile, outfile):
 
         for row in reader:
             prev_row = prev_row or row
+
+            if deadline:
+                due_date = datetime.date.fromtimestamp(deadline / 1000)
+                time = int(row['time'])
+                event_date = datetime.date.fromtimestamp(time / 1000)
+                days_to_deadline  = (due_date - event_date).days
+                if days_to_deadline < - 4:
+                    prev_row = row
+                    continue
 
             if (row['userId'] == prev_row['userId']):
                 if (repr(row['Type']) == repr('Edit')):
