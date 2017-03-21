@@ -8,17 +8,25 @@ getStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
   webcat.data = read.csv(webcat.path)
   cols.of.interest = c('userName', 'assignment', 'submissionNo', 
            'score.correctness', 'max.score.correctness',
-           'elements', 'elementsCovered')
+           'elements', 'elementsCovered', 'submissionTimeRaw', 'dueDateRaw')
   webcat.data = webcat.data[, (names(webcat.data) %in% cols.of.interest)]
   webcat.data = webcat.data[order(webcat.data$assignment, webcat.data$userName, -webcat.data$submissionNo), ]
   
   # get the last submission from each user on each project
   last.submissions = webcat.data[!duplicated(data.frame(webcat.data$assignment, webcat.data$userName)), ]
   
-  # calculate reftest correctness percentages
+  # calculate reftest percentages and discretised grades
   last.submissions$score.correctness = last.submissions$score.correctness / last.submissions$max.score.correctness
   last.submissions$elementsCovered = last.submissions$elementsCovered / last.submissions$elements
   last.submissions$score.reftest = last.submissions$score.correctness / last.submissions$elementsCovered
+  last.submissions$grade.reftest = discretise(last.submissions$score.reftest)
+  
+  # calculate on-time/not-on-time, continuous (in days) and categorical(true/false)
+  submission.times = as.POSIXct(last.submissions$submissionTimeRaw / 1000, origin = '1970-01-01')
+  due.times = as.POSIXct(last.submissions$dueDateRaw / 1000, origin = '1970-01-01')
+  last.submissions$hours.from.deadline = as.numeric(difftime(due.times, submission.times, units = 'h'))
+  last.submissions$on.time.submission = discretise(last.submissions$hours.from.deadline, binom = TRUE)
+  
   
   # read incremental checking data and format it so it can be matched with grade data
   inc.data = read.csv(inc.path)
@@ -26,14 +34,13 @@ getStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
   colnames(inc.data)[1] = 'userName'
   inc.data$userName = gsub('.{7}$', '', inc.data$userName) # 
   inc.data = inc.data[order(inc.data$assignment, inc.data$userName), ]
-  inc.data$total_grade = (inc.data$early_often + inc.data$checking + inc.data$test_checking + inc.data$test_writing) / 4
+  inc.data$composite_inc = (inc.data$early_often + inc.data$checking + inc.data$test_checking + inc.data$test_writing) / 4
   
   # merge incremental development scores and project grades
   merged = merge(last.submissions, inc.data, by=c('userName', 'assignment'))
   merged$userName = factor(merged$userName)
   
   # discretise scores
-  merged$grade.reftest = discretise(merged$score.reftest)
   merged$grade.early_often = discretise(merged$early_often)
   merged$grade.checking = discretise(merged$checking)
   merged$grade.test_checking = discretise(merged$test_checking)
@@ -52,8 +59,12 @@ getStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
   return(merged)
 }
 
-discretise = function(x) {
-  result = cut(x, c(-Inf, 0.6, 0.7, 0.8, 0.9, Inf), c('f', 'd', 'c', 'b', 'a'), right = FALSE)
+discretise = function(x, binom = FALSE) {
+  if (binom) {
+    result = cut(x, c(-Inf, 0, Inf), c('0', '1'), right = TRUE)
+  } else {
+    result = cut(x, c(-Inf, 0.6, 0.7, 0.8, 0.9, Inf), c('f', 'd', 'c', 'b', 'a'), right = FALSE)
+  }
   return(result)
 }
 
