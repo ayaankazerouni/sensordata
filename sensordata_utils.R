@@ -66,7 +66,7 @@ clust = kmeans(webcat.data[cols], 3)
 webcat.data$cluster = factor(clust$cluster)
 
 # PCA for visualisation
-# pca = prcomp(webcat.data[cols])
+pca = prcomp(webcat.data[cols])
 pcs = data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], cluster = factor(webcat.data$cluster))
 palette(c('red', 'limegreen', 'blue', 'yellow', 'black', 'magenta'))
 plot(pcs$PC1, pcs$PC2, pch = 21, bg = pcs$cluster, main = 'PCA-Reduced Data in Clusters',
@@ -75,6 +75,4 @@ legend(x = 'topright', pch=c(21,21,21), pt.bg = levels(pcs$cluster), c('Cluster 
 
 # contingency table for chi-square analysis
 tbl = table(clust$cluster, webcat.data$grade.reftest)
-
-# ANOVA grade ~ cluster
-fit = aov(score.reftest ~ cluster, data = webcat.data)
+fit.chisq = chisq.test(tbl, simulate.p.value = TRUE)
