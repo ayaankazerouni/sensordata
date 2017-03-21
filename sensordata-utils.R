@@ -1,4 +1,4 @@
-getStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
+consolidateStudentData = function(webcat.path, inc.path, remove.consistent = FALSE) {
   if (missing(webcat.path)) {
     webcat.path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
   }
@@ -68,22 +68,4 @@ discretise = function(x, binom = FALSE) {
   return(result)
 }
 
-webcat.data = getStudentData()
-cols = c('early_often', 'checking', 'test_checking', 'test_writing')
-
-# k-means clustering
-set.seed(100)
-clust = kmeans(webcat.data[cols], 3)
-webcat.data$cluster = factor(clust$cluster)
-
-# PCA for visualisation
-pca = prcomp(webcat.data[cols])
-pcs = data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], cluster = factor(webcat.data$cluster))
-palette(c('red', 'limegreen', 'blue', 'yellow', 'black', 'magenta'))
-plot(pcs$PC1, pcs$PC2, pch = 21, bg = pcs$cluster, main = 'PCA-Reduced Data in Clusters',
-     xlab = 'PC 1', ylab = 'PC 2', bty = 'L')
-legend(x = 'topright', pch=c(21,21,21), pt.bg = levels(pcs$cluster), c('Cluster 1', 'Cluster 2', 'Cluster 3'), bty = '0', cex=0.8)
-
-# contingency table for chi-square analysis
-tbl = table(clust$cluster, webcat.data$grade.reftest)
-fit.chisq = chisq.test(tbl, simulate.p.value = TRUE)
+webcat.data = consolidateStudentData()
