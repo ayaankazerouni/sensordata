@@ -18,6 +18,7 @@ def get_subsessions(infile, outfile):
     print('Getting subsessions...')
     fieldnames = [
         'projectId',
+        'email',
         'userId',
         'CASSIGNMENTNAME',
         'time',
@@ -63,7 +64,7 @@ def get_subsessions(infile, outfile):
             ws_start_time = ws_start_time or int(row['time'])
             prev_row = prev_row or row
 
-            if (row['userId'] != prev_row['userId'] or row['projectId'] != prev_row['projectId']):
+            if (row['userId'] != prev_row['userId'] or row['CASSIGNMENTNAME'] != prev_row['CASSIGNMENTNAME']):
                 # Started events for the next user or assignment, so write out aggregate data of prev user
                 # before continuing.
                 unwritten_launches = recent_launches + recent_test_launches
@@ -76,6 +77,7 @@ def get_subsessions(infile, outfile):
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
+                    'email': prev_row['email'],
                     'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'time': prev_row['time'],
                     'workSessionId': ws_id,
@@ -135,6 +137,7 @@ def get_subsessions(infile, outfile):
                         to_write = {
                             'userId': row['userId'],
                             'projectId': row['projectId'],
+                            'email': row['email'],
                             'CASSIGNMENTNAME': row['CASSIGNMENTNAME'],
                             'time': row['time'],
                             'workSessionId': ws_id,
@@ -187,6 +190,7 @@ def get_subsessions(infile, outfile):
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
+                    'email': prev_row['email'],
                     'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'time': prev_row['time'],
                     'workSessionId': ws_id,

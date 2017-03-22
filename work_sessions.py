@@ -7,7 +7,7 @@ def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
     print('Getting work sessions...')
 
-    fieldnames = ['projectId', 'userId', 'CASSIGNMENTNAME', 'workSessionId', 'start_time', 'end_time',\
+    fieldnames = ['projectId', 'userId', 'email', 'CASSIGNMENTNAME', 'workSessionId', 'start_time', 'end_time',\
         'normalLaunches', 'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods',\
         'testEditSizeMethods', 'greenZones']
 
@@ -31,7 +31,7 @@ def get_work_sessions(infile, outfile):
 
         for row in reader:
             prev_row = prev_row or row
-            if (row['userId'] == prev_row['userId'] and row['projectId'] == prev_row['projectId'] \
+            if (row['userId'] == prev_row['userId'] and row['CASSIGNMENTNAME'] == prev_row['CASSIGNMENTNAME'] \
                 and row['workSessionId'] == prev_row['workSessionId']):
                     start_time = start_time or int(row['wsStartTime'])
                     edit_size_stmts += int(row['editSizeStmts'])
@@ -54,6 +54,7 @@ def get_work_sessions(infile, outfile):
             else:
                 to_write = {
                     'userId': prev_row['userId'],
+                    'email': prev_row['email'],
                     'projectId': prev_row['projectId'],
                     'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'workSessionId': prev_row['workSessionId'],
@@ -95,6 +96,7 @@ def get_work_sessions(infile, outfile):
         to_write = {
             'userId': prev_row['userId'],
             'projectId': prev_row['projectId'],
+            'email': prev_row['email'],
             'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
             'workSessionId': prev_row['workSessionId'],
             'start_time': start_time,
