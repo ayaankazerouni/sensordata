@@ -9,7 +9,7 @@ def get_time_spent(infile, outfile):
     the time spent on a project for a student.
     """
     print('Getting time spent on project...')
-    fieldnames = ['userId', 'projectId', 'assignment', 'start_time', 'timeSpent']
+    fieldnames = ['userId', 'projectId', 'assignment', 'start_time', 'hoursOnProject']
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
@@ -24,21 +24,24 @@ def get_time_spent(infile, outfile):
 
         for row in reader:
             prev_row = prev_row or row
-            start_time = start_time or int(row['start_time'])
+            start_time = start_time or datetime.date.fromtimestamp(int(row['start_time']) / 1000)
 
             if (row['projectId'] == prev_row['projectId'] and row['userId'] == prev_row['userId']):
-                time_spent += int(row['end_time']) - int(row['start_time'])
+                end_time = datetime.datetime.fromtimestamp(int(row['end_time']) / 1000)
+                hours = (end_time - start_time).total_seconds() / 3600
+                time_spent += hours
                 prev_row = row
             else:
                 writer.writerow({'userId': prev_row['userId'], 'projectId': prev_row['projectId'], \
                     'assignment': prev_row['cleaned_assignment'], 'start_time': start_time, \
-                    'timeSpent': time_spent / 1080000})
-                time_spent = int(row['end_time']) - int(row['start_time'])
-                start_time = int(row['start_time'])
+                    'hoursOnProject': time_spent})
+                end_time = datetime.datetime.fromtimestamp(int(row['end_time']) / 1000)
+                start_time = datetime.datetime.fromtimestamp(int(row['start_time']) / 1000)
+                time_spent = (end_time - start_time).total_seconds() / 3600
                 prev_row = row
 
         writer.writerow({ 'userId': prev_row['userId'], 'projectId': prev_row['projectId'], 'assignment':\
-            prev_row['cleaned_assignment'], 'start_time': start_time, 'timeSpent': time_spent / 1080000 })
+            prev_row['cleaned_assignment'], 'start_time': start_time, 'hoursOnProject': time_spent })
 
 def main(args):
     infile = args[0]
