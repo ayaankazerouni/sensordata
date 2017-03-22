@@ -1,7 +1,7 @@
-# Miscellaneous analysis operations, in no specific order.
-# source(sensordata-utils.R) before using these
+# miscellaneous analysis operations
+source('sensordata-utils.R') # before running analyses operations below
 
-# Define some columns of interest for convenience in clustering
+# Define some columns of interest for convenience
 cols = c('early_often', 'checking', 'test_checking', 'test_writing')
 
 # k-means clustering
@@ -21,28 +21,30 @@ legend(x = 'topright', pch=c(21,21,21), pt.bg = levels(pcs$cluster), c('Cluster 
 tbl = table(clust$cluster, webcat.data$grade.reftest)
 fit.chisq = chisq.test(tbl, simulate.p.value = TRUE)
 
-# 5-fold cross validation
-folds = cut(seq(1, nrow(webcat.data)), breaks = 5, labels = FALSE)
-accuracy.total = 0
+# 5-fold cross validation on logistic regressions
+modeling.data = webcat.data[complete.cases(webcat.data), ] # remove rows with NAs
+folds = cut(seq(1, nrow(modeling.data)), breaks = 5, labels = FALSE)
+accuracies = 0
 
 for (i in 1:5) {
   # 0.8/0.2 train/test
   test.indices = which(folds == i, arr.ind = TRUE)
-  data.test = webcat.data[test.indices, ]
-  data.train = webcat.data[-test.indices, ]
+  data.test = modeling.data[test.indices, ]
+  data.train = modeling.data[-test.indices, ]
   
-  # logistic regression on.time.submission ~ early_often + checking + test_checking + test_writing
+  # logistic regression on.time.submission ~ raw metrics
   logistic.null = glm(on.time.submission ~ 1, data = data.train, family = binomial(link='logit'))
-  logistic.full = glm(on.time.submission ~ early_often + checking + test_checking + test_writing, 
-                      family = binomial(link='logit'), data = data.train)
+  logistic.full = glm(on.time.submission ~ early_often_raw + checking_raw + test_checking_raw + test_writing_raw, 
+                      data = data.train, family = binomial(link='logit'))
   logistic.final = step(logistic.full, scope = list(upper=logistic.full, lower=logistic.null), direction='backward')
   
-  # on-time/not-on-time predictions
+  # on-time/late predictions
   predictions = predict(logistic.final, newdata = data.test)
   predictions = ifelse(predictions > 0.5, 1, 0)
-  error = mean(predictions != data.test$on.time.submission)
-  accuracy = 1 - error
-  accuracy.total = accuracy.total + accuracy
+  accuracies[i] = mean(predictions == data.test$on.time.submission)
 }
 
-accuracy.average = accuracy.total / 5
+rm(modeling.data)
+
+accuracy.average = mean(accuracies)
+
