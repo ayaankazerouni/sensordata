@@ -5,6 +5,24 @@ import csv
 import datetime
 
 def early_often_scores(infile, outfile, deadline):
+    """
+    Computes early-often metrics for each student project, based
+    on the project deadline.
+
+    * Early-often index on test|solution|all statements|methods
+
+    for a total of 6 metrics.
+
+    This script must be run on data from one particular assignment,
+    since you pass it only one deadline.
+
+    Keyword arguments:
+    infile   -- the CSV input file containing raw sensordata
+    outfile  -- the CSV output file
+    deadline -- the project deadline in the form of a UNIX timestamp in milliseconds
+    """
+    print('Getting early/often scores...')
+
     fieldnames = [
         'projectId',
         'userId',
@@ -44,7 +62,7 @@ def early_often_scores(infile, outfile, deadline):
         for row in reader:
             prev_row = prev_row or row
 
-            time = int(row['time'])
+            time = int(float(row['time']))
             date = datetime.date.fromtimestamp(time / 1000)
             days_to_deadline = (due_date - date).days
 

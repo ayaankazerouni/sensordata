@@ -61,7 +61,7 @@ def get_subsessions(infile, outfile):
             # Setting prev values to the first row's values
             # to start off with. If prev values are set already,
             # they remain unchanged.
-            ws_start_time = ws_start_time or int(row['time'])
+            ws_start_time = ws_start_time or to_int(row['time'])
             prev_row = prev_row or row
 
             if (row['userId'] != prev_row['userId'] or row['CASSIGNMENTNAME'] != prev_row['CASSIGNMENTNAME']):
@@ -100,10 +100,10 @@ def get_subsessions(infile, outfile):
                 test_edit_size_stmts = 0
                 test_edit_size_methods = 0
                 curr_sizes_stmts = {}
-                ws_start_time = int(row['time'])
+                ws_start_time = to_int(row['time'])
                 prev_row = row
 
-            if (abs(int(row['time']) - int(prev_row['time'])) < 10800000):
+            if (abs(to_int(row['time']) - to_int(prev_row['time'])) < 10800000):
                 # Within the same work session, we add up numbers for edit sizes
                 # and keep track of file sizes.
                 if (repr(row['Type']) == repr('Edit')):
@@ -112,10 +112,10 @@ def get_subsessions(infile, outfile):
                         # size of the file (in statements) in a dictionary for
                         # quick lookup the next time this file is edited.
                         class_name = repr(row['Class-Name'])
-                        stmts = int(row['Current-Statements'])
+                        stmts = to_int(row['Current-Statements'])
                         prev_size_stmts = curr_sizes_stmts.get(class_name, 0)
 
-                        if (int(row['onTestCase']) == 1):
+                        if (to_int(row['onTestCase']) == 1):
                             test_edit_size_stmts += abs(stmts - prev_size_stmts)
                         else:
                             edit_size_stmts += abs(stmts - prev_size_stmts)
@@ -123,7 +123,7 @@ def get_subsessions(infile, outfile):
                         prev_launch_type = None
                     if(repr(row['Unit-Type']) == repr('Method')\
                         and repr(row['Subsubtype']) in [repr('Add'), repr('Remove')]):
-                        if (int(row['onTestCase']) == 1):
+                        if (to_int(row['onTestCase']) == 1):
                             test_edit_size_methods += 1
                         else:
                             edit_size_methods += 1
@@ -213,6 +213,16 @@ def get_subsessions(infile, outfile):
                 ws_start_time = row['time']
 
             prev_row = row
+
+def to_int(num):
+    """
+    Converts a string to an integer; can handle
+    scientific notation.
+
+    Will throw an exception if string is not an integer in scientific
+    notation or otherwise.
+    """
+    return int(float(num))
 
 def main(args):
     infile = args[0]

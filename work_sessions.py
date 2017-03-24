@@ -33,7 +33,7 @@ def get_work_sessions(infile, outfile):
             prev_row = prev_row or row
             if (row['userId'] == prev_row['userId'] and row['CASSIGNMENTNAME'] == prev_row['CASSIGNMENTNAME'] \
                 and row['workSessionId'] == prev_row['workSessionId']):
-                    start_time = start_time or int(row['wsStartTime'])
+                    start_time = start_time or int(float(row['wsStartTime']))
                     edit_size_stmts += int(row['editSizeStmts'])
                     test_edit_size_stmts += int(row['testEditSizeStmts'])
                     edit_size_methods += int(row['editSizeMethods'])
@@ -59,7 +59,7 @@ def get_work_sessions(infile, outfile):
                     'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
                     'workSessionId': prev_row['workSessionId'],
                     'start_time': start_time,
-                    'end_time': int(prev_row['time']),
+                    'end_time': int(float(prev_row['time'])),
                     'normalLaunches': normal_launches,
                     'testLaunches': test_launches,
                     'editSizeStmts': edit_size_stmts,
@@ -74,7 +74,7 @@ def get_work_sessions(infile, outfile):
                 test_edit_size_stmts = int(row['testEditSizeStmts'])
                 edit_size_methods = int(row['editSizeMethods'])
                 test_edit_size_methods = int(row['testEditSizeMethods'])
-                start_time = int(row['wsStartTime'])
+                start_time = int(float(row['wsStartTime']))
                 successes = int(row['successes'])
                 failures = int(row['failures'])
                 errors = int(row['errors'])
@@ -100,7 +100,7 @@ def get_work_sessions(infile, outfile):
             'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
             'workSessionId': prev_row['workSessionId'],
             'start_time': start_time,
-            'end_time': int(prev_row['time']),
+            'end_time': int(float(prev_row['time'])),
             'normalLaunches': normal_launches,
             'testLaunches': test_launches,
             'editSizeStmts': edit_size_stmts,
