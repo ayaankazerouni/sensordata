@@ -1,8 +1,8 @@
 # miscellaneous analysis operations
-source('sensordata-utils.R') # before running analyses operations below
+# source('sensordata-utils.R') # before running analyses operations below
 
 # Define some columns of interest for convenience
-cols = c('early_often', 'checking', 'test_checking', 'test_writing')
+cols = c('early_often', 'test_checking', 'checking', 'test_writing')
 
 # k-means clustering
 set.seed(100)
@@ -34,7 +34,7 @@ for (i in 1:5) {
   
   # logistic regression on.time.submission ~ raw metrics
   logistic.null = glm(on.time.submission ~ 1, data = data.train, family = binomial(link='logit'))
-  logistic.full = glm(on.time.submission ~ early_often_raw + checking_raw + test_checking_raw + test_writing_raw, 
+  logistic.full = glm(on.time.submission ~ early_often_raw + checking_raw + test_checking_raw + test_writing_raw,
                       data = data.train, family = binomial(link='logit'))
   logistic.final = step(logistic.full, scope = list(upper=logistic.full, lower=logistic.null), direction='backward')
   

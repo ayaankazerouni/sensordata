@@ -1,4 +1,4 @@
-consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path) {
+consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, time.path) {
   if (missing(webcat.path)) {
     webcat.path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
   }
@@ -7,6 +7,9 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path) {
   }
   if (missing(raw.inc.path)) {
     raw.inc.path = 'data/fall-2016/raw_inc.csv'
+  }
+  if (missing(time.path)) {
+    time.path = 'data/fall-2016/time_spent.csv'
   }
   
   webcat.data = read.csv(webcat.path)
@@ -47,9 +50,17 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path) {
   raw.inc.data$userName = gsub('.{7}$', '', raw.inc.data$userName)
   raw.inc.data = raw.inc.data[order(raw.inc.data$assignment, raw.inc.data$userName), ]
   
+  # read hoursOnProject data and format it
+  time.data = read.csv(time.path)
+  time.data = time.data[, !(names(time.data) %in% c('userId', 'projectId'))]
+  colnames(time.data)[1] = 'userName'
+  time.data$userName = gsub('.{7}$', '', time.data$userName)
+  time.data = time.data[order(time.data$assignment, time.data$userName), ]
+  
   # merge incremental development scores and project grades
   merged = merge(last.submissions, inc.data, by=c('userName', 'assignment'))
   merged = merge(merged, raw.inc.data, by=c('userName', 'assignment'))
+  merged = merge(merged, time.data, by=c('userName', 'assignment'))
   merged$userName = factor(merged$userName)
   
   # discretise scaled incremental development scores
