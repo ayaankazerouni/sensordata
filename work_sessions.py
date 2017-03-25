@@ -7,9 +7,21 @@ def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
     print('Getting work sessions...')
 
-    fieldnames = ['projectId', 'userId', 'email', 'CASSIGNMENTNAME', 'workSessionId', 'start_time', 'end_time',\
-        'normalLaunches', 'testLaunches', 'editSizeStmts', 'testEditSizeStmts', 'editSizeMethods',\
-        'testEditSizeMethods', 'greenZones']
+    fieldnames = [
+        'projectId',
+        'userId',
+        'email',
+        'CASSIGNMENTNAME',
+        'workSessionId',
+        'start_time',
+        'end_time',
+        'normalLaunches',
+        'testLaunches',
+        'editSizeStmts',
+        'testEditSizeStmts',
+        'editSizeMethods',
+        'testEditSizeMethods'
+    ]
 
     prev_row = None
     ws = None
@@ -39,14 +51,8 @@ def get_work_sessions(infile, outfile):
                     edit_size_methods += int(row['editSizeMethods'])
                     test_edit_size_methods += int(row['testEditSizeMethods'])
 
-                    successes = int(row['successes'])
-                    failures = int(row['failures'])
-                    errors = int(row['errors'])
-
                     if (repr(row['launchType']) == repr('Test')):
                         test_launches += 1
-                        if (successes > 0 and failures == 0 and errors == 0):
-                            green_zones += 1
                     elif (repr(row['launchType']) == repr('Normal')):
                         normal_launches += 1
 
@@ -65,8 +71,7 @@ def get_work_sessions(infile, outfile):
                     'editSizeStmts': edit_size_stmts,
                     'testEditSizeStmts': test_edit_size_stmts,
                     'editSizeMethods': edit_size_methods,
-                    'testEditSizeMethods': test_edit_size_methods,
-                    'greenZones': green_zones
+                    'testEditSizeMethods': test_edit_size_methods
                 }
                 writer.writerow(to_write)
 
@@ -82,8 +87,6 @@ def get_work_sessions(infile, outfile):
                 if (repr(row['launchType']) == repr('Test')):
                     test_launches = 1
                     normal_launches = 0
-                    if (successes > 0 and failures == 0 and errors == 0):
-                        green_zones += 1
                 elif (repr(row['launchType']) == repr('Normal')):
                     normal_launches = 1
                     test_launches = 0
@@ -106,8 +109,7 @@ def get_work_sessions(infile, outfile):
             'editSizeStmts': edit_size_stmts,
             'testEditSizeStmts': test_edit_size_stmts,
             'editSizeMethods': edit_size_methods,
-            'testEditSizeMethods': test_edit_size_methods,
-            'greenZones': green_zones
+            'testEditSizeMethods': test_edit_size_methods
         }
         writer.writerow(to_write)
 

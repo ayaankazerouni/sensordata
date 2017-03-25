@@ -29,10 +29,7 @@ def get_subsessions(infile, outfile):
         'editSizeMethods',
         'testEditSizeMethods',
         'wsStartTime',
-        'launchType',
-        'successes',
-        'failures',
-        'errors'
+        'launchType'
     ]
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
@@ -54,9 +51,6 @@ def get_subsessions(infile, outfile):
         test_curr_sizes_methods = {}
         ws_start_time = None
         prev_row = None
-        # Stacks to keep track of launches until terminations or session ends
-        recent_launches = []
-        recent_test_launches = []
 
         for row in reader:
             # Setting prev values to the first row's values
@@ -66,14 +60,6 @@ def get_subsessions(infile, outfile):
             prev_row = prev_row or row
 
             if (row['userId'] != prev_row['userId'] or row['CASSIGNMENTNAME'] != prev_row['CASSIGNMENTNAME']):
-                # Started events for the next user or assignment, so write out aggregate data of prev user
-                # before continuing.
-                unwritten_launches = recent_launches + recent_test_launches
-                unwritten_launches = sorted(unwritten_launches, key=lambda k: k['time'])
-                for launch in unwritten_launches:
-                    writer.writerow(launch)
-                recent_launches = []
-                recent_test_launches = []
 
                 to_write = {
                     'userId': prev_row['userId'],
@@ -87,10 +73,7 @@ def get_subsessions(infile, outfile):
                     'editSizeMethods': edit_size_methods,
                     'testEditSizeMethods': test_edit_size_methods,
                     'wsStartTime': ws_start_time,
-                    'launchType': 'N/A',
-                    'successes': 0,
-                    'failures': 0,
-                    'errors': 0
+                    'launchType': 'N/A'
                 }
                 writer.writerow(to_write)
 
@@ -150,38 +133,16 @@ def get_subsessions(infile, outfile):
                             'editSizeMethods': edit_size_methods,
                             'testEditSizeMethods': test_edit_size_methods,
                             'wsStartTime': ws_start_time,
-                            'launchType': launch_type,
-                            'successes': 0,
-                            'failures': 0,
-                            'errors': 0
+                            'launchType': launch_type
                         }
-                        # writer.writerow(to_write)
-                        if (repr(launch_type) == repr('Test')):
-                            recent_test_launches.append(to_write)
-                        elif (repr(launch_type) == repr('Normal')):
-                            recent_launches.append(to_write)
+                        writer.writerow(to_write)
 
                         edit_size_stmts = 0
                         edit_size_methods = 0
                         test_edit_size_stmts = 0
                         test_edit_size_methods = 0
-                    prev_launch_type = launch_type
-                elif (repr(row['Type']) == repr('Termination')):
-                    if (repr(row['Subtype']) == repr('Test')):
-                        successes = row['TestSucesses']
-                        failures = row['TestFailures']
-                        errors = row['TestErrors']
 
-                        if (recent_test_launches):
-                            to_write = recent_test_launches.pop()
-                            to_write['successes'] = successes
-                            to_write['failures'] = failures
-                            to_write['errors'] = errors
-                            writer.writerow(to_write)
-                    elif (repr(row['Subtype']) == repr('Normal')):
-                        if (recent_launches):
-                            to_write = recent_launches.pop()
-                            writer.writerow(to_write)
+                    prev_launch_type = launch_type
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
@@ -203,10 +164,7 @@ def get_subsessions(infile, outfile):
                     'editSizeMethods': edit_size_methods,
                     'testEditSizeMethods': test_edit_size_methods,
                     'wsStartTime': ws_start_time,
-                    'launchType': 'N/A',
-                    'successes': 0,
-                    'failures': 0,
-                    'errors': 0
+                    'launchType': 'N/A'
                 }
                 writer.writerow(to_write)
                 ws_id += 1
