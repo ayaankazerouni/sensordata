@@ -3,6 +3,7 @@
 import csv
 import sys
 import traceback
+import datetime
 
 def get_subsessions(infile, outfile):
     """
@@ -103,7 +104,10 @@ def get_subsessions(infile, outfile):
                 ws_start_time = to_int(row['time'])
                 prev_row = row
 
-            if (abs(to_int(row['time']) - to_int(prev_row['time'])) < 10800000):
+            curr_time = datetime.datetime.fromtimestamp(to_int(row['time']))
+            new_time = datetime.datetime.fromtimestamp(to_int(prev_row['time']))
+            hours = (new_time - curr_time).total_seconds() / 3600
+            if (hours < 3):
                 # Within the same work session, we add up numbers for edit sizes
                 # and keep track of file sizes.
                 if (repr(row['Type']) == repr('Edit')):
