@@ -80,10 +80,6 @@ def get_work_sessions(infile, outfile):
                 edit_size_methods = int(row['editSizeMethods'])
                 test_edit_size_methods = int(row['testEditSizeMethods'])
                 start_time = int(float(row['wsStartTime']))
-                successes = int(row['successes'])
-                failures = int(row['failures'])
-                errors = int(row['errors'])
-                green_zones = 0
                 if (repr(row['launchType']) == repr('Test')):
                     test_launches = 1
                     normal_launches = 0

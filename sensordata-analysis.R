@@ -20,7 +20,7 @@ legend(x = 'topright', pch=c(21,21,21), pt.bg = levels(pcs$cluster), c('Cluster 
 # contingency table for chi-square analysis
 tbl = table(clust$cluster, webcat.data$grade.reftest)
 fit.chisq = chisq.test(tbl, simulate.p.value = TRUE)
-
+# 
 # 5-fold cross validation on logistic regressions
 modeling.data = webcat.data[complete.cases(webcat.data), ] # remove rows with NAs
 folds = cut(seq(1, nrow(modeling.data)), breaks = 5, labels = FALSE)

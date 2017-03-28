@@ -87,9 +87,9 @@ def get_subsessions(infile, outfile):
                 ws_start_time = to_int(row['time'])
                 prev_row = row
 
-            curr_time = datetime.datetime.fromtimestamp(to_int(row['time']))
-            new_time = datetime.datetime.fromtimestamp(to_int(prev_row['time']))
-            hours = (new_time - curr_time).total_seconds() / 3600
+            prev_time = datetime.datetime.fromtimestamp(to_int(prev_row['time']) / 1000)
+            curr_time = datetime.datetime.fromtimestamp(to_int(row['time']) / 1000)
+            hours = (curr_time - prev_time).total_seconds() / 3600
             if (hours < 3):
                 # Within the same work session, we add up numbers for edit sizes
                 # and keep track of file sizes.
@@ -146,12 +146,6 @@ def get_subsessions(infile, outfile):
             else:
                 # Work session ended, so we write out data for the current subsession, with edits
                 # that are 'not followed by any launch'
-                unwritten_launches = recent_launches + recent_test_launches
-                unwritten_launches = sorted(unwritten_launches, key=lambda k: k['time'])
-                for launch in unwritten_launches:
-                    writer.writerow(launch)
-                recent_launches = []
-                recent_test_launches = []
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
