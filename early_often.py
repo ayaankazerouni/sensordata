@@ -4,7 +4,7 @@ import sys
 import csv
 import datetime
 
-def early_often_scores(infile, outfile, deadline):
+def early_often_scores(infile, outfile, deadline, cleaned=False):
     """
     Computes early-often metrics for each student project, based
     on the project deadline.
@@ -22,6 +22,10 @@ def early_often_scores(infile, outfile, deadline):
     deadline -- the project deadline in the form of a UNIX timestamp in milliseconds
     """
     print('Getting early/often scores...')
+
+    assignment_field = 'CASSIGNMENTNAME'
+    if cleaned:
+        assignment_field = 'cleaned_assignment'
 
     fieldnames = [
         'projectId',
@@ -111,7 +115,7 @@ def early_often_scores(infile, outfile, deadline):
                         'projectId': prev_row['projectId'],
                         'userId': prev_row['userId'],
                         'email': prev_row['email'],
-                        'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+                        'CASSIGNMENTNAME': prev_row[assignment_field],
                         'earlyOftenIndex': early_often_index,
                         'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
                         'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
@@ -161,7 +165,7 @@ def early_often_scores(infile, outfile, deadline):
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
                 'email': prev_row['email'],
-                'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+                'CASSIGNMENTNAME': prev_row[assignment_field],
                 'earlyOftenIndex': early_often_index,
                 'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
                 'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
