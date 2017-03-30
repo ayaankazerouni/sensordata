@@ -32,25 +32,25 @@ def userdata(usergroup):
         if (not math.isnan(row['score.correctness']) and abs(int(row['elements'])) > 0):
             submissiontime = datetime.date.fromtimestamp(int(row['submissionTimeRaw']) / 1000)
             daystofinal = (finalsubmissiontime - submissiontime).days
-            daystofinallist.append((finalsubmissiontime - submissiontime).days)
+            daystofinallist.append(daystofinal)
 
             # we are looping through the submissions in reverse order,
             # so calculations for gain will also be reversed.
             testpercent = int(row['score.correctness']) / int(row['max.score.correctness'])
             elpercent = int(row['elementsCovered']) / int(row['elements'])
-            refpercent = testpercent / elpercent
+            refpercent = testpercent / elpercent if elpercent != 0 else testpercent
             delta = prevpercent - refpercent if prevpercent is not None else refpercent
 
             if (delta < 0):
                 dropcount += 1
             elif (delta > 0):
                 gaincount += 1
-                weightedgainpercent += (gaincount / submissioncount) * daystofinal
+                weightedgainpercent += (gaincount / submissioncount)
             else:
                 flatcount += 1
             prevpercent = refpercent
 
-    median = np.percentile(daystofinallist, 50)
+    median = np.nanpercentile(daystofinallist, 50)
     earlyoften = weightedgainpercent / gaincount if gaincount > 0 else float('nan')
     results = {
         'submissionCount': submissioncount,
@@ -69,7 +69,7 @@ def reference_test_gains(infile, outfile):
     df.head(2)
 
     # In[]: Group data by unique values of ('assignment', 'userName'). So all the data
-    # for a student's submisisons to one assignment will be together
+    # for a student's submissions to one assignment will be together
     assignments = df.groupby(['assignment', 'userName'])
 
     results = assignments.apply(userdata)
