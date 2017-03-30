@@ -28,12 +28,6 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   last.submissions$score.reftest = last.submissions$score.correctness / last.submissions$elementsCovered
   last.submissions$grade.reftest = discretise(last.submissions$score.reftest)
   
-  # calculate on-time/late; continuous (in hours) and categorical(true/false)
-  submission.times = as.POSIXct(last.submissions$submissionTimeRaw / 1000, origin = '1970-01-01')
-  due.times = as.POSIXct(last.submissions$dueDateRaw / 1000, origin = '1970-01-01')
-  last.submissions$hours.from.deadline = as.numeric(difftime(due.times, submission.times, units = 'h'))
-  last.submissions$on.time.submission = discretise(last.submissions$hours.from.deadline, binom = TRUE)
-  
   # read scaled incremental development data and format it
   inc.data = read.csv(scaled.inc.path)
   inc.data = inc.data[, !(names(inc.data) %in% c('ref_test_gains'))] # drop unused metrics
@@ -62,6 +56,14 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   merged = merge(merged, raw.inc.data, by=c('userName', 'assignment'))
   merged = merge(merged, time.data, by=c('userName', 'assignment'))
   merged$userName = factor(merged$userName)
+  
+  # calculate on-time/late; continuous (in hours) and categorical(true/false)
+  submission.times = as.POSIXct(merged$submissionTimeRaw / 1000, origin = '1970-01-01')
+  due.times = as.POSIXct(merged$dueDateRaw / 1000, origin = '1970-01-01')
+  start.times = as.POSIXct(merged$projectStartTime / 1000, origin = '1970-01-01')
+  merged$finished.hours.from.deadline = as.numeric(difftime(due.times, submission.times, units = 'h'))
+  merged$started.days.from.deadline = as.numeric(difftime(due.times, start.times, units = 'd'))
+  merged$on.time.submission = discretise(merged$finished.hours.from.deadline, binom = TRUE)
   
   # discretise scaled incremental development scores
   merged$grade.early_often = discretise(merged$early_often)
