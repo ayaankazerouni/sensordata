@@ -10,7 +10,7 @@ def get_time_spent(infile, outfile):
     the time spent on a project for a student.
     """
     print('Getting time spent on project...')
-    fieldnames = ['userId', 'email', 'projectId', 'assignment', 'hoursOnProject']
+    fieldnames = ['userId', 'email', 'projectId', 'assignment', 'hoursOnProject', 'projectStartTime']
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
@@ -21,11 +21,13 @@ def get_time_spent(infile, outfile):
 
         prev_row = None
         time_spent = 0
+        project_start_time = None
 
         for row in reader:
             prev_row = prev_row or row
 
             if (row['CASSIGNMENTNAME'] == prev_row['CASSIGNMENTNAME'] and row['userId'] == prev_row['userId']):
+                project_start_time = project_start_time or int(float(row['start_time']))
                 start_time = datetime.datetime.fromtimestamp(int(float(row['start_time'])) / 1000)
                 end_time = datetime.datetime.fromtimestamp(int(float(row['end_time'])) / 1000)
                 hours = (end_time - start_time).total_seconds() / 3600
@@ -33,9 +35,10 @@ def get_time_spent(infile, outfile):
             else:
                 writer.writerow({'userId': prev_row['userId'], 'email': prev_row['email'],
                     'projectId': prev_row['projectId'], 'assignment': prev_row['CASSIGNMENTNAME'],
-                    'hoursOnProject': time_spent})
+                    'hoursOnProject': time_spent, 'projectStartTime': project_start_time})
                 end_time = datetime.datetime.fromtimestamp(int(float(row['end_time'])) / 1000)
                 start_time = datetime.datetime.fromtimestamp(int(float(row['start_time'])) / 1000)
+                project_start_time = int(float(row['start_time']))
                 time_spent = (end_time - start_time).total_seconds() / 3600
 
             prev_row = row
@@ -44,7 +47,8 @@ def get_time_spent(infile, outfile):
             'email': prev_row['email'],
             'projectId': prev_row['projectId'],
             'assignment': prev_row['CASSIGNMENTNAME'],
-            'hoursOnProject': time_spent
+            'hoursOnProject': time_spent,
+            'projectStartTime': project_start_time
         })
 
 def main(args):
