@@ -1,4 +1,5 @@
 const due_times = require('../due_times.json');
+const moment = require('moment');
 
 (($, window, document) => {
   const margin = {top: 20, right: 160, bottom: 30, left: 50}; // leaving space for the legend
@@ -37,13 +38,6 @@ const due_times = require('../due_times.json');
     .y0(height)
     .y1((d) => y(d.testEdits));
 
-  let launchesArea = d3.svg.area()
-    .interpolate('basis')
-    .x0((d) => x(d.start_time))
-    .x1((d) => x(d.end_time))
-    .y0(height)
-    .y1((d) => y(d.launches));
-
   // Line function for due date lines.
   let line = d3.svg.line()
       .x((d) => d.x)
@@ -55,18 +49,34 @@ const due_times = require('../due_times.json');
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.csv('ws-2894.csv', (error, data) => {
+  let term = 'fall2016';
+  let assignment = 'assignment2';
+
+  let ms1 = moment(+due_times[term][assignment]['milestone1']);
+  let ms2 = moment(+due_times[term][assignment]['milestone2']);
+  let ms3 = moment(+due_times[term][assignment]['milestone3']);
+  let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
+  let dueTime = moment(+due_times[term][assignment]['dueTime']);
+
+  d3.csv('ws-14458-p2.csv', (error, data) => {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
     // depending on how we want to use them.
+    let stopAt = 0;
     data.forEach((d) => {
-      d.start_time = new Date(+d.start_time);
-      d.end_time = new Date(+d.end_time);
+      d.start_time = moment(+d.start_time);
+      d.end_time = moment(+d.end_time);
+      let diff = dueTime.diff(d.start_time, 'd');
+      if (diff > -4) {
+        stopAt++;
+      }
       d.edits = +d.editSizeStmts;
       d.testEdits = +d.testEditSizeStmts;
       d.launches = +d.testLaunches + +d.normalLaunches;
     });
+
+    data.splice(stopAt); // don't draw work sessions more than 4 days after the deadline
 
     // Specify input domains for the scales.
     let start_min = d3.min(data, (d) => d.start_time);
@@ -102,18 +112,7 @@ const due_times = require('../due_times.json');
         }
     };
 
-    let launches = {
-      max: launchMax,
-      render() {
-        svg.append('path')
-          .datum(data)
-          .attr('data-legend', 'Launches')
-          .attr('class', 'launches')
-          .attr('d', launchesArea);
-        }
-    };
-
-    let areas = [ solutionCode, testCode, launches ].sort((a, b) => b.max - a.max);
+    let areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
 
     for (let i = 0; i < areas.length; i++) {
       areas[i].render();
@@ -142,20 +141,14 @@ const due_times = require('../due_times.json');
       .style('font-size', '12px')
       .call(d3.legend);
 
-    // Draw due date lines. Get raw due date info from first row
-    // of data. It's the same for all the data in a work_session, anyway.
-    let ms1 = +due_times['fall2016']['assignment1']['milestone1'];
-    let ms2 = +due_times['fall2016']['assignment1']['milestone2'];
-    let ms3 = +due_times['fall2016']['assignment1']['milestone3'];;
-    let earlyBonus = +due_times['fall2016']['assignment1']['earlyBonus'];
-    let dueTime = +due_times['fall2016']['assignment1']['dueTime'];;
+    // Draw due date lines
 
     // Get x-positions scaled by the time scale.
-    let dueX = x(new Date(dueTime));
-    let ms1X = x(new Date(ms1));
-    let ms2X = x(new Date(ms2));
-    let ms3X = x(new Date(ms3));
-    let earlyX = x(new Date(earlyBonus));
+    let dueX = x(dueTime);
+    let ms1X = x(ms1);
+    let ms2X = x(ms2);
+    let ms3X = x(ms3);
+    let earlyX = x(earlyBonus);
 
     // Define end-points for each line. Basically top to bottom
     // at the appropriate date on the x-axis.
