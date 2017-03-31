@@ -62,7 +62,7 @@ def incremental_checking(infile, outfile, deadline = None):
 
             if deadline:
                 due_date = datetime.date.fromtimestamp(deadline / 1000)
-                time = int(row['time'])
+                time = int(float(row['time']))
                 event_date = datetime.date.fromtimestamp(time / 1000)
                 days_to_deadline  = (due_date - event_date).days
                 if days_to_deadline < - 4:
@@ -78,7 +78,7 @@ def incremental_checking(infile, outfile, deadline = None):
                         curr_sizes[class_name] = stmts
 
                         edit_size = abs(stmts - prev_size)
-                        time = int(row['time'])
+                        time = int(float(row['time']))
                         edit = {
                             'size': edit_size,
                             'time': time
@@ -93,7 +93,7 @@ def incremental_checking(infile, outfile, deadline = None):
 
                 elif (repr(row['Type']) == repr('Launch')):
                     launch_type = row['Subtype']
-                    launch_time = int(row['time'])
+                    launch_time = int(float(row['time']))
 
                     # solution edits by launches of any kind
                     for edit in solution_edits_per_any_launch:

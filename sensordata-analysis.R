@@ -2,14 +2,14 @@
 # source('sensordata-utils.R') # before running analyses operations below
 
 # Define some columns of interest for convenience
-cols = c( 'test_stmt_early_often_raw', 'solution_stmt_early_often_raw')
+cols = c( 'testStmtsEarlyOftenIndex', 'solutionStmtEarlyOftenIndex')
 
 # k-means clustering
 set.seed(100)
 clust = kmeans(webcat.data[cols], 3)
 webcat.data$cluster = factor(clust$cluster)
 
-tclust = kmeans(webcat.data$test_stmt_early_often_raw, 2)
+tclust = kmeans(webcat.data$testWriting, 2)
 webcat.data$tclust = factor(tclust$cluster)
 
 # PCA for visualisation

@@ -4,7 +4,7 @@ import csv
 import sys
 import datetime
 
-def get_time_spent(infile, outfile):
+def get_time_spent(infile, outfile, deadline = None):
     """
     Takes in worksession data from the infile and gives back
     the time spent on a project for a student.
@@ -24,6 +24,15 @@ def get_time_spent(infile, outfile):
         project_start_time = None
 
         for row in reader:
+            if deadline:
+                current = datetime.date.fromtimestamp(int(float(row['start_time'])) / 1000)
+                due_date = datetime.date.fromtimestamp(int(float(deadline)) / 1000)
+                days_to_deadline = (due_date - current).days
+
+                if days_to_deadline < -4:
+                    prev_row = row
+                    continue
+
             prev_row = prev_row or row
 
             if (row['CASSIGNMENTNAME'] == prev_row['CASSIGNMENTNAME'] and row['userId'] == prev_row['userId']):

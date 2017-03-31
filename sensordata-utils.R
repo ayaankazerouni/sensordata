@@ -45,8 +45,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   
   # read raw incremental development data and format it
   raw.inc.data = read.csv(raw.inc.path)
-  raw.inc.data$test_writing_raw = raw.inc.data$solution_stmt_early_often_raw - raw.inc.data$test_stmt_early_often_raw
-  raw.inc.data = raw.inc.data[, !(names(inc.data) %in% c('solution_stmt_early_often_raw', 'test_stmt_early_often_raw'))] # drop unused metrics
+  raw.inc.data$testWriting = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$testStmtsEarly
   colnames(raw.inc.data)[1] = 'userName'
   raw.inc.data$userName = gsub('.{7}$', '', raw.inc.data$userName)
   raw.inc.data = raw.inc.data[order(raw.inc.data$assignment, raw.inc.data$userName), ]
@@ -61,7 +60,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   # merge incremental development scores and project grades
   merged = merge(last.submissions, ref.test.gains, by=c('userName', 'assignment'))
   merged = merge(merged, inc.data, by=c('userName', 'assignment'))
-  merged = merge(merged, raw.inc.data, by=c('userName', 'assignment'))
+  merged = merge(merged, raw.inc.data, by=c('userName', 'userId', 'assignment'))
   merged = merge(merged, time.data, by=c('userName', 'assignment'))
   merged$userName = factor(merged$userName)
   
