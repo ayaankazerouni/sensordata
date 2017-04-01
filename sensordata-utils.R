@@ -71,6 +71,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   merged$finished.hours.from.deadline = as.numeric(difftime(due.times, submission.times, units = 'h'))
   merged$started.days.from.deadline = as.numeric(difftime(due.times, start.times, units = 'd'))
   merged$on.time.submission = discretise(merged$finished.hours.from.deadline, binom = TRUE)
+  merged$userId = factor(merged$userId)
   
   # discretise scaled incremental development scores
   merged$grade.early_often = discretise(merged$early_often)
