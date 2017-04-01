@@ -20,15 +20,15 @@ body {
 }
 
 .solution-code {
-  stroke: #6699ff;
+  stroke: darkorange;
   stroke-width: 2px;
-  fill: #99ccff;
+  fill: none;
 }
 
 .test-code {
-  stroke: #ffcc00;
+  stroke: maroon;
   stroke-width: 2px;
-  fill: #ffff66;
+  fill: none;
 }
 
 .launches {
@@ -43,16 +43,16 @@ body {
 }
 
 .milestone {
-  stroke: #336699;
+  stroke: black;
 }
 
 .early {
-  stroke: #cc6600;
+  stroke: black;
   text-anchor: end;
 }
 
 .due {
-  stroke: red;
+  stroke: black;
 }
 
 .legend {

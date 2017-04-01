@@ -50,7 +50,7 @@ const moment = require('moment');
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
   let term = 'fall2016';
-  let assignment = 'assignment2';
+  let assignment = 'assignment4';
 
   let ms1 = moment(+due_times[term][assignment]['milestone1']);
   let ms2 = moment(+due_times[term][assignment]['milestone2']);
@@ -58,7 +58,7 @@ const moment = require('moment');
   let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
   let dueTime = moment(+due_times[term][assignment]['dueTime']);
 
-  d3.csv('ws-14458-p2.csv', (error, data) => {
+  d3.csv('ws-14475-p4.csv', (error, data) => {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
@@ -108,6 +108,7 @@ const moment = require('moment');
           .datum(data)
           .attr('data-legend', 'Test Code')
           .attr('class', 'edits test-code')
+          .attr('stroke-dasharray', '20,20')
           .attr('d', testEditsArea);
         }
     };
@@ -120,9 +121,9 @@ const moment = require('moment');
 
     // Draw axes.
     svg.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(xAxis);
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(xAxis);
 
     svg.append('g')
         .attr('class', 'y axis')
@@ -132,7 +133,7 @@ const moment = require('moment');
         .attr('y', 6)
         .attr('dy', '.71em')
         .style('text-anchor', 'end')
-        .text('Statements changed / Launch count');
+        .text('Statements changed');
 
     // Draw legend
     svg.append('g')
@@ -170,7 +171,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       .text('Milestone 1 Due')
-      .attr('fill', '#336699');
+      .attr('fill', 'black');
 
     let ms2G = svg.append('g')
       .attr('id', 'group-ms-2');
@@ -183,7 +184,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       .text('Milestone 2 Due')
-      .attr('fill', '#336699');
+      .attr('fill', 'black');
 
     let ms3G = svg.append('g')
       .attr('id', 'group-ms-3');
@@ -196,7 +197,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       .text('Milestone 3 Due')
-      .attr('fill', '#336699');
+      .attr('fill', 'black');
 
     let earlyG = svg.append('g')
       .attr('id', 'group-early')
@@ -209,7 +210,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       .text('Early Bonus Deadline')
-      .attr('fill', '#cc6600');
+      .attr('fill', 'black');
 
     let dueG = svg.append('g')
       .attr('id', 'group-due');
@@ -222,6 +223,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       .text('Final Submission Due')
-      .attr('fill', 'red');
+      .attr('fill', 'black');
   });
+
 })(window.jQuery, window, document);
