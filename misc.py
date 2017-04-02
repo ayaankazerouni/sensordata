@@ -76,7 +76,7 @@ def main(args):
         vals = [repr(x) for x in args[3:len(args) - 1]]
         outfile = args[len(args) - 1]
         get_sample(infile, col, vals, outfile)
-    elif args[0] in 'dist':
+    elif args[0] in ['dist', 'distinct']:
         if len(args) < 3:
             print_usage()
             sys.exit()
@@ -99,7 +99,7 @@ def print_usage():
     print("Get a sample, all the headers, or all distinct values for a field - from the " +
         "given data file.")
     print("Usage: ./misc.py sample <input_file> <column_name> <vals,> <output_file>")
-    print("OR: ./misc.py dist <input_file> <fieldname> [limit]")
+    print("OR: ./misc.py dist|distinct <input_file> <fieldname> [limit]")
     print("OR: ./misc.py headers <input_file>")
 
 if __name__ == '__main__':

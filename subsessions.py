@@ -5,7 +5,7 @@ import sys
 import traceback
 import datetime
 
-def get_subsessions(infile, outfile):
+def get_subsessions(infile, outfile, cleaned=None):
     """
     Clusters data into work sessions and subsessions.
 
@@ -17,6 +17,9 @@ def get_subsessions(infile, outfile):
     outfile -- the resultant file (CSV)
     """
     print('Getting subsessions...')
+    assignment_field = 'CASSIGNMENTNAME'
+    if cleaned:
+        assignment_field = 'cleaned_assignment'
     fieldnames = [
         'projectId',
         'email',
@@ -59,13 +62,13 @@ def get_subsessions(infile, outfile):
             ws_start_time = ws_start_time or to_int(row['time'])
             prev_row = prev_row or row
 
-            if (row['userId'] != prev_row['userId'] or row['CASSIGNMENTNAME'] != prev_row['CASSIGNMENTNAME']):
+            if (row['userId'] != prev_row['userId'] or row[assignment_field] != prev_row[assignment_field]):
 
                 to_write = {
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
                     'email': prev_row['email'],
-                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+                    'CASSIGNMENTNAME': prev_row[assignment_field],
                     'time': prev_row['time'],
                     'workSessionId': ws_id,
                     'editSizeStmts': edit_size_stmts,
@@ -125,7 +128,7 @@ def get_subsessions(infile, outfile):
                             'userId': row['userId'],
                             'projectId': row['projectId'],
                             'email': row['email'],
-                            'CASSIGNMENTNAME': row['CASSIGNMENTNAME'],
+                            'CASSIGNMENTNAME': row[assignment_field],
                             'time': row['time'],
                             'workSessionId': ws_id,
                             'editSizeStmts': edit_size_stmts,
@@ -150,7 +153,7 @@ def get_subsessions(infile, outfile):
                     'userId': prev_row['userId'],
                     'projectId': prev_row['projectId'],
                     'email': prev_row['email'],
-                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+                    'CASSIGNMENTNAME': prev_row[assignment_field],
                     'time': prev_row['time'],
                     'workSessionId': ws_id,
                     'editSizeStmts': edit_size_stmts,
@@ -184,7 +187,10 @@ def main(args):
     infile = args[0]
     outfile = args[1]
     try:
-        get_subsessions(infile, outfile)
+        if len(args) == 3:
+            get_subsessions(infile, outfile, args[2])
+        else:
+            get_subsessions(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File '%s' does not exist." % infile)
     except KeyError as e:
