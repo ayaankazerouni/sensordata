@@ -3,7 +3,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
     webcat.path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
   }
   if (missing(scaled.inc.path)) {
-    scaled.inc.path = 'data/fall-2016/scaled_inc.csv'
+    scaled.inc.path = 'data/fall-2016/scaled_inc_new.csv'
   }
   if (missing(raw.inc.path)) {
     raw.inc.path = 'data/fall-2016/raw_inc.csv'
@@ -37,7 +37,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   
   # read scaled incremental development data and format it
   inc.data = read.csv(scaled.inc.path)
-  inc.data = inc.data[, !(names(inc.data) %in% c('ref_test_gains'))] # drop unused metrics
+  # inc.data = inc.data[, !(names(inc.data) %in% c('ref_test_gains'))] # drop unused metrics
   colnames(inc.data)[1] = 'userName'
   inc.data$userName = gsub('.{7}$', '', inc.data$userName)
   inc.data = inc.data[order(inc.data$assignment, inc.data$userName), ]
@@ -79,6 +79,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   merged$grade.test_checking = discretise(merged$test_checking)
   merged$grade.test_writing = discretise(merged$test_writing)
   
+  merged = merged[merged$hoursOnProject >= 1, ]
   return(merged)
 }
 

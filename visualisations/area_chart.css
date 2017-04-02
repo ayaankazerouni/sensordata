@@ -16,7 +16,7 @@ body {
 }
 
 .edits {
-  opacity: 0.8;
+  opacity: 1.0;
 }
 
 .solution-code {
@@ -39,7 +39,8 @@ body {
 }
 
 .date-line {
-  stroke-width: 1px;
+  opacity: 0.5;
+  stroke-width: 0.5px;
 }
 
 .milestone {

@@ -4,7 +4,7 @@ const moment = require('moment');
 (($, window, document) => {
   const margin = {top: 20, right: 160, bottom: 30, left: 50}; // leaving space for the legend
   const width = 960 - margin.left - margin.right;
-  const height = 500 - margin.top - margin.bottom;
+  const height = 300 - margin.top - margin.bottom;
 
   const tickFormat = d3.time.format('%b %d');
 
@@ -49,8 +49,8 @@ const moment = require('moment');
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  let term = 'fall2016';
-  let assignment = 'assignment4';
+  let term = 'spring2016';
+  let assignment = 'assignment2';
 
   let ms1 = moment(+due_times[term][assignment]['milestone1']);
   let ms2 = moment(+due_times[term][assignment]['milestone2']);
@@ -58,7 +58,8 @@ const moment = require('moment');
   let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
   let dueTime = moment(+due_times[term][assignment]['dueTime']);
 
-  d3.csv('ws-14475-p4.csv', (error, data) => {
+  let dataFile = 'ws-17759-p2.csv'
+  d3.csv(dataFile, (error, data) => {
     if (error) throw error;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
@@ -108,7 +109,7 @@ const moment = require('moment');
           .datum(data)
           .attr('data-legend', 'Test Code')
           .attr('class', 'edits test-code')
-          .attr('stroke-dasharray', '20,20')
+          .attr('stroke-dasharray', '10,10')
           .attr('d', testEditsArea);
         }
     };
@@ -138,11 +139,9 @@ const moment = require('moment');
     // Draw legend
     svg.append('g')
       .attr('class', 'legend')
-      .attr('transform','translate(' + (width) + ',' + height / 2 + ')')
+      .attr('transform','translate(' + (width - 175) + ',' + height / 3 + ')')
       .style('font-size', '12px')
       .call(d3.legend);
-
-    // Draw due date lines
 
     // Get x-positions scaled by the time scale.
     let dueX = x(dueTime);
@@ -165,6 +164,7 @@ const moment = require('moment');
     ms1G.append('path')
       .attr('class', 'date-line milestone')
       .attr('d', line(ms1Line))
+      .attr('stroke-dasharray', '10,10');
     ms1G.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', ms1X + 6)
@@ -177,7 +177,8 @@ const moment = require('moment');
       .attr('id', 'group-ms-2');
     ms2G.append('path')
       .attr('class', 'date-line milestone')
-      .attr('d', line(ms2Line));
+      .attr('d', line(ms2Line))
+      .attr('stroke-dasharray', '10,10');
     ms2G.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', ms2X + 6)
@@ -190,7 +191,8 @@ const moment = require('moment');
       .attr('id', 'group-ms-3');
     ms3G.append('path')
       .attr('class', 'date-line milestone')
-      .attr('d', line(ms3Line));
+      .attr('d', line(ms3Line))
+      .attr('stroke-dasharray', '10,10');
     ms3G.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', ms3X + 6)
@@ -203,7 +205,8 @@ const moment = require('moment');
       .attr('id', 'group-early')
     earlyG.append('path')
       .attr('class', 'date-line early')
-      .attr('d', line(earlyLine));
+      .attr('d', line(earlyLine))
+      .attr('stroke-dasharray', '10,10');
     earlyG.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', earlyX + 6)
@@ -216,7 +219,8 @@ const moment = require('moment');
       .attr('id', 'group-due');
     dueG.append('path')
       .attr('class', 'date-line due')
-      .attr('d', line(dueTimeLine));
+      .attr('d', line(dueTimeLine))
+      .attr('stroke-dasharray', '10,10');
     dueG.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', dueX + 6)
