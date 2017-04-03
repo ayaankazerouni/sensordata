@@ -32,6 +32,11 @@ def incremental_checking(infile, outfile, deadline = None):
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
+        headers = next(reader)
+        assignment_field = 'CASSIGNMENTNAME'
+        if 'cleaned_assignment' in headers.keys():
+            assignment_field = 'cleaned_assignment'
+
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=fieldnames)
 
         # Write headers first.
@@ -61,7 +66,7 @@ def incremental_checking(infile, outfile, deadline = None):
             prev_row = prev_row or row
 
             if deadline:
-                due_date = datetime.date.fromtimestamp(deadline / 1000)
+                due_date = datetime.date.fromtimestamp(int(float(deadline)) / 1000)
                 time = int(float(row['time']))
                 event_date = datetime.date.fromtimestamp(time / 1000)
                 days_to_deadline  = (due_date - event_date).days
@@ -156,7 +161,7 @@ def incremental_checking(infile, outfile, deadline = None):
                     'projectId': prev_row['projectId'],
                     'userId': prev_row['userId'],
                     'email': prev_row['email'],
-                    'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+                    'CASSIGNMENTNAME': prev_row[assignment_field],
                     'solutionEditAnyLaunch': mean_solution_any,
                     'solutionEditRegularLaunch': mean_solution_regular,
                     'solutionEditTestLaunch': mean_solution_test,
@@ -193,7 +198,7 @@ def incremental_checking(infile, outfile, deadline = None):
                 'projectId': prev_row['projectId'],
                 'userId': prev_row['userId'],
                 'email': prev_row['email'],
-                'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+                'CASSIGNMENTNAME': prev_row[assignment_field],
                 'solutionEditAnyLaunch': mean_solution_any,
                 'solutionEditRegularLaunch': mean_solution_regular,
                 'solutionEditTestLaunch': mean_solution_test,
@@ -216,16 +221,12 @@ def main(args):
     infile = args[0]
     outfile = args[1]
     try:
-        incremental_checking(infile, outfile)
+        if len(args) == 3:
+            incremental_checking(infile, outfile, args[2])
+        else:
+            incremental_checking(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File '%s' does not exist." % infile)
-    except KeyError as e:
-        cause = e.args[0]
-        if (cause == 'CASSIGNMENTNAME'):
-            print("Key Error! Are you using a cleaned data file? Please run ./clean.py on the data file and use " +
-                "the resulting file as input.")
-        else:
-            traceback.print_exc()
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

@@ -45,7 +45,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   
   # read raw incremental development data and format it
   raw.inc.data = read.csv(raw.inc.path)
-  raw.inc.data$testWriting = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$testStmtsEarly
+  raw.inc.data$testWriting = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$testStmtsEarlyOftenIndex
   colnames(raw.inc.data)[1] = 'userName'
   raw.inc.data$userName = gsub('.{7}$', '', raw.inc.data$userName)
   raw.inc.data = raw.inc.data[order(raw.inc.data$assignment, raw.inc.data$userName), ]

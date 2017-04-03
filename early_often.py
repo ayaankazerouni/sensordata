@@ -4,7 +4,7 @@ import sys
 import csv
 import datetime
 
-def early_often_scores(infile, outfile, deadline, cleaned=False):
+def early_often_scores(infile, outfile, deadline):
     """
     Computes early-often metrics for each student project, based
     on the project deadline.
@@ -23,10 +23,6 @@ def early_often_scores(infile, outfile, deadline, cleaned=False):
     """
     print('Getting early/often scores...')
 
-    assignment_field = 'CASSIGNMENTNAME'
-    if cleaned:
-        assignment_field = 'cleaned_assignment'
-
     fieldnames = [
         'projectId',
         'userId',
@@ -43,6 +39,10 @@ def early_often_scores(infile, outfile, deadline, cleaned=False):
 
     with open(infile, 'r') as fin, open(outfile, 'w') as fout:
         reader = csv.DictReader(fin, delimiter=',')
+        headers = next(reader)
+        assignment_field = 'CASSIGNMENTNAME'
+        if 'cleaned_assignment' in headers.keys():
+            assignment_field = 'cleaned_assignment'
         writer = csv.DictWriter(fout, delimiter=',', fieldnames=fieldnames)
 
         # Write headers first.
