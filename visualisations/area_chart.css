@@ -43,6 +43,10 @@ body {
   stroke-width: 0.5px;
 }
 
+.axis-text {
+  font-size: 12px;
+}
+
 .milestone {
   stroke: black;
 }

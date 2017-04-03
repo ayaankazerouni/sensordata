@@ -16,12 +16,13 @@ const moment = require('moment');
 
   const xAxis = d3.svg.axis()
       .scale(x)
-      .ticks(d3.time.day, 3)
+      .ticks(d3.time.day, 5)
       .tickFormat(tickFormat)
       .orient('bottom');
 
   const yAxis = d3.svg.axis()
       .scale(y)
+      .ticks(5)
       .orient('left');
 
   let editsArea = d3.svg.area()
@@ -49,8 +50,8 @@ const moment = require('moment');
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  let term = 'spring2016';
-  let assignment = 'assignment2';
+  let term = 'fall2016';
+  let assignment = 'assignment3';
 
   let ms1 = moment(+due_times[term][assignment]['milestone1']);
   let ms2 = moment(+due_times[term][assignment]['milestone2']);
@@ -58,7 +59,7 @@ const moment = require('moment');
   let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
   let dueTime = moment(+due_times[term][assignment]['dueTime']);
 
-  let dataFile = 'ws-17759-p2.csv'
+  let dataFile = 'ws_4161.csv'
   d3.csv(dataFile, (error, data) => {
     if (error) throw error;
 
@@ -133,13 +134,14 @@ const moment = require('moment');
         .attr('transform', 'rotate(-90)')
         .attr('y', 6)
         .attr('dy', '.71em')
+        .attr('class', 'axis-text')
         .style('text-anchor', 'end')
         .text('Statements changed');
 
     // Draw legend
     svg.append('g')
       .attr('class', 'legend')
-      .attr('transform','translate(' + (width - 175) + ',' + height / 3 + ')')
+      .attr('transform','translate(' + (width - 300) + ',' + height / 6 + ')')
       .style('font-size', '12px')
       .call(d3.legend);
 
@@ -169,6 +171,7 @@ const moment = require('moment');
       .attr('transform', 'rotate(-90)')
       .attr('y', ms1X + 6)
       .attr('dy', '.71em')
+      .attr('class', 'axis-text')
       .style('text-anchor', 'end')
       .text('Milestone 1 Due')
       .attr('fill', 'black');
@@ -183,6 +186,7 @@ const moment = require('moment');
       .attr('transform', 'rotate(-90)')
       .attr('y', ms2X + 6)
       .attr('dy', '.71em')
+      .attr('class', 'axis-text')
       .style('text-anchor', 'end')
       .text('Milestone 2 Due')
       .attr('fill', 'black');
@@ -197,23 +201,27 @@ const moment = require('moment');
       .attr('transform', 'rotate(-90)')
       .attr('y', ms3X + 6)
       .attr('dy', '.71em')
+      .attr('class', 'axis-text')
       .style('text-anchor', 'end')
       .text('Milestone 3 Due')
       .attr('fill', 'black');
 
-    let earlyG = svg.append('g')
-      .attr('id', 'group-early')
-    earlyG.append('path')
-      .attr('class', 'date-line early')
-      .attr('d', line(earlyLine))
-      .attr('stroke-dasharray', '10,10');
-    earlyG.append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('y', earlyX + 6)
-      .attr('dy', '.71em')
-      .style('text-anchor', 'end')
-      .text('Early Bonus Deadline')
-      .attr('fill', 'black');
+    if (earlyBonus.isValid()) {
+      let earlyG = svg.append('g')
+        .attr('id', 'group-early')
+      earlyG.append('path')
+        .attr('class', 'date-line early')
+        .attr('d', line(earlyLine))
+        .attr('stroke-dasharray', '10,10');
+      earlyG.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', earlyX + 6)
+        .attr('dy', '.71em')
+        .attr('class', 'axis-text')
+        .style('text-anchor', 'end')
+        .text('Early Bonus Deadline')
+        .attr('fill', 'black');
+    }
 
     let dueG = svg.append('g')
       .attr('id', 'group-due');
@@ -225,6 +233,7 @@ const moment = require('moment');
       .attr('transform', 'rotate(-90)')
       .attr('y', dueX + 6)
       .attr('dy', '.71em')
+      .attr('class', 'axis-text')
       .style('text-anchor', 'end')
       .text('Final Submission Due')
       .attr('fill', 'black');
