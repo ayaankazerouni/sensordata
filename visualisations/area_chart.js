@@ -59,7 +59,7 @@ const moment = require('moment');
   let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
   let dueTime = moment(+due_times[term][assignment]['dueTime']);
 
-  let dataFile = 'ws_4161.csv'
+  let dataFile = 'ws-16007-p2.csv'
   d3.csv(dataFile, (error, data) => {
     if (error) throw error;
 
@@ -161,20 +161,21 @@ const moment = require('moment');
     let dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
 
     // Draw due date lines.
-    let ms1G = svg.append('g')
-      .attr('id', 'group-ms-1');
-    ms1G.append('path')
-      .attr('class', 'date-line milestone')
-      .attr('d', line(ms1Line))
-      .attr('stroke-dasharray', '10,10');
-    ms1G.append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('y', ms1X + 6)
-      .attr('dy', '.71em')
-      .attr('class', 'axis-text')
-      .style('text-anchor', 'end')
-      .text('Milestone 1 Due')
-      .attr('fill', 'black');
+      let ms1G = svg.append('g')
+        .attr('id', 'group-ms-1');
+      ms1G.append('path')
+        .attr('class', 'date-line milestone')
+        .attr('d', line(ms1Line))
+        .attr('stroke-dasharray', '10,10');
+      ms1G.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', ms1X + 6)
+        .attr('dy', '.71em')
+        .attr('class', 'axis-text')
+        .style('text-anchor', 'end')
+        .text('M1')
+        .attr('fill', 'black');
+
 
     let ms2G = svg.append('g')
       .attr('id', 'group-ms-2');
@@ -188,7 +189,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .attr('class', 'axis-text')
       .style('text-anchor', 'end')
-      .text('Milestone 2 Due')
+      .text('M2')
       .attr('fill', 'black');
 
     let ms3G = svg.append('g')
@@ -203,7 +204,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .attr('class', 'axis-text')
       .style('text-anchor', 'end')
-      .text('Milestone 3 Due')
+      .text('M3')
       .attr('fill', 'black');
 
     if (earlyBonus.isValid()) {
@@ -219,7 +220,7 @@ const moment = require('moment');
         .attr('dy', '.71em')
         .attr('class', 'axis-text')
         .style('text-anchor', 'end')
-        .text('Early Bonus Deadline')
+        .text('E')
         .attr('fill', 'black');
     }
 
@@ -235,7 +236,7 @@ const moment = require('moment');
       .attr('dy', '.71em')
       .attr('class', 'axis-text')
       .style('text-anchor', 'end')
-      .text('Final Submission Due')
+      .text('F')
       .attr('fill', 'black');
   });
 
