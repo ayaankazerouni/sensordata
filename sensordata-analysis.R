@@ -18,14 +18,14 @@ draw.silhoette = function(clust) {
   plot(sk, col=1:4, border=NA)
 }
 
-plot.pcs = function(clust) {
+plot.pcs = function(cols, cluster.column) {
   # PCA for visualisation
   pca = prcomp(webcat.data[cols])
-  pcs = data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], cluster = factor(webcat.data$cluster))
+  pcs = data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], cluster = factor(webcat.data[, cluster.column]))
   palette(c('red', 'limegreen', 'blue', 'yellow', 'darkorange', 'white'))
   plot(pcs$PC1, pcs$PC2, pch = 21, bg = pcs$cluster, main = 'PCA-Reduced Data in Clusters',
        xlab = 'PC 1', ylab = 'PC 2', bty = 'L')
-  legend(x = 'bottomright', pch=21, pt.bg = levels(pcs$cluster), c('Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4'), bty = '0', cex=0.8)
+  legend(x = 'bottomright', pch=21, pt.bg = levels(pcs$cluster), c('Cluster 1', 'Cluster 2', 'Cluster 3'), bty = '0', cex=0.8)
 }
 
 tclust = kmeans(webcat.data$testWriting, 2)
@@ -40,6 +40,8 @@ fit.chisq = chisq.test(tbl, simulate.p.value = TRUE)
 webcat.data$ab.cdf = ifelse(webcat.data$grade.reftest %in% c('a', 'b'), 'ab', 'cdf')
 ab = webcat.data[webcat.data$grade.reftest %in% c('a', 'b'), ]
 cdf = webcat.data[webcat.data$grade.reftest %in% c('c', 'd', 'f'), ]
+t1 = webcat.data[webcat.data$tclust == 1, ]
+t2 = webcat.data[webcat.data$tclust == 2, ]
 intsec = intersect(ab$userId, cdf$userId)
 inconsistent = webcat.data[webcat.data$userId %in% intsec, ]
 

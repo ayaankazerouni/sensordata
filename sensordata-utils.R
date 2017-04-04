@@ -33,6 +33,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   
   # read web-cat ref-test-gains data and format it
   ref.test.gains = read.csv(ref.test.gains.path)
+  ref.test.gains$jitterGain = ref.test.gains$gainCount / (ref.test.gains$gainCount + ref.test.gains$dropCount)
   ref.test.gains = ref.test.gains[, !(names(ref.test.gains) %in% c('submissionCount', 'medianDaysToFinal'))]
   
   # read scaled incremental development data and format it

@@ -54,13 +54,24 @@ def userdata(usergroup):
     earlyoften = weightedgainpercent / gaincount if gaincount > 0 else float('nan')
     results = {
         'submissionCount': submissioncount,
-        'dropPercent': (dropcount / submissioncount) * 100,
-        'flatPercent': (flatcount / submissioncount) * 100,
-        'gainPercent': (gaincount / submissioncount) * 100,
+        'dropCount': dropcount,
+        'flatCount': flatcount,
+        'gainCount': gaincount,
         'medianDaysToFinal': median,
         'refGainEarlyOften': earlyoften
     }
     return pd.Series(results)
+
+def pos(n):
+    """
+    Returns this number's position on the number line in relation to 0.
+    """
+    if n > 0:
+        return 1
+    elif n < 0:
+        return -1
+    else:
+        return 0
 
 def reference_test_gains(infile, outfile):
     # In[]: Import data
