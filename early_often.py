@@ -32,7 +32,10 @@ def early_often_scores(infile, outfile, deadline):
         'solutionStmtEarlyOftenIndex',
         'solutionMethodsEarlyOftenIndex',
         'testStmtsEarlyOftenIndex',
-        'testMethodsEarlyOftenIndex'
+        'testMethodsEarlyOftenIndex',
+        'launchEarlyOften',
+        'testLaunchEarlyOften',
+        'normalLaunchEarlyOften'
     ]
 
     due_date = datetime.date.fromtimestamp(deadline / 1000)
@@ -59,6 +62,12 @@ def early_often_scores(infile, outfile, deadline):
         total_solution_methods = 0
         total_weighted_test_methods = 0
         total_test_methods = 0
+        total_launches = 0
+        total_weighted_launches = 0
+        total_test_launches = 0
+        total_weighted_test_launches = 0
+        total_normal_launches = 0
+        total_weighted_normal_launches = 0
 
         curr_sizes = {}
         curr_sizes_methods = {}
@@ -102,6 +111,17 @@ def early_often_scores(infile, outfile, deadline):
 
                     curr_sizes[class_name] = curr_size
                     curr_sizes_methods[class_name] = curr_methods
+                elif (repr(row['Type']) == repr('Launch')):
+                    total_launches += 1
+                    total_weighted_launches += days_to_deadline
+
+                    if (repr(row['Subtype']) == repr('Test')):
+                        total_test_launches += 1
+                        total_weighted_test_launches += days_to_deadline
+                    elif (repr(row['Subtype']) == repr('Normal')):
+                        total_normal_launches += 1
+                        total_weighted_normal_launches += days_to_deadline
+
                 prev_row = row
             else:
                 if (total_edit_size > 0):
@@ -110,6 +130,9 @@ def early_often_scores(infile, outfile, deadline):
                     solution_meth_early_often_index = total_weighted_solution_methods / total_solution_methods
                     test_stmt_early_often_index = total_weighted_test_edits / total_test_edits
                     test_meth_early_often_index = total_weighted_test_methods / total_test_methods
+                    launch_early_often = total_weighted_launches / total_launches if total_launches > 0 else None
+                    test_launch_early_often = total_weighted_test_launches / total_test_launches if total_test_launches > 0 else None
+                    normal_launch_early_often = total_weighted_normal_launches / total_normal_launches if total_normal_launches > 0 else None
 
                     to_write = {
                         'projectId': prev_row['projectId'],
@@ -120,7 +143,10 @@ def early_often_scores(infile, outfile, deadline):
                         'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
                         'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
                         'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
-                        'testMethodsEarlyOftenIndex': test_meth_early_often_index
+                        'testMethodsEarlyOftenIndex': test_meth_early_often_index,
+                        'launchEarlyOften': launch_early_often,
+                        'testLaunchEarlyOften': test_launch_early_often,
+                        'normalLaunchEarlyOften': normal_launch_early_often
                     }
                     writer.writerow(to_write)
 
@@ -152,6 +178,17 @@ def early_often_scores(infile, outfile, deadline):
                     curr_sizes[class_name] = curr_size
                     curr_sizes_methods[class_name] = curr_methods
 
+                elif (repr(row['Type']) == repr('Launch')):
+                    total_launches = 1
+                    total_weighted_launches = days_to_deadline
+
+                    if (repr(row['Subtype']) == repr('Test')):
+                        total_test_launches = 1
+                        total_weighted_test_launches = days_to_deadline
+                    elif (repr(row['Subtype']) == repr('Normal')):
+                        total_normal_launches = 1
+                        total_weighted_normal_launches = days_to_deadline
+
                 prev_row = row
 
         if (total_edit_size > 0):
@@ -160,6 +197,9 @@ def early_often_scores(infile, outfile, deadline):
             solution_meth_early_often_index = total_weighted_solution_methods / total_solution_methods
             test_stmt_early_often_index = total_weighted_test_edits / total_test_edits
             test_meth_early_often_index = total_weighted_test_methods / total_test_methods
+            launch_early_often = total_weighted_launches / total_launches if total_launches > 0 else None
+            test_launch_early_often = total_weighted_test_launches / total_test_launches if total_test_launches > 0 else None
+            normal_launch_early_often = total_weighted_normal_launches / total_normal_launches if total_normal_launches > 0 else None
 
             to_write = {
                 'projectId': prev_row['projectId'],
@@ -170,7 +210,10 @@ def early_often_scores(infile, outfile, deadline):
                 'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
                 'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
                 'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
-                'testMethodsEarlyOftenIndex': test_meth_early_often_index
+                'testMethodsEarlyOftenIndex': test_meth_early_often_index,
+                'launchEarlyOften': launch_early_often,
+                'testLaunchEarlyOften': test_launch_early_often,
+                'normalLaunchEarlyOften': normal_launch_early_often
             }
             writer.writerow(to_write)
 

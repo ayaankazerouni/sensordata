@@ -23,7 +23,8 @@ def userdata(usergroup):
     submissioncount = 0
     daystofinal = 0
     daystofinallist = []
-    weightedgainpercent = 0
+    gaindaystodeadline = 0
+    dropdaystodeadline = 0
 
     finalsubmissiontime = datetime.date.fromtimestamp(usergroup.iloc[0]['submissionTimeRaw'] / 1000)
 
@@ -43,22 +44,28 @@ def userdata(usergroup):
 
             if (delta < 0):
                 dropcount += 1
+                dropdaystodeadline += daystofinal
             elif (delta > 0):
                 gaincount += 1
-                weightedgainpercent += (gaincount / submissioncount)
+                gaindaystodeadline += daystofinal
             else:
                 flatcount += 1
             prevpercent = refpercent
 
     median = np.nanpercentile(daystofinallist, 50)
-    earlyoften = weightedgainpercent / gaincount if gaincount > 0 else float('nan')
+    gainearlyoften = gaindaystodeadline / submissioncount if gaincount > 0 else None
+    dropearlyoften = dropdaystodeadline / submissioncount if dropcount > 0 else None
     results = {
         'submissionCount': submissioncount,
         'dropCount': dropcount,
+        'dropPercent': dropcount / submissioncount,
+        'dropEarlyOften': dropearlyoften,
         'flatCount': flatcount,
+        'flatPercent': flatcount / submissioncount,
         'gainCount': gaincount,
-        'medianDaysToFinal': median,
-        'refGainEarlyOften': earlyoften
+        'gainPercent': gaincount / submissioncount,
+        'gainEarlyOften': gainearlyoften,
+        'medianDaysToFinal': median
     }
     return pd.Series(results)
 
