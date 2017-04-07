@@ -47,6 +47,9 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   # read raw incremental development data and format it
   raw.inc.data = read.csv(raw.inc.path)
   raw.inc.data$testWriting = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$testStmtsEarlyOftenIndex
+  raw.inc.data$testCheckingRaw = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$testLaunchEarlyOften
+  raw.inc.data$solutionCheckingRaw = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$normalLaunchEarlyOften
+  raw.inc.data$checkingRaw = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$launchEarlyOften
   colnames(raw.inc.data)[1] = 'userName'
   raw.inc.data$userName = gsub('.{7}$', '', raw.inc.data$userName)
   raw.inc.data = raw.inc.data[order(raw.inc.data$assignment, raw.inc.data$userName), ]
@@ -80,7 +83,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   merged$grade.test_checking = discretise(merged$test_checking)
   merged$grade.test_writing = discretise(merged$test_writing)
   
-  merged = merged[merged$hoursOnProject >= 1, ]
+  # merged = merged[merged$hoursOnProject >= 1, ]
   return(merged)
 }
 
