@@ -16,19 +16,21 @@ body {
 }
 
 .edits {
-  opacity: 1.0;
+  opacity: 0.8;
 }
 
 .solution-code {
-  stroke: darkorange;
-  stroke-width: 2px;
+  stroke: maroon;
+  stroke-width: 1.5px;
   fill: none;
+  opacity: 1;
 }
 
 .test-code {
-  stroke: maroon;
-  stroke-width: 2px;
+  stroke: orange;
   fill: none;
+  stroke-width: 1.5px;
+  opacity: 1;
 }
 
 .launches {

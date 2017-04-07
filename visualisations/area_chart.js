@@ -7,6 +7,7 @@ const moment = require('moment');
   const height = 300 - margin.top - margin.bottom;
 
   const tickFormat = d3.time.format('%b %d');
+  const legendOffset = 300;
 
   const x = d3.time.scale()
       .range([0, width - 150]);
@@ -22,19 +23,19 @@ const moment = require('moment');
 
   const yAxis = d3.svg.axis()
       .scale(y)
-      .ticks(5)
+      .ticks(6)
       .orient('left');
 
   let editsArea = d3.svg.area()
-    .interpolate('basis')
+    .interpolate('step')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.edits));
 
   let testEditsArea = d3.svg.area()
-    .interpolate('basis')
-    .x0((d) => x(d.start_time))
+    .interpolate('step')
+    .x0((d) => x(d.start_time) + 4)
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.testEdits));
@@ -51,7 +52,7 @@ const moment = require('moment');
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
   let term = 'fall2016';
-  let assignment = 'assignment3';
+  let assignment = 'assignment4';
 
   let ms1 = moment(+due_times[term][assignment]['milestone1']);
   let ms2 = moment(+due_times[term][assignment]['milestone2']);
@@ -59,7 +60,7 @@ const moment = require('moment');
   let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
   let dueTime = moment(+due_times[term][assignment]['dueTime']);
 
-  let dataFile = 'ws-16007-p2.csv'
+  let dataFile = 'ws-14475-p4.csv'
   d3.csv(dataFile, (error, data) => {
     if (error) throw error;
 
@@ -110,16 +111,17 @@ const moment = require('moment');
           .datum(data)
           .attr('data-legend', 'Test Code')
           .attr('class', 'edits test-code')
-          .attr('stroke-dasharray', '10,10')
           .attr('d', testEditsArea);
         }
     };
 
-    let areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
+    // let areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
+    testCode.render()
+    solutionCode.render()
 
-    for (let i = 0; i < areas.length; i++) {
-      areas[i].render();
-    }
+    // for (let i = 0; i < areas.length; i++) {
+    //   areas[i].render();
+    // }
 
     // Draw axes.
     svg.append('g')
@@ -141,7 +143,7 @@ const moment = require('moment');
     // Draw legend
     svg.append('g')
       .attr('class', 'legend')
-      .attr('transform','translate(' + (width - 300) + ',' + height / 6 + ')')
+      .attr('transform','translate(' + (width - legendOffset) + ',' + height / 7 + ')')
       .style('font-size', '12px')
       .call(d3.legend);
 
