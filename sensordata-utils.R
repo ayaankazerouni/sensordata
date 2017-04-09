@@ -6,7 +6,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
     scaled.inc.path = 'data/fall-2016/scaled_inc_new.csv'
   }
   if (missing(raw.inc.path)) {
-    raw.inc.path = 'data/fall-2016/raw_inc.csv'
+    raw.inc.path = 'data/fall-2016/raw_inc_copy.csv'
   }
   if (missing(time.path)) {
     time.path = 'data/fall-2016/time_spent.csv'

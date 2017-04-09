@@ -3,6 +3,7 @@
 import sys
 import csv
 import datetime
+import numpy as np
 
 def early_often_scores(infile, outfile, deadline):
     """
@@ -29,6 +30,10 @@ def early_often_scores(infile, outfile, deadline):
         'email',
         'CASSIGNMENTNAME',
         'earlyOftenIndex',
+        'lineEditMean',
+        'lineEditMedian',
+        'lineEditSd',
+        'skewness',
         'solutionStmtEarlyOftenIndex',
         'solutionMethodsEarlyOftenIndex',
         'testStmtsEarlyOftenIndex',
@@ -52,22 +57,19 @@ def early_often_scores(infile, outfile, deadline):
         writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
 
         prev_row = None
-        total_weighted_edit_size = 0
-        total_edit_size = 0
-        total_weighted_solution_edits = 0
-        total_solution_edits = 0
-        total_weighted_test_edits = 0
-        total_test_edits = 0
-        total_weighted_solution_methods = 0
-        total_solution_methods = 0
-        total_weighted_test_methods = 0
-        total_test_methods = 0
-        total_launches = 0
-        total_weighted_launches = 0
-        total_test_launches = 0
-        total_weighted_test_launches = 0
-        total_normal_launches = 0
-        total_weighted_normal_launches = 0
+        total_weighted_edit_size = []
+        total_edit_size = []
+        total_weighted_solution_edits = []
+        total_solution_edits = []
+        total_weighted_test_edits = []
+        total_test_edits = []
+        total_weighted_solution_methods = []
+        total_solution_methods = []
+        total_weighted_test_methods = []
+        total_test_methods = []
+        total_weighted_launches = []
+        total_weighted_test_launches = []
+        total_weighted_normal_launches = []
 
         curr_sizes = {}
         curr_sizes_methods = {}
@@ -95,44 +97,45 @@ def early_often_scores(infile, outfile, deadline):
                     edit_size = abs(prev_size - curr_size)
                     method_edit_size = abs(prev_methods - curr_methods)
 
-                    total_weighted_edit_size += (edit_size * days_to_deadline)
-                    total_edit_size += edit_size
+                    total_weighted_edit_size.append((edit_size * days_to_deadline))
+                    total_edit_size.append(edit_size)
 
                     if (int(row['onTestCase']) == 1):
-                        total_weighted_test_edits += (edit_size * days_to_deadline)
-                        total_test_edits += edit_size
-                        total_weighted_test_methods += (method_edit_size * days_to_deadline)
-                        total_test_methods += method_edit_size
+                        total_weighted_test_edits.append((edit_size * days_to_deadline))
+                        total_test_edits.append(edit_size)
+                        total_weighted_test_methods.append(method_edit_size * days_to_deadline)
+                        total_test_methods.append(method_edit_size)
                     else:
-                        total_weighted_solution_edits += (edit_size * days_to_deadline)
-                        total_solution_edits += edit_size
-                        total_weighted_solution_methods += (method_edit_size *  days_to_deadline)
-                        total_solution_methods += method_edit_size
+                        total_weighted_solution_edits.append(edit_size * days_to_deadline)
+                        total_solution_edits.append(edit_size)
+                        total_weighted_solution_methods.append(method_edit_size *  days_to_deadline)
+                        total_solution_methods.append(method_edit_size)
 
                     curr_sizes[class_name] = curr_size
                     curr_sizes_methods[class_name] = curr_methods
                 elif (repr(row['Type']) == repr('Launch')):
-                    total_launches += 1
-                    total_weighted_launches += days_to_deadline
+                    total_weighted_launches.append(days_to_deadline)
 
                     if (repr(row['Subtype']) == repr('Test')):
-                        total_test_launches += 1
-                        total_weighted_test_launches += days_to_deadline
+                        total_weighted_test_launches.append(days_to_deadline)
                     elif (repr(row['Subtype']) == repr('Normal')):
-                        total_normal_launches += 1
-                        total_weighted_normal_launches += days_to_deadline
+                        total_weighted_normal_launches.append(days_to_deadline)
 
                 prev_row = row
             else:
-                if (total_edit_size > 0):
-                    early_often_index = total_weighted_edit_size / total_edit_size
-                    solution_stmt_early_often_index = total_weighted_solution_edits / total_solution_edits
-                    solution_meth_early_often_index = total_weighted_solution_methods / total_solution_methods
-                    test_stmt_early_often_index = total_weighted_test_edits / total_test_edits
-                    test_meth_early_often_index = total_weighted_test_methods / total_test_methods
-                    launch_early_often = total_weighted_launches / total_launches if total_launches > 0 else None
-                    test_launch_early_often = total_weighted_test_launches / total_test_launches if total_test_launches > 0 else None
-                    normal_launch_early_often = total_weighted_normal_launches / total_normal_launches if total_normal_launches > 0 else None
+                if (len(total_edit_size) > 0):
+                    early_often_index = np.sum(total_weighted_edit_size) / np.sum(total_edit_size)
+                    line_edit_mean = np.mean(total_weighted_edit_size)
+                    line_edit_sd = np.std(total_weighted_edit_size)
+                    line_edit_med = np.median(total_weighted_edit_size)
+                    skewness = (line_edit_mean - line_edit_med) * 3 / line_edit_sd
+                    solution_stmt_early_often_index = np.sum(total_weighted_solution_edits) / np.sum(total_solution_edits)
+                    solution_meth_early_often_index = np.sum(total_weighted_solution_methods) / np.sum(total_solution_methods)
+                    test_stmt_early_often_index = np.sum(total_weighted_test_edits) / np.sum(total_test_edits)
+                    test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
+                    launch_early_often = np.mean(total_weighted_launches)
+                    test_launch_early_often = np.mean(total_weighted_test_launches)
+                    normal_launch_early_often = np.mean(total_weighted_normal_launches)
 
                     to_write = {
                         'projectId': prev_row['projectId'],
@@ -140,6 +143,10 @@ def early_often_scores(infile, outfile, deadline):
                         'email': prev_row['email'],
                         'CASSIGNMENTNAME': prev_row[assignment_field],
                         'earlyOftenIndex': early_often_index,
+                        'lineEditMean': line_edit_mean,
+                        'lineEditMedian': line_edit_med,
+                        'lineEditSd': line_edit_sd,
+                        'skewness': skewness,
                         'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
                         'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
                         'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
@@ -150,6 +157,19 @@ def early_often_scores(infile, outfile, deadline):
                     }
                     writer.writerow(to_write)
 
+                total_weighted_edit_size = []
+                total_edit_size = []
+                total_weighted_solution_edits = []
+                total_solution_edits = []
+                total_weighted_test_edits = []
+                total_test_edits = []
+                total_weighted_solution_methods = []
+                total_solution_methods = []
+                total_weighted_test_methods = []
+                total_test_methods = []
+                total_weighted_launches = []
+                total_weighted_test_launches = []
+                total_weighted_normal_launches = []
                 curr_sizes = {}
                 curr_sizes_methods = {}
                 if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
@@ -161,45 +181,46 @@ def early_often_scores(infile, outfile, deadline):
 
                     edit_size = abs(prev_size - curr_size)
                     method_edit_size = abs(prev_methods - curr_methods)
-                    total_weighted_edit_size = (edit_size * days_to_deadline)
+                    total_weighted_edit_size = [(edit_size * days_to_deadline)]
+                    total_edit_size = [edit_size]
 
                     if (int(row['onTestCase']) == 1):
-                        total_weighted_test_edits = (edit_size * days_to_deadline)
-                        total_test_edits = edit_size
-                        total_weighted_test_methods = (method_edit_size * days_to_deadline)
-                        total_test_methods = method_edit_size
+                        total_weighted_test_edits = [(edit_size * days_to_deadline)]
+                        total_test_edits = [ edit_size ]
+                        total_weighted_test_methods = [(method_edit_size * days_to_deadline)]
+                        total_test_methods = [method_edit_size]
                     else:
-                        total_weighted_solution_edits = (edit_size * days_to_deadline)
-                        total_solution_edits = edit_size
-                        total_weighted_solution_methods = (method_edit_size *  days_to_deadline)
-                        total_solution_methods = method_edit_size
+                        total_weighted_solution_edits = [(edit_size * days_to_deadline)]
+                        total_solution_edits = [edit_size]
+                        total_weighted_solution_methods = [(method_edit_size *  days_to_deadline)]
+                        total_solution_methods = [method_edit_size]
 
-                    total_edit_size = edit_size
                     curr_sizes[class_name] = curr_size
                     curr_sizes_methods[class_name] = curr_methods
 
                 elif (repr(row['Type']) == repr('Launch')):
-                    total_launches = 1
-                    total_weighted_launches = days_to_deadline
+                    total_weighted_launches = [days_to_deadline]
 
                     if (repr(row['Subtype']) == repr('Test')):
-                        total_test_launches = 1
-                        total_weighted_test_launches = days_to_deadline
+                        total_weighted_test_launches = [days_to_deadline]
                     elif (repr(row['Subtype']) == repr('Normal')):
-                        total_normal_launches = 1
-                        total_weighted_normal_launches = days_to_deadline
+                        total_weighted_normal_launches = [days_to_deadline]
 
                 prev_row = row
 
-        if (total_edit_size > 0):
-            early_often_index = total_weighted_edit_size / total_edit_size
-            solution_stmt_early_often_index = total_weighted_solution_edits / total_solution_edits
-            solution_meth_early_often_index = total_weighted_solution_methods / total_solution_methods
-            test_stmt_early_often_index = total_weighted_test_edits / total_test_edits
-            test_meth_early_often_index = total_weighted_test_methods / total_test_methods
-            launch_early_often = total_weighted_launches / total_launches if total_launches > 0 else None
-            test_launch_early_often = total_weighted_test_launches / total_test_launches if total_test_launches > 0 else None
-            normal_launch_early_often = total_weighted_normal_launches / total_normal_launches if total_normal_launches > 0 else None
+        if (len(total_edit_size) > 0):
+            early_often_index = np.sum(total_weighted_edit_size) / np.sum(total_edit_size)
+            line_edit_mean = np.mean(total_weighted_edit_size)
+            line_edit_sd = np.std(total_weighted_edit_size)
+            line_edit_med = np.median(total_weighted_edit_size)
+            skewness = (line_edit_mean - line_edit_med) * 3 / line_edit_sd
+            solution_stmt_early_often_index = np.sum(total_weighted_solution_edits) / np.sum(total_solution_edits)
+            solution_meth_early_often_index = np.sum(total_weighted_solution_methods) / np.sum(total_solution_methods)
+            test_stmt_early_often_index = np.sum(total_weighted_test_edits) / np.sum(total_test_edits)
+            test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
+            launch_early_often = np.mean(total_weighted_launches)
+            test_launch_early_often = np.mean(total_weighted_test_launches)
+            normal_launch_early_often = np.mean(total_weighted_normal_launches)
 
             to_write = {
                 'projectId': prev_row['projectId'],
@@ -207,6 +228,10 @@ def early_often_scores(infile, outfile, deadline):
                 'email': prev_row['email'],
                 'CASSIGNMENTNAME': prev_row[assignment_field],
                 'earlyOftenIndex': early_often_index,
+                'lineEditMean': line_edit_mean,
+                'lineEditMedian': line_edit_med,
+                'lineEditSd': line_edit_sd,
+                'skewness': skewness,
                 'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
                 'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
                 'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
