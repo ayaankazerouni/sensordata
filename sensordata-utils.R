@@ -83,7 +83,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   merged$grade.test_checking = discretise(merged$test_checking)
   merged$grade.test_writing = discretise(merged$test_writing)
   
-  # merged = merged[merged$hoursOnProject >= 1, ]
+  merged = merged[merged$hoursOnProject >= 1, ]
   return(merged)
 }
 
