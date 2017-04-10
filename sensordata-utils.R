@@ -1,4 +1,6 @@
-consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, time.path, ref.test.gains.path) {
+consolidateStudentData = function(webcat.path, scaled.inc.path, 
+                                  raw.inc.path, time.path, ref.test.gains.path,
+                                  ws.path) {
   if (missing(webcat.path)) {
     webcat.path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
   }
@@ -13,6 +15,9 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   }
   if (missing(ref.test.gains.path)) {
     ref.test.gains.path = 'data/fall-2016/ref_test_gains.csv'
+  }
+  if (missing(ws.path)) {
+    ws.path = 'data/fall-2016/work_sessions.csv'
   }
   
   webcat.data = read.csv(webcat.path)
@@ -61,11 +66,21 @@ consolidateStudentData = function(webcat.path, scaled.inc.path, raw.inc.path, ti
   time.data$userName = gsub('.{7}$', '', time.data$userName)
   time.data = time.data[order(time.data$assignment, time.data$userName), ]
   
+  # read work session data for launching data
+  require(plyr)
+  ws.data = read.csv(ws.path)
+  colnames(ws.data)[colnames(ws.data) == 'CASSIGNMENTNAME'] = 'assignment'
+  launchtotals = ddply(ws.data, c('userId', 'assignment'), function(x) {
+    y = x[c('testLaunches', 'normalLaunches')]
+    apply(y, 2, sum)
+  })
+  
   # merge incremental development scores and project grades
   merged = merge(last.submissions, ref.test.gains, by=c('userName', 'assignment'))
   merged = merge(merged, inc.data, by=c('userName', 'assignment'))
   merged = merge(merged, raw.inc.data, by=c('userName', 'userId', 'assignment'))
   merged = merge(merged, time.data, by=c('userName', 'assignment'))
+  merged = merge(merged, launchtotals, by=c('userId', 'assignment'))
   merged$userName = factor(merged$userName)
   
   # calculate on-time/late; continuous (in hours) and categorical(true/false)
