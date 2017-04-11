@@ -35,7 +35,7 @@ const moment = require('moment');
 
   let testEditsArea = d3.svg.area()
     .interpolate('step')
-    .x0((d) => x(d.start_time) + 4)
+    .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.testEdits));

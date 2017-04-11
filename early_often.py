@@ -3,6 +3,8 @@
 import sys
 import csv
 import datetime
+import re
+import json
 import pandas as pd
 import numpy as np
 
@@ -14,12 +16,18 @@ def userearlyoften(usergroup):
     usergroup -- pandas.DataFrame
     """
     prev_row = None
-    total_weighted_edits = []
-    total_edits = []
-    total_weighted_solution_edits = []
-    total_solution_edits = []
-    total_weighted_test_edits = []
-    total_test_edits = []
+    total_weighted_edits_bytes = []
+    total_edits_bytes = []
+    total_weighted_edits_stmts = []
+    total_edits_stmts = []
+    total_weighted_solution_bytes = []
+    total_solution_bytes = []
+    total_weighted_solution_stmts = []
+    total_solution_stmts = []
+    total_weighted_test_bytes = []
+    total_test_bytes = []
+    total_weighted_test_stmts = []
+    total_test_stmts = []
     total_weighted_solution_methods = []
     total_solution_methods = []
     total_weighted_test_methods = []
@@ -28,12 +36,23 @@ def userearlyoften(usergroup):
     total_weighted_test_launches = []
     total_weighted_normal_launches = []
 
-    curr_sizes = {}
+    curr_sizes_bytes = {}
+    curr_sizes_stmts = {}
     curr_sizes_methods = {}
 
     assignment_field = 'CASSIGNMENTNAME'
     if 'cleaned_assignment' in usergroup.columns:
         assignment_field = 'cleaned_assignment'
+
+    first = usergroup.iloc[0]
+    first_time = int(first['time'])
+    term = get_term(first_time)
+    first_assignment = first[assignment_field]
+    number = int(re.search(r'\d', first_assignment).group())
+
+    due_time = data[term]['assignment%d' % (number)]['dueTime']
+    due_time = int(due_time)
+    due_date = datetime.date.fromtimestamp(due_time / 1000)
 
     for index, row in usergroup.iterrows():
         prev_row = prev_row if prev_row is None else row
@@ -48,31 +67,53 @@ def userearlyoften(usergroup):
 
         if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
             class_name = repr(row['Class-Name'])
-            curr_size = int(row['Current-Statements'])
+            curr_bytes = int(row['Current-Size'])
+            curr_stmts = int(row['Current-Statements'])
             curr_methods = int(row['Current-Methods'])
 
-            prev_size = curr_sizes.get(class_name, 0)
+            prev_bytes = curr_sizes_bytes.get(class_name, 0)
+            prev_stmts = curr_sizes_stmts.get(class_name, 0)
             prev_methods = curr_sizes_methods.get(class_name, 0)
 
-            edit_size = abs(prev_size - curr_size)
+            byte_edit_size = abs(prev_bytes - curr_bytes)
+            stmt_edit_size = abs(prev_stmts - curr_stmts)
             method_edit_size = abs(prev_methods - curr_methods)
 
-            total_weighted_edits.append((edit_size * days_to_deadline))
-            total_edits.append(edit_size)
+            on_test_case = int(row['onTestCase']) == 1
 
-            if (int(row['onTestCase']) == 1):
-                total_weighted_test_edits.append((edit_size * days_to_deadline))
-                total_test_edits.append(edit_size)
-                total_weighted_test_methods.append(method_edit_size * days_to_deadline)
-                total_test_methods.append(method_edit_size)
-            else:
-                total_weighted_solution_edits.append(edit_size * days_to_deadline)
-                total_solution_edits.append(edit_size)
-                total_weighted_solution_methods.append(method_edit_size *  days_to_deadline)
-                total_solution_methods.append(method_edit_size)
+            if byte_edit_size > 0:
+                total_weighted_edits_bytes.append(byte_edit_size * days_to_deadline)
+                total_edits_bytes.append(byte_edit_size)
 
-            curr_sizes[class_name] = curr_size
+                if on_test_case:
+                    total_weighted_test_bytes.append(byte_edit_size * days_to_deadline)
+                    total_test_bytes.append(byte_edit_size)
+                else:
+                    total_weighted_solution_bytes.append(byte_edit_size * days_to_deadline)
+                    total_solution_bytes.append(byte_edit_size)
+
+            if stmt_edit_size > 0:
+                total_weighted_edits_stmts.append(stmt_edit_size * days_to_deadline)
+                total_edits_stmts.append(stmt_edit_size)
+
+                if on_test_case:
+                    total_weighted_test_stmts.append(stmt_edit_size * days_to_deadline)
+                    total_test_stmts.append(stmt_edit_size)
+                else:
+                    total_weighted_solution_stmts.append(stmt_edit_size * days_to_deadline)
+                    total_solution_stmts.append(stmt_edit_size)
+
+            if method_edit_size > 0:
+                if on_test_case:
+                    total_weighted_test_methods.append(method_edit_size * days_to_deadline)
+                    total_test_methods.append(method_edit_size)
+                else:
+                    total_weighted_solution_methods.append(method_edit_size * days_to_deadline)
+                    total_solution_methods.append(method_edit_size)
+
+            curr_sizes_stmts[class_name] = curr_stmts
             curr_sizes_methods[class_name] = curr_methods
+            curr_sizes_bytes[class_name] = curr_bytes
         elif (repr(row['Type']) == repr('Launch')):
             total_weighted_launches.append(days_to_deadline)
 
@@ -83,15 +124,20 @@ def userearlyoften(usergroup):
 
         prev_row = row
 
-    if (len(total_edits) > 0):
-        early_often_index = np.sum(total_weighted_edits) / np.sum(total_edits)
-        line_edit_mean = np.mean(total_weighted_edits)
-        line_edit_sd = np.std(total_weighted_edits)
-        line_edit_med = np.median(total_weighted_edits)
-        skewness = (line_edit_mean - line_edit_med) * 3 / line_edit_sd
-        solution_stmt_early_often_index = np.sum(total_weighted_solution_edits) / np.sum(total_solution_edits)
+    global finished
+    finished = finished + 1
+    percent = round((finished / ngroups) * 100)
+    if percent in range(20, 30) or percent in range(50, 60)  or percent in range(70, 100):
+        print("%d%% done" % percent)
+
+    if (len(total_edits_stmts) > 0):
+        byte_early_often_index = np.sum(total_weighted_edits_bytes) / np.sum(total_edits_bytes)
+        stmt_early_often_index = np.sum(total_weighted_edits_stmts) / np.sum(total_edits_stmts)
+        solution_byte_early_often_index = np.sum(total_weighted_solution_bytes) / np.sum(total_solution_bytes)
+        solution_stmt_early_often_index = np.sum(total_weighted_solution_stmts) / np.sum(total_solution_stmts)
         solution_meth_early_often_index = np.sum(total_weighted_solution_methods) / np.sum(total_solution_methods)
-        test_stmt_early_often_index = np.sum(total_weighted_test_edits) / np.sum(total_test_edits)
+        test_byte_early_often_index = np.sum(total_weighted_test_bytes) / np.sum(total_test_bytes)
+        test_stmt_early_often_index = np.sum(total_weighted_test_stmts) / np.sum(total_test_stmts)
         test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
         launch_early_often = np.mean(total_weighted_launches)
         test_launch_early_often = np.mean(total_weighted_test_launches)
@@ -99,16 +145,14 @@ def userearlyoften(usergroup):
 
         to_write = {
             'projectId': prev_row['projectId'],
-            'userId': prev_row['userId'],
+            'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
             'email': prev_row['email'],
-            'CASSIGNMENTNAME': prev_row[assignment_field],
-            'earlyOftenIndex': early_often_index,
-            'lineEditMean': line_edit_mean,
-            'lineEditMedian': line_edit_med,
-            'lineEditSd': line_edit_sd,
-            'skewness': skewness,
+            'stmtEarlyOftenIndex': stmt_early_often_index,
+            'byteEarlyOftenIndex': byte_early_often_index,
+            'solutionByteEarlyOftenIndex': solution_byte_early_often_index,
             'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
             'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
+            'testByteEarlyOftenIndex': test_byte_early_often_index,
             'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
             'testMethodsEarlyOftenIndex': test_meth_early_often_index,
             'launchEarlyOften': launch_early_often,
@@ -120,9 +164,13 @@ def userearlyoften(usergroup):
     else:
         return None
 
-def earlyoften(infile, outfile, deadline):
+def earlyoften(infile, outfile=None):
     # Import data
-    dtypes={
+    dtypes = {
+        'userId': str,
+        'projectId': str,
+        'email': str,
+        'CASSIGNMENTNAME': str,
         'time': int,
         'Class-Name': object,
         'Unit-Type': object,
@@ -131,33 +179,59 @@ def earlyoften(infile, outfile, deadline):
         'Subsubtype': object,
         'onTestCase': object,
         'Current-Statements': object,
-        'Current-Methods': object
+        'Current-Methods': object,
+        'Current-Size': object
     }
-    df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False)
-    df.sort_values(by=['userId', 'time'], ascending=[1,1], inplace=True)
+    df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()))
+    df.sort_values(by=['time'], ascending=[1], inplace=True)
     df.fillna('', inplace=True)
+    print('1. Finished reading CSV.')
 
-    # Group data by unqiue values of userIds
+    # Group data by unique values of userIds and assignment
     userdata = df.groupby(['userId'])
+    print('2. Finished grouping data. Applying function now.')
 
-    global due_date
-    due_date = datetime.date.fromtimestamp(deadline / 1000)
+    global data
+    with open('due_times.json') as data_file:
+        data = json.load(data_file)
+
+    global finished
+    finished = 0
+    global ngroups
+    ngroups = len(userdata)
     results = userdata.apply(userearlyoften)
 
     # Write out
-    results.to_csv(outfile)
+    if outfile:
+        results.to_csv(outfile)
+    else:
+        return results
+
+def get_term(timestamp):
+    """
+    Expects a timestamp in milliseconds.
+    """
+    fall_time = 1452877947000
+    spring_time = 1471281147000
+    if timestamp >= fall_time:
+        return 'fall2016'
+
+    if timestamp >= spring_time:
+        return 'spring2016'
+    else:
+        return None
 
 def main(args):
     infile = args[0]
     outfile = args[1]
-    deadline = int(args[2])
+    deadline = int(args[2]) if len(args) > 2 else None
     try:
-        earlyoften(infile, outfile, deadline)
+        earlyoften(infile, outfile)
     except FileNotFoundError as e:
         print("Error! File '%s' does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print('Calculates an early/often index for each student project for a given assignment.')
         print('Early/often is the [sum of (editSize * daysToDeadline) / totalEditSize].')
         print('Usage:\n\t./early_often.py <input file> <output file> <assignment deadline as a millisecond timestamp>')
