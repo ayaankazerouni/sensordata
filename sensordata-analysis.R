@@ -10,8 +10,8 @@ inconsistent = webcat.data[webcat.data$userId %in% intsec, ]
 
 # for contrasts
 webcat.data$ab.cdf = factor(ifelse(webcat.data$grade.reftest %in% c('a', 'b'), '1', '0'))
-testwriting.ab = webcat.data[!is.na(webcat.data$testWriting) & webcat.data$testWriting < 1.5, ]
-testwriting.cdf = webcat.data[!is.na(webcat.data$testWriting) & webcat.data$testWriting >= 1.5, ]
+testwriting.ab = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting < 1.5, ]
+testwriting.cdf = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting >= 1.5, ]
 
 # some subsets for convenience
 on.time = webcat.data[webcat.data$on.time.submission == 1, ]

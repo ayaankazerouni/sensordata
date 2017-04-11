@@ -130,7 +130,7 @@ def userearlyoften(usergroup):
     if percent in range(20, 30) or percent in range(50, 60)  or percent in range(70, 100):
         print("%d%% done" % percent)
 
-    if (len(total_edits_stmts) > 0):
+    if (len(total_edits_bytes) > 0):
         byte_early_often_index = np.sum(total_weighted_edits_bytes) / np.sum(total_edits_bytes)
         stmt_early_often_index = np.sum(total_weighted_edits_stmts) / np.sum(total_edits_stmts)
         solution_byte_early_often_index = np.sum(total_weighted_solution_bytes) / np.sum(total_solution_bytes)
@@ -143,12 +143,34 @@ def userearlyoften(usergroup):
         test_launch_early_often = np.mean(total_weighted_test_launches)
         normal_launch_early_often = np.mean(total_weighted_normal_launches)
 
+        stretched_bytes = []
+        for weighted, unweighted in zip(total_weighted_edits_bytes, total_edits_bytes):
+            relative_time = weighted / unweighted
+            for i in range(weighted):
+                stretched_bytes.append(relative_time)
+
+        byte_edit_median = np.median(stretched_bytes)
+        byte_edit_sd = np.std(stretched_bytes)
+
+        stretched_stmts = []
+        for weighted, unweighted in zip(total_weighted_edits_stmts, total_edits_stmts):
+            relative_time = weighted / unweighted
+            for i in range(weighted):
+                stretched_stmts.append(relative_time)
+
+        stmt_edit_median = np.median(stretched_stmts)
+        stmt_edit_sd = np.std(stretched_stmts)
+
         to_write = {
             'projectId': prev_row['projectId'],
             'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
             'email': prev_row['email'],
-            'stmtEarlyOftenIndex': stmt_early_often_index,
             'byteEarlyOftenIndex': byte_early_often_index,
+            'byteEditMedian': byte_edit_median,
+            'byteEditSd': byte_edit_sd,
+            'stmtEarlyOftenIndex': stmt_early_often_index,
+            'stmtEditMedian': stmt_edit_median,
+            'stmtEditSd': stmt_edit_sd,
             'solutionByteEarlyOftenIndex': solution_byte_early_often_index,
             'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
             'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
