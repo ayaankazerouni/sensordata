@@ -32,7 +32,8 @@ consolidateStudentData = function(webcat.path, scaled.inc.path,
 
   # calculate reftest percentages and discretised project grades
   last.submissions$score.correctness = last.submissions$score.correctness / last.submissions$max.score.correctness
-  last.submissions$elementsCovered = last.submissions$elementsCovered / last.submissions$elements
+  last.submissions$elementsCovered = (last.submissions$elementsCovered / last.submissions$elements) / 0.98
+  last.submissions$elementsCovered = ifelse(last.submissions$elementsCovered > 1.0, 1.0, last.submissions$elementsCovered)
   last.submissions$score.reftest = last.submissions$score.correctness / last.submissions$elementsCovered
   last.submissions$grade.reftest = discretise(last.submissions$score.reftest)
 
@@ -119,3 +120,64 @@ discretise = function(x, binom = FALSE) {
 }
 
 webcat.data = consolidateStudentData()
+
+# some subsets for convenience
+ab = webcat.data[webcat.data$grade.reftest %in% c('a', 'b'), ]
+cdf = webcat.data[webcat.data$grade.reftest %in% c('c', 'd', 'f'), ]
+on.time = webcat.data[webcat.data$on.time.submission == 1, ]
+late = webcat.data[webcat.data$on.time.submission == 0, ]
+
+# only keep students with at least one A/B score and at least one C/D/F score
+# for within subjects analysis
+intsec = intersect(ab$userId, cdf$userId)
+inconsistent = webcat.data[webcat.data$userId %in% intsec, ]
+on.time.inconsistent = inconsistent[inconsistent$on.time.submission == 1, ]
+late.inconsistent = inconsistent[inconsistent$on.time.submission == 0, ]
+
+# for contrasts
+webcat.data$ab.cdf = factor(ifelse(webcat.data$grade.reftest %in% c('a', 'b'), '1', '0'))
+testwriting.ab = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting < 1.5, ]
+testwriting.cdf = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting>= 1.5, ]
+
+# within ss model
+require(nlme)
+fit = lme(submissionNo ~ ab.cdf, random = ~ 1 | userId/grade.reftest, 
+          data = webcat.data, na.action = na.omit)
+anova(fit)
+require(multcomp)
+tukey = glht(fit,linfct=mcp(ab.cdf = 'Tukey'))
+summary(tukey)
+
+# 5-fold validation
+df.temp = webcat.data[, c('ab.cdf', 'byteEarlyOftenIndex', 'byteEditMedian', 'byteEditSd', 'byteSkew')]
+df.temp = df.temp[complete.cases(df.temp), ]
+df.temp = df.temp[!is.infinite(df.temp$byteSkew), ]
+df.temp = df.temp[sample(nrow(df.temp)), ]
+folds = cut(seq(1, nrow(df.temp)), breaks=5, labels=FALSE)
+
+precision = 0
+accuracy = 0
+recall = 0
+
+for (i in 1:5) {
+  test.indices = which(folds == i, arr.ind = TRUE)
+  data.train = df.temp[-test.indices, ]
+  data.test = df.temp[test.indices, ]
+  
+  ea.null = glm(ab.cdf ~ 1, data = df.temp, family = binomial(link='logit'))
+  ea.full = glm(ab.cdf ~ ., data = df.temp, family = binomial(link='logit'))
+  ea.final = step(ea.full, scope = list(upper = ea.full, lower = ea.null), direction = 'backward')
+  
+  pred = predict(ea.final, newdata = data.test)
+  pred = ifelse(pred > 0.5, 1, 0)
+  data.test$pred = pred
+  
+  tp = nrow(data.test[data.test$pred == 1 & data.test$ab.cdf == 1, ])
+  fp = nrow(data.test[data.test$pred == 1 & data.test$ab.cdf == 0, ])
+  tn = nrow(data.test[data.test$pred == 0 & data.test$ab.cdf == 0, ])
+  fn = nrow(data.test[data.test$pred == 0 & data.test$ab.cdf == 1, ])
+  
+  precision[i] = tp / (tp + fp)
+  recall[i] = tp / (tp + fn)
+  accuracy[i] = (tp + tn) / (tp + tn + fp + fn)
+}
