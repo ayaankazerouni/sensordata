@@ -48,11 +48,14 @@ def userearlyoften(usergroup):
     first_time = int(first['time'])
     term = get_term(first_time)
     first_assignment = first[assignment_field]
-    number = int(re.search(r'\d', first_assignment).group())
+    assignment_number = int(re.search(r'\d', first_assignment).group())
+    user_id = first['email'].split('@')[0]
 
-    due_time = data[term]['assignment%d' % (number)]['dueTime']
+    due_time = data[term]['assignment%d' % (assignment_number)]['dueTime']
     due_time = int(due_time)
     due_date = datetime.date.fromtimestamp(due_time / 1000)
+
+    lastsubmissiontime = submissions.loc[user_id,'Project %d' % assignment_number]['submissionTimeRaw']
 
     for index, row in usergroup.iterrows():
         prev_row = prev_row if prev_row is None else row
@@ -61,7 +64,7 @@ def userearlyoften(usergroup):
         date = datetime.date.fromtimestamp(time / 1000)
         days_to_deadline = (due_date - date).days
 
-        if days_to_deadline < -4:
+        if time > lastsubmissiontime or days_to_deadline < -4:
             prev_row = row
             continue
 
@@ -140,8 +143,14 @@ def userearlyoften(usergroup):
         test_stmt_early_often_index = np.sum(total_weighted_test_stmts) / np.sum(total_test_stmts)
         test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
         launch_early_often = np.mean(total_weighted_launches)
+        launch_median = np.median(total_weighted_launches)
+        launch_sd = np.std(total_weighted_launches)
         test_launch_early_often = np.mean(total_weighted_test_launches)
+        test_launch_median = np.median(total_weighted_test_launches)
+        test_launch_sd = np.std(total_weighted_test_launches)
         normal_launch_early_often = np.mean(total_weighted_normal_launches)
+        normal_launch_median = np.median(total_weighted_normal_launches)
+        normal_launch_sd = np.std(total_weighted_normal_launches)
 
         stretched_bytes = []
         for weighted, unweighted in zip(total_weighted_edits_bytes, total_edits_bytes):
@@ -151,6 +160,24 @@ def userearlyoften(usergroup):
 
         byte_edit_median = np.median(stretched_bytes)
         byte_edit_sd = np.std(stretched_bytes)
+
+        stretched_solution_bytes = []
+        for weighted, unweighted in zip(total_weighted_solution_bytes, total_solution_bytes):
+            relative_time = weighted / unweighted
+            for i in range(weighted):
+                stretched_solution_bytes.append(relative_time)
+
+        solution_byte_edit_median = np.median(stretched_solution_bytes)
+        solution_byte_edit_sd = np.std(stretched_solution_bytes)
+
+        stretched_test_bytes = []
+        for weighted, unweighted in zip(total_weighted_test_bytes, total_test_bytes):
+            relative_time = weighted / unweighted
+            for i in range(weighted):
+                stretched_test_bytes.append(relative_time)
+
+        test_byte_edit_median = np.median(stretched_test_bytes)
+        test_byte_edit_sd = np.std(stretched_test_bytes)
 
         stretched_stmts = []
         for weighted, unweighted in zip(total_weighted_edits_stmts, total_edits_stmts):
@@ -172,14 +199,24 @@ def userearlyoften(usergroup):
             'stmtEditMedian': stmt_edit_median,
             'stmtEditSd': stmt_edit_sd,
             'solutionByteEarlyOftenIndex': solution_byte_early_often_index,
+            'solutionByteEditMedian': solution_byte_edit_median,
+            'solutionByteEditSd': solution_byte_edit_sd,
             'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
             'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
             'testByteEarlyOftenIndex': test_byte_early_often_index,
+            'testByteEditMedian': test_byte_edit_median,
+            'testByteEditSd': test_byte_edit_sd,
             'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
             'testMethodsEarlyOftenIndex': test_meth_early_often_index,
             'launchEarlyOften': launch_early_often,
+            'launchMedian': launch_median,
+            'launchSd': launch_sd,
             'testLaunchEarlyOften': test_launch_early_often,
-            'normalLaunchEarlyOften': normal_launch_early_often
+            'testLaunchMedian': test_launch_median,
+            'testLaunchSd': test_launch_sd,
+            'normalLaunchEarlyOften': normal_launch_early_often,
+            'normalLaunchMedian': normal_launch_median,
+            'normalLaunchSd': normal_launch_sd
         }
 
         return pd.Series(to_write)
@@ -187,6 +224,20 @@ def userearlyoften(usergroup):
         return None
 
 def earlyoften(infile, outfile=None):
+    # Import due date data
+    dtypes = {
+        'userName': str,
+        'assignment': str,
+        'submissionNo': int,
+        'submissionTimeRaw': float
+    }
+    global submissions
+    submissions = pd.read_csv('data/fall-2016/web-cat-students-with-sensordata.csv',
+        dtype=dtypes, usecols=list(dtypes.keys()))
+    submissions.sort_values(by=['userName', 'assignment', 'submissionNo'], ascending=[1,1,0], inplace=True)
+    submissions = submissions.groupby(['userName', 'assignment']).first()
+    print('0. Finished reading submission data.')
+
     # Import data
     dtypes = {
         'userId': str,
@@ -207,11 +258,11 @@ def earlyoften(infile, outfile=None):
     df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()))
     df.sort_values(by=['time'], ascending=[1], inplace=True)
     df.fillna('', inplace=True)
-    print('1. Finished reading CSV.')
+    print('1. Finished reading raw sensordata.')
 
     # Group data by unique values of userIds and assignment
     userdata = df.groupby(['userId'])
-    print('2. Finished grouping data. Applying function now.')
+    print('2. Finished grouping data. Calculating measures now.')
 
     global data
     with open('due_times.json') as data_file:
@@ -246,7 +297,7 @@ def get_term(timestamp):
 def main(args):
     infile = args[0]
     outfile = args[1]
-    deadline = int(args[2]) if len(args) > 2 else None
+
     try:
         earlyoften(infile, outfile)
     except FileNotFoundError as e:
@@ -254,8 +305,7 @@ def main(args):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print('Calculates an early/often index for each student project for a given assignment.')
-        print('Early/often is the [sum of (editSize * daysToDeadline) / totalEditSize].')
-        print('Usage:\n\t./early_often.py <input file> <output file> <assignment deadline as a millisecond timestamp>')
+        print('Calculates edit statistics for students from raw sensordata.')
+        print('Usage:\n\t./early_often.py <input file> <output file> <data file of web-cat submissions>')
         sys.exit()
     main(sys.argv[1:])

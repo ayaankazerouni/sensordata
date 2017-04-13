@@ -33,7 +33,7 @@ consolidateStudentData = function(webcat.path, scaled.inc.path,
   # calculate reftest percentages and discretised project grades
   last.submissions$score.correctness = last.submissions$score.correctness / last.submissions$max.score.correctness
   last.submissions$elementsCovered = (last.submissions$elementsCovered / last.submissions$elements) / 0.98
-  last.submissions$elementsCovered = ifelse(last.submissions$elementsCovered > 1.0, 1.0, last.submissions$elementsCovered)
+  last.submissions$elementsCovered = ifelse(last.submissions$elementsCovered <= 1, last.submissions$elementsCovered, 1)
   last.submissions$score.reftest = last.submissions$score.correctness / last.submissions$elementsCovered
   last.submissions$grade.reftest = discretise(last.submissions$score.reftest)
 
@@ -63,6 +63,9 @@ consolidateStudentData = function(webcat.path, scaled.inc.path,
   raw.inc.data$stmtNormalChecking = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$normalLaunchEarlyOften
   raw.inc.data$stmtChecking = raw.inc.data$solutionStmtEarlyOftenIndex - raw.inc.data$launchEarlyOften
   raw.inc.data$stmtSkew = 3 * (raw.inc.data$stmtEarlyOftenIndex - raw.inc.data$stmtEditMedian) / raw.inc.data$stmtEditSd
+  raw.inc.data$launchSkew = 3 * (raw.inc.data$launchEarlyOften - raw.inc.data$launchMedian) / raw.inc.data$launchSd
+  raw.inc.data$testLaunchSkew = 3 * (raw.inc.data$testLaunchEarlyOften - raw.inc.data$testLaunchMedian) / raw.inc.data$testLaunchSd
+  raw.inc.data$normalLaunchSkew = 3 * (raw.inc.data$normalLaunchEarlyOften - raw.inc.data$normalLaunchMedian) / raw.inc.data$normalLaunchSd
   colnames(raw.inc.data)[colnames(raw.inc.data) == 'email'] = 'userName'
   raw.inc.data$userName = gsub('.{7}$', '', raw.inc.data$userName)
   raw.inc.data = raw.inc.data[order(raw.inc.data$assignment, raw.inc.data$userName), ]
@@ -137,7 +140,7 @@ late.inconsistent = inconsistent[inconsistent$on.time.submission == 0, ]
 # for contrasts
 webcat.data$ab.cdf = factor(ifelse(webcat.data$grade.reftest %in% c('a', 'b'), '1', '0'))
 testwriting.ab = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting < 1.5, ]
-testwriting.cdf = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting>= 1.5, ]
+testwriting.cdf = webcat.data[!is.na(webcat.data$stmtTestWriting) & webcat.data$stmtTestWriting >= 1.5, ]
 
 # within ss model
 require(nlme)
