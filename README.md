@@ -24,7 +24,7 @@ The data has the following fields:
 ### Description of Processes
 Some python files have not been described here, because you can perform their functions using any data-processing software. So they are not really useful.
 
-* [early_often.py](early_often.py) - Calculates early/often and incremental test writing indices
+* [early_often.py](early_often.py) - Calculates early/often indices for solution code writing, test writing, normal program executions, and test code executions, along with a suite of other measures we use to try to assess incremental development.
 * [incremental_checking.py](incremental_checking.py) - Calculates incremental checking and incremental test checking indices
 * [subsessions.py](subsessions.py) - Reduces raw sensordata into subsessions. Subsessions are separated by program Launches
 * [work_sessions.py](work_sessions.py) - Reduces subsession data into work sessions. Work sessions are separated by gaps of >= 3 hours without activity
