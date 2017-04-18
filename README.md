@@ -30,7 +30,7 @@ Some python files have not been described here, because you can perform their fu
 * [work_sessions.py](work_sessions.py) - Reduces subsession data into work sessions. Work sessions are separated by gaps of >= 3 hours without activity
 * [time_spent.py](time_spent.py) - Calculates the time spent on each project in hours (using work session data)
 
-[sensordata-utils.R](sensordata-utils.R) and [sensordata-analysis.R](sensordata-analysis.R) contain analysis processes rather specific to my research, so I haven't described them here.
+[sensordata-utils.R](sensordata-utils.R) and [sensordata-figures.R](sensordata-figures.R) contain analysis and visualisation processes rather specific to my research, so I haven't described them here.
 You may explore the source if you like.
 
-The [visualisations](visualisations) directory contains tentative D3 visualisations which will probably go away soon.
+The [visualisations](visualisations) directory contains tentative D3 visualisations of student programming habits over time. These will probably go away soon.
