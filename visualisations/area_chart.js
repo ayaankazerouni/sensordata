@@ -1,5 +1,5 @@
-const due_times = require('../due_times.json');
-const moment = require('moment');
+import due_times from '../due_times';
+import moment from 'moment';
 
 (($, window, document) => {
   const margin = {top: 20, right: 160, bottom: 30, left: 50}; // leaving space for the legend
@@ -26,14 +26,14 @@ const moment = require('moment');
       .ticks(6)
       .orient('left');
 
-  let editsArea = d3.svg.area()
+  const editsArea = d3.svg.area()
     .interpolate('step')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.edits));
 
-  let testEditsArea = d3.svg.area()
+  const testEditsArea = d3.svg.area()
     .interpolate('step')
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
@@ -41,26 +41,26 @@ const moment = require('moment');
     .y1((d) => y(d.testEdits));
 
   // Line function for due date lines.
-  let line = d3.svg.line()
+  const line = d3.svg.line()
       .x((d) => d.x)
       .y((d) => d.y);
 
-  let svg = d3.select('div.chart-area').append('svg')
+  const svg = d3.select('div.chart-area').append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  let term = 'fall2016';
-  let assignment = 'assignment4';
+  const term = 'fall2016';
+  const assignment = 'assignment4';
 
-  let ms1 = moment(+due_times[term][assignment]['milestone1']);
-  let ms2 = moment(+due_times[term][assignment]['milestone2']);
-  let ms3 = moment(+due_times[term][assignment]['milestone3']);
-  let earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
-  let dueTime = moment(+due_times[term][assignment]['dueTime']);
+  const ms1 = moment(+due_times[term][assignment]['milestone1']);
+  const ms2 = moment(+due_times[term][assignment]['milestone2']);
+  const ms3 = moment(+due_times[term][assignment]['milestone3']);
+  const earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
+  const dueTime = moment(+due_times[term][assignment]['dueTime']);
 
-  let dataFile = 'ws-14475-p4.csv'
+  const dataFile = 'ws-14475-p4.csv'
   d3.csv(dataFile, (error, data) => {
     if (error) throw error;
 
@@ -82,18 +82,18 @@ const moment = require('moment');
     data.splice(stopAt); // don't draw work sessions more than 4 days after the deadline
 
     // Specify input domains for the scales.
-    let start_min = d3.min(data, (d) => d.start_time);
-    let end_max = d3.max(data, (d) => d.end_time);
+    const start_min = d3.min(data, (d) => d.start_time);
+    const end_max = d3.max(data, (d) => d.end_time);
     x.domain([start_min, end_max]);
 
-    let editsMax = d3.max(data, (d) => d.edits);
-    let testEditsMax = d3.max(data, (d) => d.testEdits);
-    let launchMax = d3.max(data, (d) => d.launches);
+    const editsMax = d3.max(data, (d) => d.edits);
+    const testEditsMax = d3.max(data, (d) => d.testEdits);
+    const launchMax = d3.max(data, (d) => d.launches);
     y.domain([0, Math.max(editsMax, testEditsMax, launchMax)]);
 
     // Draw areas for solution code, test code, and launches. Draw them in order
     // decreasing maximums, so the smallest area ends up in front, and visible.
-    let solutionCode = {
+    const solutionCode = {
       max: editsMax,
       render() {
         svg.append('path')
@@ -104,7 +104,7 @@ const moment = require('moment');
         }
     };
 
-    let testCode = {
+    const testCode = {
       max: testEditsMax,
       render() {
         svg.append('path')
@@ -115,7 +115,7 @@ const moment = require('moment');
         }
     };
 
-    // let areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
+    // const areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
     testCode.render()
     solutionCode.render()
 
@@ -148,38 +148,38 @@ const moment = require('moment');
       .call(d3.legend);
 
     // Get x-positions scaled by the time scale.
-    let dueX = x(dueTime);
-    let ms1X = x(ms1);
-    let ms2X = x(ms2);
-    let ms3X = x(ms3);
-    let earlyX = x(earlyBonus);
+    const dueX = x(dueTime);
+    const ms1X = x(ms1);
+    const ms2X = x(ms2);
+    const ms3X = x(ms3);
+    const earlyX = x(earlyBonus);
 
     // Define end-points for each line. Basically top to bottom
     // at the appropriate date on the x-axis.
-    let ms1Line = [{ 'x': ms1X, 'y': height }, { 'x': ms1X, 'y': 0 }];
-    let ms2Line = [{ 'x': ms2X, 'y': height }, { 'x': ms2X, 'y': 0 }];
-    let ms3Line = [{ 'x': ms3X, 'y': height }, { 'x': ms3X, 'y': 0 }];
-    let earlyLine = [{ 'x': earlyX, 'y': height }, { 'x': earlyX, 'y': 0 }];
-    let dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
+    const ms1Line = [{ 'x': ms1X, 'y': height }, { 'x': ms1X, 'y': 0 }];
+    const ms2Line = [{ 'x': ms2X, 'y': height }, { 'x': ms2X, 'y': 0 }];
+    const ms3Line = [{ 'x': ms3X, 'y': height }, { 'x': ms3X, 'y': 0 }];
+    const earlyLine = [{ 'x': earlyX, 'y': height }, { 'x': earlyX, 'y': 0 }];
+    const dueTimeLine = [{ 'x': dueX, 'y': height }, { 'x': dueX, 'y': 0 }];
 
     // Draw due date lines.
-      let ms1G = svg.append('g')
-        .attr('id', 'group-ms-1');
-      ms1G.append('path')
-        .attr('class', 'date-line milestone')
-        .attr('d', line(ms1Line))
-        .attr('stroke-dasharray', '10,10');
-      ms1G.append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', ms1X + 6)
-        .attr('dy', '.71em')
-        .attr('class', 'axis-text')
-        .style('text-anchor', 'end')
-        .text('M1')
-        .attr('fill', 'black');
+    const ms1G = svg.append('g')
+      .attr('id', 'group-ms-1');
+    ms1G.append('path')
+      .attr('class', 'date-line milestone')
+      .attr('d', line(ms1Line))
+      .attr('stroke-dasharray', '10,10');
+    ms1G.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', ms1X + 6)
+      .attr('dy', '.71em')
+      .attr('class', 'axis-text')
+      .style('text-anchor', 'end')
+      .text('M1')
+      .attr('fill', 'black');
 
 
-    let ms2G = svg.append('g')
+    const ms2G = svg.append('g')
       .attr('id', 'group-ms-2');
     ms2G.append('path')
       .attr('class', 'date-line milestone')
@@ -194,7 +194,7 @@ const moment = require('moment');
       .text('M2')
       .attr('fill', 'black');
 
-    let ms3G = svg.append('g')
+    const ms3G = svg.append('g')
       .attr('id', 'group-ms-3');
     ms3G.append('path')
       .attr('class', 'date-line milestone')
@@ -210,7 +210,7 @@ const moment = require('moment');
       .attr('fill', 'black');
 
     if (earlyBonus.isValid()) {
-      let earlyG = svg.append('g')
+      const earlyG = svg.append('g')
         .attr('id', 'group-early')
       earlyG.append('path')
         .attr('class', 'date-line early')
@@ -226,7 +226,7 @@ const moment = require('moment');
         .attr('fill', 'black');
     }
 
-    let dueG = svg.append('g')
+    const dueG = svg.append('g')
       .attr('id', 'group-due');
     dueG.append('path')
       .attr('class', 'date-line due')

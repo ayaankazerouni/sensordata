@@ -1,4 +1,4 @@
-{
+export default {
   "spring2016": {
     "assignment1": {
       "milestone1": 1453849200000,
@@ -56,4 +56,4 @@
       "earlyBonus": 1481065200000
     }
   }
-}
+};
