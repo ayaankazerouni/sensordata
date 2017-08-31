@@ -35,10 +35,13 @@ def userearlyoften(usergroup):
     total_weighted_launches = []
     total_weighted_test_launches = []
     total_weighted_normal_launches = []
+    total_test_assertions = []
+    total_weighted_test_assertions = []
 
     curr_sizes_bytes = {}
     curr_sizes_stmts = {}
     curr_sizes_methods = {}
+    curr_test_assertions = {} # for each file
 
     assignment_field = 'CASSIGNMENTNAME'
     if 'cleaned_assignment' in usergroup.columns:
@@ -82,6 +85,13 @@ def userearlyoften(usergroup):
             stmt_edit_size = abs(prev_stmts - curr_stmts)
             method_edit_size = abs(prev_methods - curr_methods)
 
+            assertion_change_size = 0
+            if row['Current-Test-Assertions'] != '':
+                curr_assertions = int(row['Current-Test-Assertions']) # for the current file
+                prev_assertions = curr_test_assertions.get(class_name, 0)
+                assertion_change_size = abs(prev_assertions - curr_assertions)
+                curr_test_assertions[class_name] = curr_assertions
+
             on_test_case = int(row['onTestCase']) == 1
 
             if byte_edit_size > 0:
@@ -114,6 +124,10 @@ def userearlyoften(usergroup):
                     total_weighted_solution_methods.append(method_edit_size * days_to_deadline)
                     total_solution_methods.append(method_edit_size)
 
+            if assertion_change_size > 0:
+                total_weighted_test_assertions.append(assertion_change_size * days_to_deadline)
+                total_test_assertions.append(assertion_change_size)
+
             curr_sizes_stmts[class_name] = curr_stmts
             curr_sizes_methods[class_name] = curr_methods
             curr_sizes_bytes[class_name] = curr_bytes
@@ -142,6 +156,7 @@ def userearlyoften(usergroup):
         test_byte_early_often_index = np.sum(total_weighted_test_bytes) / np.sum(total_test_bytes)
         test_stmt_early_often_index = np.sum(total_weighted_test_stmts) / np.sum(total_test_stmts)
         test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
+        test_assertion_early_often_index = np.sum(total_weighted_test_assertions) / np.sum(total_test_assertions)
         launch_early_often = np.mean(total_weighted_launches)
         launch_median = np.median(total_weighted_launches)
         launch_sd = np.std(total_weighted_launches)
@@ -188,9 +203,18 @@ def userearlyoften(usergroup):
         stmt_edit_median = np.median(stretched_stmts)
         stmt_edit_sd = np.std(stretched_stmts)
 
+        stretched_assertions = []
+        for weighted, unweighted in zip(total_weighted_test_assertions, total_test_assertions):
+            relative_time = weighted / unweighted
+            for i in range(weighted):
+                stretched_assertions.append(relative_time)
+
+        test_assertion_median = np.median(stretched_assertions)
+        test_assertion_sd = np.std(stretched_assertions)
+
         to_write = {
             'projectId': prev_row['projectId'],
-            'CASSIGNMENTNAME': prev_row['CASSIGNMENTNAME'],
+            'assignment': prev_row['CASSIGNMENTNAME'],
             'email': prev_row['email'],
             'byteEarlyOftenIndex': byte_early_often_index,
             'byteEditMedian': byte_edit_median,
@@ -208,6 +232,9 @@ def userearlyoften(usergroup):
             'testByteEditSd': test_byte_edit_sd,
             'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
             'testMethodsEarlyOftenIndex': test_meth_early_often_index,
+            'assertionsEarlyOftenIndex': test_assertion_early_often_index,
+            'assertionsMedian': test_assertion_median,
+            'assertionSd': test_assertion_sd,
             'launchEarlyOften': launch_early_often,
             'launchMedian': launch_median,
             'launchSd': launch_sd,
@@ -253,7 +280,8 @@ def earlyoften(infile, outfile=None):
         'onTestCase': object,
         'Current-Statements': object,
         'Current-Methods': object,
-        'Current-Size': object
+        'Current-Size': object,
+        'Current-Test-Assertions': object
     }
     df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()))
     df.sort_values(by=['time'], ascending=[1], inplace=True)
@@ -306,6 +334,6 @@ def main(args):
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         print('Calculates edit statistics for students from raw sensordata.')
-        print('Usage:\n\t./early_often.py <input file> <output file> <data file of web-cat submissions>')
+        print('Usage:\n\t./early_often.py <input file> <output file>')
         sys.exit()
     main(sys.argv[1:])

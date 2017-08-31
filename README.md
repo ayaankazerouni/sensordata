@@ -30,6 +30,8 @@ The following fields are **required** for *Edit* events (and can be `None` for o
 ### Description of Files
 Some files have not been described here, because you can perform their functions using any data-processing software. So they are not really useful. The files described below will spit out CSV result files which you can put together for analysis based on your needs.
 
+Running `./[file-name]` without any arguments will display usage information.
+
 * [early_often.py](early_often.py) - Calculates early/often indices for solution code writing, test writing, normal program executions, and test code executions, along with a suite of other measures we use to try to assess incremental development.
 * [incremental_checking.py](incremental_checking.py) - Calculates incremental checking and incremental test checking indices
 * [time_spent.py](time_spent.py) - Calculates the time spent on each project in hours (using work session data)
