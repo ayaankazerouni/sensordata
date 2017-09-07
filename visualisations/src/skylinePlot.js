@@ -1,7 +1,7 @@
-import due_times from '../due_times';
+import dueTimes from '../dueTimes';
 import moment from 'moment';
 
-(($, window, document) => {
+export function makeSkylinePlot(dataFile) {
   const margin = {top: 20, right: 160, bottom: 30, left: 50}; // leaving space for the legend
   const width = 960 - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
@@ -45,24 +45,32 @@ import moment from 'moment';
       .x((d) => d.x)
       .y((d) => d.y);
 
-  const svg = d3.select('div.chart-area').append('svg')
+  const svg = d3.select('.chart-area').append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  const term = 'fall2016';
   const assignment = 'assignment4';
+  const termName = 'Fall 2016';
+  const term = termName.toLowerCase().replace(/\s+/, '');
 
-  const ms1 = moment(+due_times[term][assignment]['milestone1']);
-  const ms2 = moment(+due_times[term][assignment]['milestone2']);
-  const ms3 = moment(+due_times[term][assignment]['milestone3']);
-  const earlyBonus = moment(+due_times[term][assignment]['earlyBonus']);
-  const dueTime = moment(+due_times[term][assignment]['dueTime']);
+  const ms1 = moment(+dueTimes[term][assignment]['milestone1']);
+  const ms2 = moment(+dueTimes[term][assignment]['milestone2']);
+  const ms3 = moment(+dueTimes[term][assignment]['milestone3']);
+  const earlyBonus = moment(+dueTimes[term][assignment]['earlyBonus']);
+  const dueTime = moment(+dueTimes[term][assignment]['dueTime']);
 
-  const dataFile = 'ws-14475-p4.csv'
   d3.csv(dataFile, (error, data) => {
     if (error) throw error;
+
+    // Print some info about the visualisation
+    const first = data[0];
+    const userId = first.userId;
+    const assignmentName = first.CASSIGNMENTNAME;
+
+    const infoElement = document.getElementsByClassName('info')[0];
+    infoElement.innerHTML = `Skyline Plot for user ${userId}'s work on ${assignmentName} in ${termName}.`;
 
     // Prepare the data for visualisations. Basically we're making them dates or numbers,
     // depending on how we want to use them.
@@ -98,6 +106,7 @@ import moment from 'moment';
       render() {
         svg.append('path')
           .datum(data)
+          .attr('stroke-dasharray', '10,10')
           .attr('data-legend', 'Solution Code')
           .attr('class', 'edits solution-code')
           .attr('d', editsArea);
@@ -118,10 +127,6 @@ import moment from 'moment';
     // const areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
     testCode.render()
     solutionCode.render()
-
-    // for (let i = 0; i < areas.length; i++) {
-    //   areas[i].render();
-    // }
 
     // Draw axes.
     svg.append('g')
@@ -241,5 +246,4 @@ import moment from 'moment';
       .text('F')
       .attr('fill', 'black');
   });
-
-})(window.jQuery, window, document);
+};

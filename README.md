@@ -41,4 +41,4 @@ Running `./[file-name]` without any arguments will display usage information.
 [sensordata-utils.R](sensordata-utils.R) and [sensordata-figures.R](sensordata-figures.R) contain analysis and visualisation processes rather specific to our use cases, and without much re-use value that I can see. So I haven't described them here.
 You may explore the source if you like.
 
-The [visualisations](visualisations) directory contains tentative D3 visualisations of student programming habits over time. These will probably go away soon.
+The [visualisations](visualisations) directory contains tentative D3 visualisations of student programming habits over time.

@@ -1,22 +1,26 @@
 {
-  "name": "visualisations",
+  "name": "sensordata-visualisation",
+  "description": "Visualisations of student development data as using d3.js.",
   "version": "1.0.0",
   "description": "",
-  "main": "area_chart.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ayaankazerouni/sensordata"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --inline --hot"
   },
   "author": "Ayaan Kazerouni",
   "license": "ISC",
   "dependencies": {
-    "babel-core": "^6.23.1",
-    "babel-loader": "^6.3.2",
-    "babel-preset-es2015": "^6.22.0",
     "json-loader": "^0.5.4",
     "moment": "^2.18.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.1"
   }
