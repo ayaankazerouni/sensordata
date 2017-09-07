@@ -1,49 +1,40 @@
 import dueTimes from '../dueTimes';
 import moment from 'moment';
+import * as d3 from 'd3';
+import { legendColor } from 'd3-svg-legend';
 
 export function makeSkylinePlot(dataFile) {
   const margin = {top: 20, right: 160, bottom: 30, left: 50}; // leaving space for the legend
   const width = 960 - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
 
-  const tickFormat = d3.time.format('%b %d');
+  const tickFormat = d3.timeFormat('%b %d');
   const legendOffset = 300;
 
-  const x = d3.time.scale()
+  const x = d3.scaleTime()
       .range([0, width - 150]);
 
-  const y = d3.scale.linear()
+  const y = d3.scaleLinear()
       .range([height, 0]);
 
-  const xAxis = d3.svg.axis()
-      .scale(x)
-      .ticks(d3.time.day, 5)
-      .tickFormat(tickFormat)
-      .orient('bottom');
-
-  const yAxis = d3.svg.axis()
-      .scale(y)
-      .ticks(6)
-      .orient('left');
-
-  const editsArea = d3.svg.area()
-    .interpolate('step')
+  const editsArea = d3.area()
+    .curve(d3.curveStep)
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.edits));
 
-  const testEditsArea = d3.svg.area()
-    .interpolate('step')
+  const testEditsArea = d3.area()
+    .curve(d3.curveStep)
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.testEdits));
 
   // Line function for due date lines.
-  const line = d3.svg.line()
-      .x((d) => d.x)
-      .y((d) => d.y);
+  const line = d3.line()
+    .x((d) => d.x)
+    .y((d) => d.y);
 
   const svg = d3.select('.chart-area').append('svg')
       .attr('width', width + margin.left + margin.right)
@@ -104,7 +95,7 @@ export function makeSkylinePlot(dataFile) {
     const solutionCode = {
       max: editsMax,
       render() {
-        svg.append('path')
+        return svg.append('path')
           .datum(data)
           .attr('stroke-dasharray', '10,10')
           .attr('data-legend', 'Solution Code')
@@ -116,7 +107,7 @@ export function makeSkylinePlot(dataFile) {
     const testCode = {
       max: testEditsMax,
       render() {
-        svg.append('path')
+        return svg.append('path')
           .datum(data)
           .attr('data-legend', 'Test Code')
           .attr('class', 'edits test-code')
@@ -125,18 +116,18 @@ export function makeSkylinePlot(dataFile) {
     };
 
     // const areas = [ solutionCode, testCode ].sort((a, b) => b.max - a.max);
-    testCode.render()
-    solutionCode.render()
+    const testPath = testCode.render()
+    const solutionPath = solutionCode.render()
 
     // Draw axes.
     svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + height + ')')
-      .call(xAxis);
+      .call(d3.axisBottom(x));
 
     svg.append('g')
         .attr('class', 'y axis')
-        .call(yAxis)
+        .call(d3.axisLeft(y))
       .append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', 6)
@@ -146,11 +137,20 @@ export function makeSkylinePlot(dataFile) {
         .text('Statements changed');
 
     // Draw legend
+    const ordinal = d3.scaleOrdinal()
+      .domain(['Solution Edits', 'Test Edits'])
+      .range(['maroon', 'orange'])
+
+    const legendOrdinal = legendColor()
+        .shape('circle')
+        .shapeRadius(5)
+        .scale(ordinal);
+
     svg.append('g')
       .attr('class', 'legend')
       .attr('transform','translate(' + (width - legendOffset) + ',' + height / 7 + ')')
       .style('font-size', '12px')
-      .call(d3.legend);
+      .call(legendOrdinal);
 
     // Get x-positions scaled by the time scale.
     const dueX = x(dueTime);

@@ -61,13 +61,3 @@ body {
 .due {
   stroke: black;
 }
-
-.legend {
-  fill: white;
-  stroke: black;
-  opacity: 0.8;
-}
-
-.legend-item:hover {
-  cursor: pointer;
-}
