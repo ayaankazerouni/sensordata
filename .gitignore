@@ -22,3 +22,6 @@ sandbox.py
 # no npm extras
 */node_modules/
 npm-debug.log
+
+# no webpack-generated stuff
+build/

@@ -1,9 +1,9 @@
 const webpack = require('webpack');
 
 const config = {
-  entry: "./area_chart.js",
+  entry: "./src/main.js",
   output: {
-    filename: "bundle.js"
+    filename: "build/bundle.js"
   },
   module: {
     rules: [
@@ -16,7 +16,7 @@ const config = {
         test: /\.js$/,
         exclude: /node_modules/,
         loader: 'babel-loader'
-      }
+      },
     ]
   },
   resolve: {
