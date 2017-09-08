@@ -9,3 +9,11 @@ ul {
   border-top: 2px solid darkblue;
   padding: 10px;
 }
+
+.chart-area {
+  border-top: 2px solid darkblue;
+}
+
+.info {
+  font-size: medium;
+}
