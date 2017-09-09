@@ -1,7 +1,7 @@
 import pandas as pd
 import datetime
 
-def consolidate_student_data(webcat_path, raw_inc_path, time_path, ref_test_gains_path, ws_path):
+def consolidate_student_data(webcat_path=None, raw_inc_path=None, time_path=None, ref_test_gains_path=None, ws_path=None):
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
 
@@ -28,6 +28,18 @@ def consolidate_student_data(webcat_path, raw_inc_path, time_path, ref_test_gain
         .merge(right=time_data, left_index=True, right_index=True) \
         .merge(right=launch_totals, left_index=True, right_index=True)
 
+    hours_from_deadline = (merged['dueDateRaw'] - merged['submissionTimeRaw'])
+    merged['finished.hours.from.deadline'] = hours_from_deadline.apply(lambda diff: diff.total_seconds() / 3600)
+    merged['on.time.submission'] = merged['finished.hours.from.deadline'].apply(lambda h: 1 if h >= 0 else 0)
+
+    days_from_deadline = (merged['dueDateRaw'] - merged['projectStartTime'])
+    merged['started.days.from.deadline'] = days_from_deadline.apply(lambda diff: diff.days)
+
+    # drop identifying column
+    merged = merged.reset_index().set_index(['userId', 'assignment']).drop('userName', axis=1)
+
+    return merged
+
 def load_webcat_submission_data(webcat_path):
     cols_of_interest = [
         'userName',
@@ -40,7 +52,11 @@ def load_webcat_submission_data(webcat_path):
         'submissionTimeRaw',
         'dueDateRaw'
     ]
-    data = pd.read_csv(webcat_path, usecols=cols_of_interest)
+    date_parser = lambda d: datetime.datetime.fromtimestamp(int(float(d)) / 1000)
+    data = pd.read_csv(webcat_path, \
+        usecols=cols_of_interest, \
+        parse_dates=['dueDateRaw', 'submissionTimeRaw'], \
+        date_parser=date_parser)
     data.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0], inplace=True)
 
     # get the last submission from each user on each project
@@ -108,7 +124,8 @@ def load_time_spent_data(time_path):
         'hoursOnProject',
         'projectStartTime'
     ]
-    data = pd.read_csv(time_path, usecols=cols_of_interest)
+    date_parser = lambda d: datetime.datetime.fromtimestamp(int(float(d)) / 1000)
+    data = pd.read_csv(time_path, usecols=cols_of_interest, parse_dates=['projectStartTime'], date_parser=date_parser)
     data.rename(index=str, columns={'email': 'userName'}, inplace=True)
     data['userName'].fillna('', inplace=True)
     data['userName'] = data['userName'].apply(lambda x: x if x == '' else x[:x.index('@')])
@@ -133,3 +150,5 @@ def load_launch_totals(ws_path):
     data = data.reset_index().set_index(['userName', 'assignment'])
 
     return data
+
+merged = consolidate_student_data()
