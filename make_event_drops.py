@@ -2,9 +2,10 @@
 
 # In[]: import lib and data
 import pandas as pd
-from datetime import datetime
+import numpy as np
 
 infile = '~/Desktop/p1-10116.csv'
+outfile = 'visualisations/results/p1-10116-eventDrops.json'
 dtypes = {
     'userId': str,
     'projectId': str,
@@ -28,4 +29,11 @@ df.loc[(df.Type == 'Edit') & (df.onTestCase == '1'), 'Subtype'] = 'Test'
 df.loc[(df.Type == 'Edit') & (df.onTestCase == '0'), 'Subtype'] = 'Normal'
 
 # In[]: df is only Edits and Launches
-type_groups = df.groupby(['Type', 'Subtype'], as_index=False)
+type_groups = df.groupby(['Type', 'Subtype'])
+type_groups = type_groups.aggregate({ 'time': lambda t: tuple(t) }).reset_index()
+type_groups['Type'] += type_groups['Subtype']
+type_groups.rename(columns={ 'Type': 'name', 'time': 'data' }, inplace=True) # event-drops expects this
+type_groups = type_groups.drop('Subtype', axis=1)
+
+# In[]: write out json
+type_groups.to_json(path_or_buf=outfile, orient='records')
