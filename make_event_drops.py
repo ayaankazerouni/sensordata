@@ -35,5 +35,6 @@ type_groups['Type'] += type_groups['Subtype']
 type_groups.rename(columns={ 'Type': 'name', 'time': 'data' }, inplace=True) # event-drops expects this
 type_groups = type_groups.drop('Subtype', axis=1)
 
+
 # In[]: write out json
 type_groups.to_json(path_or_buf=outfile, orient='records')
