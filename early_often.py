@@ -141,12 +141,6 @@ def userearlyoften(usergroup):
 
         prev_row = row
 
-    global finished
-    finished = finished + 1
-    percent = round((finished / ngroups) * 100)
-    if percent in range(20, 30) or percent in range(50, 60)  or percent in range(70, 100):
-        print("%d%% done" % percent)
-
     if (len(total_edits_bytes) > 0):
         byte_early_often_index = np.sum(total_weighted_edits_bytes) / np.sum(total_edits_bytes)
         stmt_early_often_index = np.sum(total_weighted_edits_stmts) / np.sum(total_edits_stmts)
@@ -296,10 +290,6 @@ def earlyoften(infile, outfile=None):
     with open('due_times.json') as data_file:
         data = json.load(data_file)
 
-    global finished
-    finished = 0
-    global ngroups
-    ngroups = len(userdata)
     results = userdata.apply(userearlyoften)
 
     # Write out
