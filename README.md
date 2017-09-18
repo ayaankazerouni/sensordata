@@ -27,8 +27,18 @@ The following fields are **required** for *Edit* events (and can be `None` for o
 * **Current-Test-Assertions** - The number of test assertions in the originating file
 * **onTestCase** - [ 0, 1 ] Whether or not the event originates from a test file
 
-### Description of Files
-Some files have not been described here, because you can perform their functions using any data-processing software. So they are not really useful. The files described below will spit out CSV result files which you can put together for analysis based on your needs.
+### Description
+#### Dependencies
+All of the following depends on:
+* [Python >= 3.5](https://docs.python.org/3.5/)
+* [Numpy](http://www.numpy.org/)
+* [Pandas](http://pandas.pydata.org/)
+* [Node.js under LTS](https://github.com/nodejs/LTS)
+
+#### Processes
+Some files have not been described here. These files either do pretty basic stuff that can be done better in any data processing software, or are no longer dealing with current forms of the data.
+They will be deleted soon.
+The files described below will spit out results in CSV format.
 
 Running `./[file-name]` without any arguments will display usage information.
 
@@ -39,7 +49,10 @@ Running `./[file-name]` without any arguments will display usage information.
 * [subsessions.py](subsessions.py) - Reduces raw sensordata into subsessions. Subsessions are separated by program Launches
 * [work_sessions.py](work_sessions.py) - Reduces subsession data into work sessions. Work sessions are separated by gaps of >= `THRESHOLD` hours without activity
 
-[sensordata_utils.py](sensordata-utils.py) consolidates the results of all the above processes into a [Pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html) where each `student assignment` is a single row of scores and metrics, that you can use for analysis in some kind of [Jupyter](https://try.jupyter.org/) environment.
+[sensordata_utils.py](sensordata_utils.py) consolidates the results of all the above processes into a [Pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html) where each `student assignment` is a single row of scores and metrics. You can play with this data however you want in some kind [Jupyter](https://try.jupyter.org/) environment or export to CSV for more control.
+
+[generate_project_report.py](generate_project_report.py) does **all the above processes** automatically, ending with the DataFrame of consolidated data.
+Run `./generate_project_report.py --help` for usage info.
 
 [sensordata-figures.R](sensordata-figures.R) does some pretty basic plotting rather specific to our use cases, and without much re-use value that I can see. So I haven't described it here.
 You may explore the source if you like.

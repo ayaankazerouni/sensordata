@@ -5,9 +5,7 @@ import sys
 import traceback
 import datetime
 
-THRESHOLD = 3
-
-def get_subsessions(infile, outfile, cleaned=None):
+def get_subsessions(infile, outfile, threshold=3, cleaned=None):
     """
     Clusters data into work sessions and subsessions.
 
@@ -95,7 +93,7 @@ def get_subsessions(infile, outfile, cleaned=None):
             prev_time = datetime.datetime.fromtimestamp(to_int(prev_row['time']) / 1000)
             curr_time = datetime.datetime.fromtimestamp(to_int(row['time']) / 1000)
             hours = (curr_time - prev_time).total_seconds() / 3600
-            if (hours < THRESHOLD):
+            if (hours < threshold):
                 # Within the same work session, we add up numbers for edit sizes
                 # and keep track of file sizes.
                 if (repr(row['Type']) == repr('Edit')):

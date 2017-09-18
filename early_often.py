@@ -244,7 +244,7 @@ def userearlyoften(usergroup):
     else:
         return None
 
-def earlyoften(infile, outfile=None):
+def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-students-with-sensordata.csv', duetimepath='./due_times.json'):
     # Import due date data
     dtypes = {
         'userName': str,
@@ -253,8 +253,7 @@ def earlyoften(infile, outfile=None):
         'submissionTimeRaw': float
     }
     global submissions
-    submissions = pd.read_csv('data/fall-2016/web-cat-students-with-sensordata.csv',
-        dtype=dtypes, usecols=list(dtypes.keys()))
+    submissions = pd.read_csv(submissionspath, dtype=dtypes, usecols=list(dtypes.keys()))
     submissions.sort_values(by=['userName', 'assignment', 'submissionNo'], ascending=[1,1,0], inplace=True)
     submissions = submissions.groupby(['userName', 'assignment']).first()
     print('0. Finished reading submission data.')
@@ -284,10 +283,10 @@ def earlyoften(infile, outfile=None):
 
     # Group data by unique values of userIds and assignment
     userdata = df.groupby(['userId'])
-    print('2. Finished grouping data. Calculating measures now.')
+    print('2. Finished grouping data. Calculating measures now. This could take some time...')
 
     global data
-    with open('due_times.json') as data_file:
+    with open(duetimepath) as data_file:
         data = json.load(data_file)
 
     results = userdata.apply(userearlyoften)
