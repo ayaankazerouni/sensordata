@@ -7,11 +7,11 @@ import pandas as pd
 
 # import sensordata pipeline methods
 from subsessions import get_subsessions
-from work_sessions import get_work_sessions
+from work_sessions_from_subsessions import get_work_sessions
 from time_spent import get_time_spent
 from reference_test_gains import reference_test_gains
 from early_often import earlyoften
-from sensordata_utils import consolidate_student_data
+from consolidate_sensordata import consolidate_student_data
 
 # method to do stuff
 def aggregate(args):
