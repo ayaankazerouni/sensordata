@@ -1,3 +1,6 @@
+#! /usr/bin/env python3
+
+import argparse
 import pandas as pd
 from datetime import datetime
 
@@ -82,6 +85,7 @@ def userworksessions(usergroup, threshold=3):
 
 
 def worksessions(infile, outfile=None):
+    print('Getting worksessions...')
     dtypes = {
         'userId': str,
         'projectId': str,
@@ -98,12 +102,31 @@ def worksessions(infile, outfile=None):
         'Current-Methods': object,
         'Current-Size': object
     }
+    print('\tReading raw sensordata')
     df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()))
     df.sort_values(by=['time'], ascending=[1], inplace=True)
     df.fillna('', inplace=True)
 
+    print('\tGrouping student projects')
     userdata = df.groupby(['userId'])
+    print('\tCalculating worksessions. This could take some time...')
     results = userdata.apply(userworksessions, threshold=3)
-    return results
 
-results = worksessions('~/Desktop/p1-sample.csv')
+    if outfile is None:
+        return results
+    else:
+        results.to_csv(outfile)
+        return None
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('infile',
+        help='path to raw sensordata for multiple students working on a single assignment')
+    parser.add_argument('--outfile', '-o',
+        help='path to desired output file for work_session data',
+        default=None)
+    args = parser.parse_args()
+
+    infile = args.infile
+    outfile = args.outfile
+    results = worksessions(infile, outfile) # may be None

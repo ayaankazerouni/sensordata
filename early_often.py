@@ -61,7 +61,7 @@ def userearlyoften(usergroup):
     lastsubmissiontime = submissions.loc[user_id,'Project %d' % assignment_number]['submissionTimeRaw']
 
     for index, row in usergroup.iterrows():
-        prev_row = prev_row if prev_row is None else row
+        prev_row = row if prev_row is None else prev_row
 
         time = int(float(row['time']))
         date = datetime.date.fromtimestamp(time / 1000)
