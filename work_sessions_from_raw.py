@@ -1,26 +1,40 @@
 #! /usr/bin/env python3
 
+"""
+Gets work session data from raw sensordata.
+Work sessions are separeted by a specified number of
+hours of inactivity (3 by default).
+"""
+
+from datetime import datetime
 import argparse
 import pandas as pd
-from datetime import datetime
 
 def userworksessions(usergroup, threshold=3):
+    """
+    Acts on each submitted project's data.
+    Returns a dataframe of work sessions, where each
+    work session is separated by threshold hours of inactivity.
+
+    Keyword arguments:
+    usergroup   pd.DataFrame containing all sensordata from the given project
+    threshold   the number of hours of inactivity that should separate a work session.
+                default 3.
+    """
     prev_row = None
-    ws = None
     test_launches = 0
     normal_launches = 0
-    start_time = None
     edit_size_stmts = 0
     test_edit_size_stmts = 0
     curr_sizes_stmts = {}
     normal_launches = 0
     test_launches = 0
     ws_start_time = None
-    ws = 0
+    ws_id = 0
 
     userresult = None
 
-    for index, row in usergroup.iterrows():
+    for row in usergroup.iterrows():
         prev_row = row if prev_row is None else prev_row
 
         prev_time = int(float(prev_row['time']))
@@ -38,7 +52,7 @@ def userworksessions(usergroup, threshold=3):
                 'email': row['email'],
                 'projectId': row['projectId'],
                 'CASSIGNMENTNAME': row['CASSIGNMENTNAME'],
-                'workSessionId': ws,
+                'workSessionId': ws_id,
                 'start_time': ws_start_time,
                 'end_time': prev_time,
                 'normalLaunches': normal_launches,
@@ -59,7 +73,7 @@ def userworksessions(usergroup, threshold=3):
             test_edit_size_stmts = 0
             normal_launches = 0
             test_launches = 0
-            ws += 1
+            ws_id += 1
 
         if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
             class_name = repr(row['Class-Name'])
@@ -85,6 +99,7 @@ def userworksessions(usergroup, threshold=3):
 
 
 def worksessions(infile, outfile=None):
+    """Group projects and get work sessions for each."""
     print('Getting worksessions...')
     dtypes = {
         'userId': str,

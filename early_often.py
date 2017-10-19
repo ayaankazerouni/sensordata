@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
 
 import sys
-import csv
 import datetime
 import re
 import json
 import pandas as pd
 import numpy as np
 
-def userearlyoften(usergroup):
+def userearlyoften(usergroup, due_date_data):
     """
     This function acts on data for one student's sensordata.
 
@@ -54,11 +53,11 @@ def userearlyoften(usergroup):
     assignment_number = int(re.search(r'\d', first_assignment).group())
     user_id = first['email'].split('@')[0]
 
-    due_time = data[term]['assignment%d' % (assignment_number)]['dueTime']
+    due_time = due_date_data[term]['assignment%d' % (assignment_number)]['dueTime']
     due_time = int(due_time)
     due_date = datetime.date.fromtimestamp(due_time / 1000)
 
-    lastsubmissiontime = submissions.loc[user_id,'Project %d' % assignment_number]['submissionTimeRaw']
+    lastsubmissiontime = submissions.loc[user_id, 'Project %d' % assignment_number]['submissionTimeRaw']
 
     for index, row in usergroup.iterrows():
         prev_row = row if prev_row is None else prev_row
@@ -71,7 +70,7 @@ def userearlyoften(usergroup):
             prev_row = row
             continue
 
-        if (repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0):
+        if repr(row['Type']) == repr('Edit') and len(row['Class-Name']) > 0:
             class_name = repr(row['Class-Name'])
             curr_bytes = int(row['Current-Size'])
             curr_stmts = int(row['Current-Statements'])
@@ -141,7 +140,7 @@ def userearlyoften(usergroup):
 
         prev_row = row
 
-    if (len(total_edits_bytes) > 0):
+    if len(total_edits_bytes) > 0:
         byte_early_often_index = np.sum(total_weighted_edits_bytes) / np.sum(total_edits_bytes)
         stmt_early_often_index = np.sum(total_weighted_edits_stmts) / np.sum(total_edits_stmts)
         solution_byte_early_often_index = np.sum(total_weighted_solution_bytes) / np.sum(total_solution_bytes)
@@ -150,7 +149,7 @@ def userearlyoften(usergroup):
         test_byte_early_often_index = np.sum(total_weighted_test_bytes) / np.sum(total_test_bytes)
         test_stmt_early_often_index = np.sum(total_weighted_test_stmts) / np.sum(total_test_stmts)
         test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
-        test_assertion_early_often_index = np.sum(total_weighted_test_assertions) / np.sum(total_test_assertions)
+        test_assrt_early_often_index = np.sum(total_weighted_test_assertions) / np.sum(total_test_assertions)
         launch_early_often = np.mean(total_weighted_launches)
         launch_median = np.median(total_weighted_launches)
         launch_sd = np.std(total_weighted_launches)
@@ -226,7 +225,7 @@ def userearlyoften(usergroup):
             'testByteEditSd': test_byte_edit_sd,
             'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
             'testMethodsEarlyOftenIndex': test_meth_early_often_index,
-            'assertionsEarlyOftenIndex': test_assertion_early_often_index,
+            'assertionsEarlyOftenIndex': test_assrt_early_often_index,
             'assertionsMedian': test_assertion_median,
             'assertionSd': test_assertion_sd,
             'launchEarlyOften': launch_early_often,
@@ -285,11 +284,11 @@ def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-stu
     userdata = df.groupby(['userId'])
     print('2. Finished grouping data. Calculating measures now. This could take some time...')
 
-    global data
+    due_date_data = None
     with open(duetimepath) as data_file:
-        data = json.load(data_file)
+        due_date_data = json.load(data_file)
 
-    results = userdata.apply(userearlyoften)
+    results = userdata.apply(userearlyoften, due_date_data=due_date_data)
 
     # Write out
     if outfile:
@@ -312,12 +311,13 @@ def get_term(timestamp):
         return None
 
 def main(args):
+    """Parses CLI arguments and begins execution."""
     infile = args[0]
     outfile = args[1]
 
     try:
         earlyoften(infile, outfile)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print("Error! File '%s' does not exist." % infile)
 
 if __name__ == '__main__':

@@ -1,7 +1,20 @@
-import pandas as pd
-import datetime
+"""Import and consolidate incremental development metrics from several sources."""
 
-def consolidate_student_data(webcat_path=None, raw_inc_path=None, time_path=None, ref_test_gains_path=None, ws_path=None):
+import datetime
+import pandas as pd
+
+def consolidate_student_data(webcat_path=None, raw_inc_path=None,
+                             time_path=None, ref_test_gains_path=None, ws_path=None):
+    """
+    Import, format, and consolidate incremental development metrics from several sources.
+
+    Keyword arguments:
+    webcat_path         = path to webcat submission data
+    raw_inc_path        = path to raw incremental development scores
+    time_path           = path to time spent data
+    ref_test_gains_path = path to ref_test_gains metrics
+    ws_path             = path to work session data (for launch totals)
+    """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
 
@@ -17,11 +30,11 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None, time_path=None
     if ws_path is None:
         ws_path = 'data/fall-2016/work_sessions.csv'
 
-    webcat_data = load_webcat_submission_data(webcat_path) # get webcat submission data
-    ref_test_gains = load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
-    raw_inc_data = load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
-    time_data = load_time_spent_data(time_path) # get time spent on projects
-    launch_totals = load_launch_totals(ws_path) # get launch totals from work session data
+    webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
+    ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
+    raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
+    time_data = __load_time_spent_data(time_path) # get time spent on projects
+    launch_totals = __load_launch_totals(ws_path) # get launch totals from work session data
 
     merged = webcat_data.merge(right=ref_test_gains, left_index=True, right_index=True) \
         .merge(right=raw_inc_data, left_index=True, right_index=True) \
@@ -40,7 +53,7 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None, time_path=None
 
     return merged
 
-def load_webcat_submission_data(webcat_path):
+def __load_webcat_submission_data(webcat_path):
     cols_of_interest = [
         'userName',
         'assignment',
@@ -70,7 +83,7 @@ def load_webcat_submission_data(webcat_path):
     data.set_index(['userName', 'assignment'], inplace=True)
     return data
 
-def load_ref_test_data(ref_test_gains_path):
+def __load_ref_test_data(ref_test_gains_path):
     cols_of_interest = [
         'assignment',
         'userName',
@@ -87,7 +100,7 @@ def load_ref_test_data(ref_test_gains_path):
 
     return data
 
-def load_raw_inc_data(raw_inc_path):
+def __load_raw_inc_data(raw_inc_path):
     data = pd.read_csv(raw_inc_path)
 
     # each derived metric is calculated once using changes in raw file size, and once using change in statements
@@ -96,7 +109,8 @@ def load_raw_inc_data(raw_inc_path):
     data['byteNormalChecking'] = data['solutionByteEarlyOftenIndex'] - data['normalLaunchEarlyOften']
     data['byteChecking'] = data['solutionByteEarlyOftenIndex'] - data['launchEarlyOften']
     data['byteSkew'] = 3 * (data['byteEarlyOftenIndex'] - data['byteEditMedian']) / data['byteEditSd']
-    data['solutionByteSkew'] = 3 * (data['solutionByteEarlyOftenIndex'] - data['solutionByteEditMedian']) / data['solutionByteEditSd']
+    data['solutionByteSkew'] = 3 * (data['solutionByteEarlyOftenIndex'] - data['solutionByteEditMedian']) / \
+        data['solutionByteEditSd']
     data['testByteSkew'] = 3 *(data['testByteEarlyOftenIndex'] - data['testByteEditMedian']) / data['testByteEditSd']
 
     data['stmtTestWriting'] = data['solutionStmtEarlyOftenIndex'] - data['testStmtsEarlyOftenIndex']
@@ -117,7 +131,7 @@ def load_raw_inc_data(raw_inc_path):
 
     return data
 
-def load_time_spent_data(time_path):
+def __load_time_spent_data(time_path):
     cols_of_interest = [
         'email',
         'assignment',
@@ -129,12 +143,12 @@ def load_time_spent_data(time_path):
     data.rename(index=str, columns={'email': 'userName'}, inplace=True)
     data['userName'].fillna('', inplace=True)
     data['userName'] = data['userName'].apply(lambda x: x if x == '' else x[:x.index('@')])
-    data.sort_values(by=['assignment', 'userName'], ascending=[1,1], inplace=True)
+    data.sort_values(by=['assignment', 'userName'], ascending=[1, 1], inplace=True)
     data.set_index(['userName', 'assignment'], inplace=True)
 
     return data
 
-def load_launch_totals(ws_path):
+def __load_launch_totals(ws_path):
     cols_of_interest = [
         'email',
         'CASSIGNMENTNAME',
@@ -151,4 +165,4 @@ def load_launch_totals(ws_path):
 
     return data
 
-merged = consolidate_student_data()
+MERGED = consolidate_student_data()
