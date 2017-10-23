@@ -1,3 +1,11 @@
+"""
+Calculates incremental development metrics in the form
+of Early/Often indices. Simply put, an early often index
+is the mean amount of code written on a given day leading
+up to the project due date. We calculate similar metrics
+for [solution/test] code writing and [solution/test] launches.
+"""
+
 #! /usr/bin/env python3
 
 import sys

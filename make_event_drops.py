@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 
-infile = '~/Desktop/p1-10116.csv'
+infile = '~/Desktop/p1-10116.csv' # sample file for testing
 outfile = 'visualisations/results/p1-10116-eventDrops.json'
 dtypes = {
     'userId': str,

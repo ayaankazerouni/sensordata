@@ -1,3 +1,11 @@
+"""
+Calculates incremental checking metrics: mean
+amounts of [solution/test] code written between successive
+[solution/test] launches.
+
+(These measures didn't return anything interesting)
+"""
+
 #! /usr/bin/env python3
 
 import csv
