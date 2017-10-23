@@ -30,7 +30,7 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     if ws_path is None:
         ws_path = 'data/fall-2016/work_sessions.csv'
 
-    webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
+    webcat_data = load_webcat_submission_data(webcat_path) # get webcat submission data
     ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
     raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
     time_data = __load_time_spent_data(time_path) # get time spent on projects
@@ -53,7 +53,12 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
 
     return merged
 
-def __load_webcat_submission_data(webcat_path):
+def load_webcat_submission_data(webcat_path):
+    """
+    Loads webcat submission data from webcat_path. Only returns the student's final submission
+    on each projects. Submission data is modified so that score.correctness
+    only represents scores on instructor-written reference tests.
+    """
     cols_of_interest = [
         'userName',
         'assignment',
