@@ -55,7 +55,7 @@ Running `./[file-name]` without any arguments will display usage information.
 * [subsessions.py](subsessions.py) - Reduces raw sensordata into subsessions. Subsessions are separated by program Launches
 * [work_sessions.py](work_sessions.py) - Reduces subsession data into work sessions. Work sessions are separated by gaps of >= `THRESHOLD` hours without activity
 
-[sensordata_utils.py](sensordata_utils.py) consolidates the results of all the above processes into a [Pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html) where each `student assignment` is a single row of scores and metrics. You can play with this data however you want in some kind [Jupyter](https://try.jupyter.org/) environment or export to CSV for more control.
+[consolidate_sensordata.py](consolidate_sensordata.py) consolidates the results of all the above processes into a [Pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html) where each `student assignment` is a single row of scores and metrics. You can play with this data however you want in some kind [Jupyter](https://try.jupyter.org/) environment or export to CSV for more control.
 
 [generate_project_report.py](generate_project_report.py) does **all the above processes** automatically, ending with the DataFrame of consolidated data.
 Run `./generate_project_report.py --help` for usage info.
