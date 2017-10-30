@@ -33,7 +33,7 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     webcat_data = load_webcat_submission_data(webcat_path) # get webcat submission data
     ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
     raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
-    time_data = __load_time_spent_data(time_path) # get time spent on projects
+    time_data = load_time_spent_data(time_path) # get time spent on projects
     launch_totals = __load_launch_totals(ws_path) # get launch totals from work session data
 
     merged = webcat_data.merge(right=ref_test_gains, left_index=True, right_index=True) \
@@ -136,7 +136,7 @@ def __load_raw_inc_data(raw_inc_path):
 
     return data
 
-def __load_time_spent_data(time_path):
+def load_time_spent_data(time_path):
     cols_of_interest = [
         'email',
         'assignment',
