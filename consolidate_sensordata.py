@@ -17,6 +17,7 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     time_path           = path to time spent data
     ref_test_gains_path = path to ref_test_gains metrics
     ws_path             = path to work session data (for launch totals)
+    repo_mining_path    = path to repo-mining results from repodriller
     """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
@@ -34,7 +35,7 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
         ws_path = 'data/fall-2016/work_sessions.csv'
 
     if repo_mining_path is None:
-        repo_mining_path = 'data/fall-2016/repo-mining.csv'
+        repo_mining_path = 'data/repo-mining.csv'
 
     webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
     ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it

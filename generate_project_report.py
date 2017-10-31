@@ -15,9 +15,10 @@ from consolidate_sensordata import consolidate_student_data
 
 # method to do stuff
 def aggregate(args):
-    path_subsessions = os.path.join(args.output, 'subsessions.csv')
+    # ask for information up front, if needed 
     if args.yes:
         threshold = 3
+        path_repo_mining = 'data/repo-mining.csv'
     else:
         threshold = input('Please enter a threshold in hours for work_sessions (leave blank for default):')
         try:
@@ -25,6 +26,11 @@ def aggregate(args):
         except ValueError:
             print('Invalid input. Using default value of 3 hours.')
             threshold = 3
+        path_repo_mining = input('Please enter a path to CSV output from repository mining (leave blank for default)')
+        if len(path_repo_mining) == 0:
+            path_repo_mining = 'data/repo-mining.csv'
+    
+    path_subsessions = os.path.join(args.output, 'subsessions.csv')
     get_subsessions(args.raw, path_subsessions, threshold=threshold)
     path_worksessions = os.path.join(args.output, 'worksessions.csv')
     get_work_sessions(path_subsessions, path_worksessions)
@@ -38,7 +44,8 @@ def aggregate(args):
         raw_inc_path=args.raw,
         time_path=path_timespent,
         ref_test_gains_path=path_reftestgains,
-        ws_path=path_worksessions)
+        ws_path=path_worksessions,
+        repo_mining_path=path_repo_mining)
     return report
 
 if __name__ == '__main__':

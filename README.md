@@ -74,8 +74,8 @@ Data format (work session data):
 * number of test edits
 * number of solution edits
 
-You would also need some due date data (see [dueTimes.js](visualisations/dueTimes.js) to show milestone markers.
+You would also need some due date data (see [dueTimes.js](visualisations/dueTimes.js)) to show milestone markers.
 
-##### Event Drops (see [marmelab/EventDrops](https://github.com/marmelab/EventDrops)
+##### Event Drops (see [marmelab/EventDrops](https://github.com/marmelab/EventDrops))
 Data format:
-* Use [make_event_drops.py](make_event_drops.py) to transform raw sensordata into the format required by EventDrops. Then you can point the appopriate method call to a data file.
+* Use [make_event_drops.py](make_event_drops.py) to transform raw sensordata into the format required by EventDrops. Then you can point the appropriate method call at a data file.
