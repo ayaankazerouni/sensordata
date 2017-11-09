@@ -5,7 +5,7 @@ body {
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: black;
   shape-rendering: crispEdges;
 }
 
@@ -41,23 +41,10 @@ body {
 }
 
 .date-line {
-  opacity: 0.5;
+  stroke: black;
   stroke-width: 0.5px;
 }
 
 .axis-text {
   font-size: 12px;
-}
-
-.milestone {
-  stroke: black;
-}
-
-.early {
-  stroke: black;
-  text-anchor: end;
-}
-
-.due {
-  stroke: black;
 }

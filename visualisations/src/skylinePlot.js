@@ -7,7 +7,7 @@ export function makeSkylinePlot(dataFile) {
   const width = 960 - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
 
-  const tickFormat = d3.timeFormat('%b %d');
+  const tickFormat = d3.timeFormat('%m/%d');
   const legendOffset = 300;
 
   const x = d3.scaleTime()
@@ -17,14 +17,14 @@ export function makeSkylinePlot(dataFile) {
       .range([height, 0]);
 
   const editsArea = d3.area()
-    .curve(d3.curveStep)
+    .curve(d3.curveStepAfter)
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
     .y1((d) => y(d.edits));
 
   const testEditsArea = d3.area()
-    .curve(d3.curveStep)
+    .curve(d3.curveStepAfter)
     .x0((d) => x(d.start_time))
     .x1((d) => x(d.end_time))
     .y0(height)
@@ -41,8 +41,8 @@ export function makeSkylinePlot(dataFile) {
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  const assignment = 'assignment4';
-  const termName = 'Fall 2016';
+  const assignment = 'assignment2';
+  const termName = 'Spring 2016';
   const term = termName.toLowerCase().replace(/\s+/, '');
 
   const ms1 = moment(+dueTimes[term][assignment]['milestone1']);
@@ -74,7 +74,6 @@ export function makeSkylinePlot(dataFile) {
       }
       d.edits = +d.editSizeStmts;
       d.testEdits = +d.testEditSizeStmts;
-      d.launches = +d.testLaunches + +d.normalLaunches;
     });
 
     data.splice(stopAt); // don't draw work sessions more than 4 days after the deadline
@@ -86,8 +85,7 @@ export function makeSkylinePlot(dataFile) {
 
     const editsMax = d3.max(data, (d) => d.edits);
     const testEditsMax = d3.max(data, (d) => d.testEdits);
-    const launchMax = d3.max(data, (d) => d.launches);
-    y.domain([0, Math.max(editsMax, testEditsMax, launchMax)]);
+    y.domain([0, Math.max(editsMax, testEditsMax)]);
 
     // Draw areas for solution code, test code, and launches. Draw them in order
     // decreasing maximums, so the smallest area ends up in front, and visible.
@@ -96,7 +94,7 @@ export function makeSkylinePlot(dataFile) {
       render() {
         return svg.append('path')
           .datum(data)
-          .attr('stroke-dasharray', '10,10')
+          .attr('stroke-dasharray', '2,2')
           .attr('data-legend', 'Solution Code')
           .attr('class', 'edits solution-code')
           .attr('d', editsArea);
@@ -122,7 +120,8 @@ export function makeSkylinePlot(dataFile) {
     svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + height + ')')
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x)
+              .tickFormat(tickFormat));
 
     svg.append('g')
         .attr('class', 'y axis')

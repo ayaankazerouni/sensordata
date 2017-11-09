@@ -1,6 +1,7 @@
 # no system stuff
 *.DS_Store
 *.~lock*
+*.swp
 
 # no auto-generated R stuff
 .R*
@@ -19,6 +20,7 @@ results/
 .ipynb_checkpoints/
 sandbox.py
 __pycache__/
+.spyproject/
 
 # no npm extras
 */node_modules/

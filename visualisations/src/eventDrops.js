@@ -1,4 +1,3 @@
-import eventDrops from 'event-drops';
 import moment from 'moment';
 
 export function makeEventDrops(dataFile) {
