@@ -3,11 +3,11 @@
 import datetime
 import pandas as pd
 
-from method_metrics import get_method_metrics
+from method_metrics import get_method_metrics, get_coevolution_metrics
 
 def consolidate_student_data(webcat_path=None, raw_inc_path=None,
                              time_path=None, ref_test_gains_path=None, ws_path=None,
-                             repo_mining_path=None):
+                             repo_mining_path=None, coevolution_path=None):
     """
     Import, format, and consolidate incremental development metrics from several sources.
 
@@ -17,7 +17,8 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     time_path           = path to time spent data
     ref_test_gains_path = path to ref_test_gains metrics
     ws_path             = path to work session data (for launch totals)
-    repo_mining_path    = path to repo-mining results from repodriller
+    repo_mining_path    = path to method-mining results from repodriller
+    coevolution         = path to coevolution results from repodriller
     """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
@@ -35,7 +36,10 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
         ws_path = 'data/fall-2016/work_sessions.csv'
 
     if repo_mining_path is None:
-        repo_mining_path = 'data/repo-mining.csv'
+        repo_mining_path = 'data/fall-2016/repo-mining.csv'
+
+    if coevolution_path is None:
+        coevolution_path = 'data/fall-2016/coevolution.csv'
 
     webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
     ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
@@ -43,12 +47,14 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     time_data = __load_time_spent_data(time_path) # get time spent on projects
     launch_totals = __load_launch_totals(ws_path) # get launch totals from work session data
     method_metrics = get_method_metrics(repo_mining_path) # get aggregated repo-mining metrics
+    coevolution_metrics = get_coevolution_metrics(coevolution_path) # get aggregated test/prod coevolution metrics
 
     merged = webcat_data.merge(right=ref_test_gains, left_index=True, right_index=True) \
         .merge(right=raw_inc_data, left_index=True, right_index=True) \
         .merge(right=time_data, left_index=True, right_index=True) \
         .merge(right=launch_totals, left_index=True, right_index=True) \
-        .merge(right=method_metrics, left_index=True, right_index=True)
+        .merge(right=method_metrics, left_index=True, right_index=True) \
+        .merge(right=coevolution_metrics, left_index=True, right_index=True)
 
     days_from_deadline = (merged['dueDateRaw'] - merged['projectStartTime'])
     merged['startedDaysFromDeadline'] = days_from_deadline.apply(lambda diff: diff.days)
