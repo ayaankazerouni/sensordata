@@ -47,7 +47,7 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     time_data = __load_time_spent_data(time_path) # get time spent on projects
     launch_totals = __load_launch_totals(ws_path) # get launch totals from work session data
     method_metrics = get_method_metrics(repo_mining_path) # get aggregated repo-mining metrics
-    coevolution_metrics = get_coevolution_metrics(coevolution_path) # get aggregated test/prod coevolution metrics
+    coevolution_metrics = get_coevolution_metrics(coevolution_path) # get aggregated test/prod and test/(prod + test)coevolution metrics
 
     merged = webcat_data.merge(right=ref_test_gains, left_index=True, right_index=True) \
         .merge(right=raw_inc_data, left_index=True, right_index=True) \
@@ -97,7 +97,7 @@ def __load_webcat_submission_data(webcat_path):
     data['elementsCovered'] = data['elementsCovered'].apply(lambda x: x if x <= 1 else 1)
     data['score.reftest'] = data['score.correctness'] / data['elementsCovered']
 
-    #  calculate submission time outcomes
+    # calculate submission time outcomes 
     hours_from_deadline = (data['dueDateRaw'] - data['submissionTimeRaw'])
     data['finishedHoursFromDeadline'] = hours_from_deadline.apply(lambda diff: diff.total_seconds() / 3600)
     data['onTimeSubmission'] = data['finishedHoursFromDeadline'].apply(lambda h: 1 if h >= 0 else 0)
