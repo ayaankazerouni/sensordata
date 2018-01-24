@@ -1,9 +1,8 @@
 # sensordata
 
-A collection of scripts for pre-processing, analysis, and visualisation of SensorData collected by [DevEventTracker](https://github.com/web-cat/eclipse-plugins-importer-exporter/tree/DevEventTrackerAddition).
+A collection of scripts for measuring and visualising aspects of incremental software development, using SensorData collected by [DevEventTracker](https://github.com/web-cat/eclipse-plugins-importer-exporter/tree/DevEventTrackerAddition).
 
 These scripts deal with data in CSV format.
-
 
 If you use this work, please cite the following:
 
