@@ -129,3 +129,13 @@ plot(composite_inc$testLaunchEarlyOften, composite_inc$finished.hours.from.deadl
      ylab='Finishing Time (hours from deadline)', pch=21, bg='cornflowerblue')
 abline(lm(finished.hours.from.deadline ~ testLaunchEarlyOften, data = composite_inc), col='red')
 dev.off()
+
+# functions
+drawTestSolutionBarplot = function(testCode, solutionCode, pos.legend='top') {
+  stopifnot(length(testCode) == length(solutionCode))
+  
+  m = matrix(data=c(testCode, solutionCode), nrow=2, byrow=T)
+  barplot(m, col=c('maroon', 'orange'), beside=T, space=c(0,1), xlab='Work Session #', ylab='Lines changed',
+          legend.text=c('Test Code', 'Solution Code'), args.legend=list(x=pos.legend, cex=0.7),
+          names.arg=c(1:length(testCode)), cex.names=0.75)
+}

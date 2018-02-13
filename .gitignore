@@ -17,6 +17,7 @@ results/
 *.pdf
 
 # no python extras
+*.ipynb
 .ipynb_checkpoints/
 sandbox.py
 __pycache__/
