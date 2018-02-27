@@ -70,6 +70,8 @@ def __load_webcat_submission_data(webcat_path):
     on each projects. Submission data is modified so that score.correctness
     only represents scores on instructor-written reference tests.
     """
+    print('Loading web-cat submission data')
+
     cols_of_interest = [
         'userName',
         'assignment',
@@ -106,6 +108,8 @@ def __load_webcat_submission_data(webcat_path):
     return data
 
 def __load_ref_test_data(ref_test_gains_path):
+    print('Loading reference test passing data')
+
     cols_of_interest = [
         'assignment',
         'userName',
@@ -123,6 +127,8 @@ def __load_ref_test_data(ref_test_gains_path):
     return data
 
 def __load_raw_inc_data(raw_inc_path):
+    print('Loading raw early/often data')
+
     data = pd.read_csv(raw_inc_path)
 
     # each derived metric is calculated once using changes in raw file size, and once using change in statements
@@ -154,6 +160,8 @@ def __load_raw_inc_data(raw_inc_path):
     return data
 
 def __load_time_spent_data(time_path):
+    print('Loading time spent data')
+
     cols_of_interest = [
         'email',
         'assignment',
@@ -171,6 +179,8 @@ def __load_time_spent_data(time_path):
     return data
 
 def __load_launch_totals(ws_path):
+    print('Loading launch totals')
+
     cols_of_interest = [
         'email',
         'CASSIGNMENTNAME',
@@ -187,4 +197,6 @@ def __load_launch_totals(ws_path):
 
     return data
 
-MERGED = consolidate_student_data()
+if __name__ == '__main__':
+    MERGED = consolidate_student_data()
+    MERGED.to_csv(path_or_buf='~/Desktop/consolidated.csv', index=False)

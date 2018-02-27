@@ -137,5 +137,7 @@ drawTestSolutionBarplot = function(testCode, solutionCode, pos.legend='top') {
   m = matrix(data=c(testCode, solutionCode), nrow=2, byrow=T)
   barplot(m, col=c('maroon', 'orange'), beside=T, space=c(0,1), xlab='Work Session #', ylab='Lines changed',
           legend.text=c('Test Code', 'Solution Code'), args.legend=list(x=pos.legend, cex=0.7),
-          names.arg=c(1:length(testCode)), cex.names=0.75)
+          names.arg=c(1:length(testCode)), cex.names=0.75, ylim=c(0, 1700), yaxt='n')
+  ticks = c(0, 500, 1000, 1500, 1700)
+  axis(2, at=ticks, labels = ticks)
 }
