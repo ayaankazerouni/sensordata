@@ -8,22 +8,22 @@ import argparse
 
 from method_metrics import get_method_metrics, get_coevolution_metrics
 
-def consolidate_student_data(webcat_path=None, raw_inc_path=None,
-                             time_path=None, ref_test_gains_path=None, ws_path=None,
-                             repo_mining_path=None, coevolution_path=None,
-                             mutation_path=None):
+def consolidate_student_data(webcat_path=False, raw_inc_path=False,
+                             time_path=False, ref_test_gains_path=False, launch_totals_path=False,
+                             repo_mining_path=False, coevolution_path=False,
+                             mutation_path=False):
     """
     Import, format, and consolidate incremental development metrics from several sources.
 
     Keyword arguments:
-    webcat_path         = path to webcat submission data
-    raw_inc_path        = path to raw incremental development scores
-    time_path           = path to time spent data
-    ref_test_gains_path = path to ref_test_gains metrics
-    ws_path             = path to work session data (for launch totals)
-    repo_mining_path    = path to method-mining results from repodriller
-    coevolution_path    = path to coevolution results from repodriller
-    mutation_path       = path to mutation testing results from PIT
+    webcat_path         = String path, None for default, or False to omit
+    raw_inc_path        = String path, None for default, or False to omit
+    time_path           = String path, None for default, or False to omit
+    ref_test_gains_path = String path, None for default, or False to omit 
+    launch_totals_path  = String path to work_session data, None for default, or False to omit 
+    repo_mining_path    = String path, None for default, or False to omit 
+    coevolution_path    = String path, None for default, or False to omit
+    mutation_path       = String path, None for default, or False to omit 
     """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
@@ -37,8 +37,8 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
     if ref_test_gains_path is None:
         ref_test_gains_path = 'data/fall-2016/ref_test_gains.csv'
 
-    if ws_path is None:
-        ws_path = 'data/fall-2016/work_sessions.csv'
+    if launch_totals_path is None:
+        launch_totals_path = 'data/fall-2016/work_sessions.csv'
 
     if repo_mining_path is None:
         repo_mining_path = 'data/fall-2016/repo-mining.csv'
@@ -47,30 +47,48 @@ def consolidate_student_data(webcat_path=None, raw_inc_path=None,
         coevolution_path = 'data/fall-2016/coevolution.csv'
 
     if mutation_path is None:
-        mutation_path = '~/Developer/student-projects/mutation-testing/p1/'
+        mutation_path = 'data/fall-2016/mutation-testing.csv'
 
     webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
-    ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
-    raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
-    time_data = __load_time_spent_data(time_path) # get time spent on projects
-    launch_totals = __load_launch_totals(ws_path) # get launch totals from work session data
-    method_metrics = get_method_metrics(repo_mining_path) # get aggregated repo-mining metrics
-    coevolution_metrics = get_coevolution_metrics(coevolution_path) # get aggregated test/prod and test/(prod + test)coevolution metrics
-    mutation_results = aggregate_mutation_results(mutation_path) # get mutation coverage results from PIT testing
 
-    merged = webcat_data.merge(right=ref_test_gains, left_index=True, right_index=True) \
-        .merge(right=mutation_results, left_index=True, right_index=True) \
-        .merge(right=raw_inc_data, left_index=True, right_index=True) \
-        .merge(right=time_data, left_index=True, right_index=True) \
-        .merge(right=launch_totals, left_index=True, right_index=True) \
-        .merge(right=method_metrics, left_index=True, right_index=True) \
-        .merge(right=coevolution_metrics, left_index=True, right_index=True)
+    merged = webcat_data
 
-    days_from_deadline = (merged['dueDateRaw'] - merged['projectStartTime'])
-    merged['startedDaysFromDeadline'] = days_from_deadline.apply(lambda diff: diff.days)
+    if ref_test_gains_path:
+        ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
+        merged = merged.merge(right=ref_test_gains, left_index=True, right_index=True)
+    
+    if mutation_path:
+        print('Loading mutation testing data')
+        mutation_results = pd.read_csv(mutation_path, index_col=['userName', 'assignment']) # get mutation coverage results from PIT testing
+        merged = merged.merge(right=mutation_results, left_index=True, right_index=True)
+    
+    if raw_inc_path:
+        raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
+        merged = merged.merge(right=raw_inc_data, left_index=True, right_index=True)
+    
+    if time_path:
+        time_data = __load_time_spent_data(time_path) # get time spent on projects
+        merged = merged.merge(right=time_data, left_index=True, right_index=True)
+    
+    if launch_totals_path:
+        launch_totals = __load_launch_totals(launch_totals_path) # get launch totals from work session data
+        merged = merged.merge(right=launch_totals, left_index=True, right_index=True)
+    
+    if repo_mining_path:
+        method_metrics = get_method_metrics(repo_mining_path) # get aggregated repo-mining metrics
+        merged = merged.merge(right=method_metrics, left_index=True, right_index=True)
+    
+    if coevolution_path:
+        coevolution_metrics = get_coevolution_metrics(coevolution_path) # get aggregated test/prod and test/(prod + test) coevolution metrics
+        merged = merged.merge(right=coevolution_metrics, left_index=True, right_index=True)
 
-    # drop identifying column
-    # merged = merged.reset_index().set_index(['userId', 'assignment']).drop('userName', axis=1)
+    if webcat_path and time_path:
+        days_from_deadline = (merged['dueDateRaw'] - merged['projectStartTime'])
+        merged['startedDaysFromDeadline'] = days_from_deadline.apply(lambda diff: diff.days)
+
+    # drop identifying column is anonymized column was loaded for analysis
+    if raw_inc:
+        merged = merged.reset_index().set_index(['userId', 'assignment']).drop('userName', axis=1)
 
     return merged
 
@@ -108,6 +126,7 @@ def __load_webcat_submission_data(webcat_path):
     data['elementsCovered'] = (data['elementsCovered'] / data['elements']) / 0.98
     data['elementsCovered'] = data['elementsCovered'].apply(lambda x: x if x <= 1 else 1)
     data['score.reftest'] = data['score.correctness'] / data['elementsCovered']
+    data['score.reftest'] = data['score.reftest'].apply(lambda x: x if x <= 1 else 1)
 
     # calculate submission time outcomes 
     hours_from_deadline = (data['dueDateRaw'] - data['submissionTimeRaw'])
