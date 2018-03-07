@@ -86,8 +86,8 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
         days_from_deadline = (merged['dueDateRaw'] - merged['projectStartTime'])
         merged['startedDaysFromDeadline'] = days_from_deadline.apply(lambda diff: diff.days)
 
-    # drop identifying column is anonymized column was loaded for analysis
-    if raw_inc:
+    # drop identifying column if anonymized column was loaded for analysis
+    if raw_inc_path:
         merged = merged.reset_index().set_index(['userId', 'assignment']).drop('userName', axis=1)
 
     return merged
