@@ -9,9 +9,7 @@ import argparse
 from method_metrics import get_method_metrics, get_coevolution_metrics
 
 def consolidate_student_data(webcat_path=False, raw_inc_path=False,
-                             time_path=False, ref_test_gains_path=False, launch_totals_path=False,
-                             repo_mining_path=False, coevolution_path=False,
-                             mutation_path=False):
+                             time_path=False, launch_totals_path=False):
     """
     Import, format, and consolidate incremental development metrics from several sources.
 
@@ -22,8 +20,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     ref_test_gains_path = String path, None for default, or False to omit 
     launch_totals_path  = String path to work_session data, None for default, or False to omit 
     repo_mining_path    = String path, None for default, or False to omit 
-    coevolution_path    = String path, None for default, or False to omit
-    mutation_path       = String path, None for default, or False to omit 
     """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
@@ -40,15 +36,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     if launch_totals_path is None:
         launch_totals_path = 'data/fall-2016/work_sessions.csv'
 
-    if repo_mining_path is None:
-        repo_mining_path = 'data/fall-2016/repo-mining.csv'
-
-    if coevolution_path is None:
-        coevolution_path = 'data/fall-2016/coevolution.csv'
-
-    if mutation_path is None:
-        mutation_path = 'data/fall-2016/mutation-testing.csv'
-
     webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
 
     merged = webcat_data
@@ -56,11 +43,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     if ref_test_gains_path:
         ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
         merged = merged.merge(right=ref_test_gains, left_index=True, right_index=True)
-    
-    if mutation_path:
-        print('Loading mutation testing data')
-        mutation_results = pd.read_csv(mutation_path, index_col=['userName', 'assignment']) # get mutation coverage results from PIT testing
-        merged = merged.merge(right=mutation_results, left_index=True, right_index=True)
     
     if raw_inc_path:
         raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
@@ -74,14 +56,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
         launch_totals = __load_launch_totals(launch_totals_path) # get launch totals from work session data
         merged = merged.merge(right=launch_totals, left_index=True, right_index=True)
     
-    if repo_mining_path:
-        method_metrics = get_method_metrics(repo_mining_path) # get aggregated repo-mining metrics
-        merged = merged.merge(right=method_metrics, left_index=True, right_index=True)
-    
-    if coevolution_path:
-        coevolution_metrics = get_coevolution_metrics(coevolution_path) # get aggregated test/prod and test/(prod + test) coevolution metrics
-        merged = merged.merge(right=coevolution_metrics, left_index=True, right_index=True)
-
     if webcat_path and time_path:
         days_from_deadline = (merged['dueDateRaw'] - merged['projectStartTime'])
         merged['startedDaysFromDeadline'] = days_from_deadline.apply(lambda diff: diff.days)

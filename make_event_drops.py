@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+# Toy script for putting data in the format required by marmelab/EventDrops
+
 # In[]: import lib and data
 import pandas as pd
 import numpy as np
