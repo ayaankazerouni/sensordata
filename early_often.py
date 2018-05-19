@@ -15,12 +15,15 @@ import json
 import pandas as pd
 import numpy as np
 
-def userearlyoften(usergroup, due_date_data):
+def userearlyoften(usergroup, due_date_data, submissions):
     """
     This function acts on data for one student's sensordata.
+    Generally, it is invoked by earlyoften in a split-apply-combine procedure.
 
     Keyword arguments:
-    usergroup -- pandas.DataFrame
+    usergroup       -- Event stream for a student working on a single project
+    due_date_data   -- Dictionary containing due dates in millisecond timestamps 
+    submissions     -- Last submission from each student`
     """
     prev_row = None
     total_weighted_edits_bytes = []
@@ -55,7 +58,7 @@ def userearlyoften(usergroup, due_date_data):
         assignment_field = 'cleaned_assignment'
 
     first = usergroup.iloc[0]
-    first_time = int(first['time'])
+    first_time = int(first['time'] / 1000)
     term = get_term(first_time)
     first_assignment = first[assignment_field]
     assignment_number = int(re.search(r'\d', first_assignment).group())
@@ -252,20 +255,28 @@ def userearlyoften(usergroup, due_date_data):
         return None
 
 def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-students-with-sensordata.csv', duetimepath='./due_times.json'):
-    # Import due date data
+    """Calculate Early/Often indices for developers based on IDE events.
+    
+    Keyword arguments:
+    infile          -- Path to a file containing raw SensorData
+    outfile         -- Path to a file where combined early often metrics should be written (optional).
+                       If None, output is written to a Pandas DataFrame.
+    submissionspath -- Path to Web-CAT submissions. Used only to determine the time of the final submission.
+    duetimepath     -- Path to a JSON file containing due date data for assignments in different terms.
+    """
+    # Grab the last submission from each student
     dtypes = {
         'userName': str,
         'assignment': str,
         'submissionNo': int,
         'submissionTimeRaw': float
     }
-    global submissions
     submissions = pd.read_csv(submissionspath, dtype=dtypes, usecols=list(dtypes.keys()))
     submissions.sort_values(by=['userName', 'assignment', 'submissionNo'], ascending=[1,1,0], inplace=True)
     submissions = submissions.groupby(['userName', 'assignment']).first()
     print('0. Finished reading submission data.')
 
-    # Import data
+    # Import event stream for all students 
     dtypes = {
         'userId': str,
         'projectId': str,
@@ -288,7 +299,7 @@ def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-stu
     df.fillna('', inplace=True)
     print('1. Finished reading raw sensordata.')
 
-    # Group data by unique values of userIds and assignment
+    # Group data by student and project 
     userdata = df.groupby(['userId'])
     print('2. Finished grouping data. Calculating measures now. This could take some time...')
 
@@ -296,7 +307,7 @@ def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-stu
     with open(duetimepath) as data_file:
         due_date_data = json.load(data_file)
 
-    results = userdata.apply(userearlyoften, due_date_data=due_date_data)
+    results = userdata.apply(userearlyoften, due_date_data=due_date_data, submissions=submissions)
 
     # Write out
     if outfile:
@@ -305,18 +316,27 @@ def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-stu
         return results
 
 def get_term(timestamp):
-    """
-    Expects a timestamp in milliseconds.
-    """
-    fall_time = 1452877947000
-    spring_time = 1471281147000
-    if timestamp >= fall_time:
-        return 'fall2016'
+    """Returns a term id based on a timestamp in seconds."""
+  
+    try:
+        eventtime = datetime.datetime.fromtimestamp(timestamp)
+        year = eventtime.year
+        month = eventtime.month
 
-    if timestamp >= spring_time:
-        return 'spring2016'
-    else:
-        return None
+        if month >= 8:
+            return 'fall%d' % year
+        elif month >= 5: # TODO: Deal with summer terms?
+            return 'summer-1-%d' % year
+        elif month >= 7:
+            return 'summer-2-%d' % year
+        elif month >= 1:
+            return 'spring%d' % year
+        else:
+            return None
+    except ValueError:
+        print('Error! Please make sure your timestamp is in seconds.')
+        sys.exit()
+
 
 def main(args):
     """Parses CLI arguments and begins execution."""
@@ -324,7 +344,7 @@ def main(args):
     outfile = args[1]
 
     try:
-        earlyoften(infile, outfile)
+       results = earlyoften(infile, outfile) # If outfile is None, stores results in memory
     except FileNotFoundError:
         print("Error! File '%s' does not exist." % infile)
 
