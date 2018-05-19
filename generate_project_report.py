@@ -69,5 +69,6 @@ if __name__ == '__main__':
 
     if os.listdir(args.output) == []:
         df = aggregate(args) # play with consolidated data here
+        df.to_csv(os.path.join(args.output, 'consolidated.csv'), index=True)
     else:
         sys.exit('\nError: Please make sure your output directory is empty.')

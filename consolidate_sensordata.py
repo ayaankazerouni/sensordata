@@ -6,8 +6,6 @@ import datetime
 import pandas as pd
 import argparse
 
-from method_metrics import get_method_metrics, get_coevolution_metrics
-
 def consolidate_student_data(webcat_path=False, raw_inc_path=False,
                              time_path=False, launch_totals_path=False):
     """
