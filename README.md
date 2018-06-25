@@ -50,10 +50,10 @@ Running `./[file-name]` without any arguments will display usage information.
 * [subsessions.py](subsessions.py) - Reduces raw sensordata into subsessions. Subsessions are separated by program Launches
 * [work_sessions.py](work_sessions.py) - Reduces subsession data into work sessions. Work sessions are separated by gaps of >= `THRESHOLD` hours without activity
 
-[consolidate_sensordata.py](consolidate_sensordata.py) consolidates the results of all the above processes into a [Pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html) where each `student assignment` is a single row of scores and metrics. You can play with this data however you want in some kind [Jupyter](https://try.jupyter.org/) environment or export to CSV for more control.
+[consolidate_sensordata.py](consolidate_sensordata.py) consolidates the results of all the above processes into a Pandas DataFrame where each `student assignment` is a single row of scores and metrics. You can play with this data however you want in some kind of notebook environment or export to CSV for more control.
 
 [generate_project_report.py](generate_project_report.py) does **all the above processes** automatically, ending with the DataFrame of consolidated data.
-Run `./generate_project_report.py --help` for usage info.
+Run `./generate_project_report.py --help` for usage info. **Note: This may take several minutes.**
 
 #### JS visualisations
 The [visualisations](visualisations) directory contains **tentative** D3.js visualisations of student programming habits over time.
@@ -71,7 +71,3 @@ Data format (work session data):
 * number of solution edits
 
 You would also need some due date data (see [dueTimes.js](visualisations/dueTimes.js)) to show milestone markers.
-
-##### Event Drops (see [marmelab/EventDrops](https://github.com/marmelab/EventDrops))
-Data format:
-* Use [make_event_drops.py](make_event_drops.py) to transform raw sensordata into the format required by EventDrops. Then you can point the appropriate method call at a data file.
