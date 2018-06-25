@@ -325,9 +325,9 @@ def get_term(timestamp):
 
         if month >= 8:
             return 'fall%d' % year
-        elif month >= 5: # TODO: Deal with summer terms?
+        elif month >= 7: # TODO: Deal with summer terms?
             return 'summer-1-%d' % year
-        elif month >= 7:
+        elif month > 5:
             return 'summer-2-%d' % year
         elif month >= 1:
             return 'spring%d' % year
