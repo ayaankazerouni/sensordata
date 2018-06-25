@@ -34,24 +34,24 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     if launch_totals_path is None:
         launch_totals_path = 'data/fall-2016/work_sessions.csv'
 
-    webcat_data = __load_webcat_submission_data(webcat_path) # get webcat submission data
+    webcat_data = load_webcat_submission_data(webcat_path) # get webcat submission data
 
     merged = webcat_data
 
     if ref_test_gains_path:
-        ref_test_gains = __load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
+        ref_test_gains = load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
         merged = merged.merge(right=ref_test_gains, left_index=True, right_index=True)
     
     if raw_inc_path:
-        raw_inc_data = __load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
+        raw_inc_data = load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
         merged = merged.merge(right=raw_inc_data, left_index=True, right_index=True)
     
     if time_path:
-        time_data = __load_time_spent_data(time_path) # get time spent on projects
+        time_data = load_time_spent_data(time_path) # get time spent on projects
         merged = merged.merge(right=time_data, left_index=True, right_index=True)
     
     if launch_totals_path:
-        launch_totals = __load_launch_totals(launch_totals_path) # get launch totals from work session data
+        launch_totals = load_launch_totals(launch_totals_path) # get launch totals from work session data
         merged = merged.merge(right=launch_totals, left_index=True, right_index=True)
     
     if webcat_path and time_path:
@@ -64,7 +64,7 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
 
     return merged
 
-def __load_webcat_submission_data(webcat_path):
+def load_webcat_submission_data(webcat_path):
     """
     Loads webcat submission data from webcat_path. Only returns the student's final submission
     on each projects. Submission data is modified so that score.correctness
@@ -108,7 +108,7 @@ def __load_webcat_submission_data(webcat_path):
     data.set_index(['userName', 'assignment'], inplace=True)
     return data
 
-def __load_ref_test_data(ref_test_gains_path):
+def load_ref_test_data(ref_test_gains_path):
     print('Loading reference test passing data')
 
     cols_of_interest = [
@@ -127,7 +127,7 @@ def __load_ref_test_data(ref_test_gains_path):
 
     return data
 
-def __load_raw_inc_data(raw_inc_path):
+def load_raw_inc_data(raw_inc_path):
     print('Loading raw early/often data')
 
     data = pd.read_csv(raw_inc_path)
@@ -160,7 +160,7 @@ def __load_raw_inc_data(raw_inc_path):
 
     return data
 
-def __load_time_spent_data(time_path):
+def load_time_spent_data(time_path):
     print('Loading time spent data')
 
     cols_of_interest = [
@@ -179,7 +179,7 @@ def __load_time_spent_data(time_path):
 
     return data
 
-def __load_launch_totals(ws_path):
+def load_launch_totals(ws_path):
     print('Loading launch totals')
 
     cols_of_interest = [
