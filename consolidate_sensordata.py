@@ -34,9 +34,9 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     if launch_totals_path is None:
         launch_totals_path = 'data/fall-2016/work_sessions.csv'
 
-    webcat_data = load_webcat_submission_data(webcat_path) # get webcat submission data
+    scoredata = load_final_score_data(webcat_path) # get webcat submission data
 
-    merged = webcat_data
+    merged = scoredata
 
     if ref_test_gains_path:
         ref_test_gains = load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
@@ -64,13 +64,14 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
 
     return merged
 
-def load_webcat_submission_data(webcat_path):
+def load_final_score_data(webcat_path):
+    """Loads final score data from webcat_path. 
+    
+    Only returns the student's final submission on each projects. 
+    Submission data is modified so that score.correctness only represents 
+    scores on instructor-written reference tests, and doesn't include points
+    from students' own tests.
     """
-    Loads webcat submission data from webcat_path. Only returns the student's final submission
-    on each projects. Submission data is modified so that score.correctness
-    only represents scores on instructor-written reference tests.
-    """
-    print('Loading web-cat submission data')
 
     cols_of_interest = [
         'userName',
@@ -109,7 +110,7 @@ def load_webcat_submission_data(webcat_path):
     return data
 
 def load_ref_test_data(ref_test_gains_path):
-    print('Loading reference test passing data')
+    """Loads reference test gain data."""
 
     cols_of_interest = [
         'assignment',
@@ -128,7 +129,11 @@ def load_ref_test_data(ref_test_gains_path):
     return data
 
 def load_raw_inc_data(raw_inc_path):
-    print('Loading raw early/often data')
+    """Loads early/often metrics for code editing and launching.
+    
+    Note that this does NOT calculate the metrics. raw_inc_path refers
+    to a CSV file that contains already-calculated values. 
+    """
 
     data = pd.read_csv(raw_inc_path)
 
@@ -161,7 +166,10 @@ def load_raw_inc_data(raw_inc_path):
     return data
 
 def load_time_spent_data(time_path):
-    print('Loading time spent data')
+    """Loads the time spent in hours for each student-project.
+    
+    Operates on work session data.
+    """
 
     cols_of_interest = [
         'email',
@@ -180,7 +188,10 @@ def load_time_spent_data(time_path):
     return data
 
 def load_launch_totals(ws_path):
-    print('Loading launch totals')
+    """Calculates and loads totals for Normal and Test launches.
+    
+    Operates on work session data. 
+    """
 
     cols_of_interest = [
         'email',
@@ -196,6 +207,32 @@ def load_launch_totals(ws_path):
     data = data.groupby(['userName', 'assignment'])[['testLaunches', 'normalLaunches']].sum()
     data = data.reset_index().set_index(['userName', 'assignment'])
 
+    return data
+
+def load_launches(sensordata_path):
+    """Loads raw launch data.
+
+    Convenience method: filters out everything but Launches from raw sensordata.
+    """
+    dtypes = {
+        'email': str,
+        'CASSIGNMENTNAME': str,
+        'time': float,
+        'Type': str,
+        'Subtype': str,
+        'TestSucesses': str,
+        'TestFailures': str
+    }
+    eventtypes = ['Launch', 'Termination']
+    data = pd.read_csv('~/Developer/sensordata/data/fall-2016/cs3114-sensordata.csv', 
+        dtype=dtypes, usecols=dtypes.keys()) \
+        .query('Type in @eventtypes') \
+        .rename(columns={ 
+            'email': 'userName', 
+            'CASSIGNMENTNAME': 'assignment', 
+            'TestSucesses': 'TestSuccesses'
+		})
+    data.userName = l.userName.apply(lambda u: u.split('@')[0])
     return data
 
 if __name__ == '__main__':

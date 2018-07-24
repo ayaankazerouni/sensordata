@@ -1,9 +1,14 @@
-"""
-Calculates incremental development metrics in the form
-of Early/Often indices. Simply put, an early often index
+"""Calculates incremental development metrics in the form
+of Early/Often indices. 
+
+Simply put, an early often index
 is the mean amount of code written on a given day leading
 up to the project due date. We calculate similar metrics
 for [solution/test] code writing and [solution/test] launches.
+
+To use:
+    from early_often import earlyoften, or
+    ./early_often.py <input file> <output file> on the command line
 """
 
 #! /usr/bin/env python3
@@ -254,8 +259,10 @@ def userearlyoften(usergroup, due_date_data, submissions):
     else:
         return None
 
-def earlyoften(infile, outfile=None, submissionspath='data/fall-2016/web-cat-students-with-sensordata.csv', duetimepath='./due_times.json'):
+def earlyoften(infile, submissionspath, duetimepath, outfile=None):
     """Calculate Early/Often indices for developers based on IDE events.
+    Early/Often refers to the mean time of a certain type of event, in terms of
+    "days until the deadline".
     
     Keyword arguments:
     infile          -- Path to a file containing raw SensorData
