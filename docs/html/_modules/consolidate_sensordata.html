@@ -1,0 +1,320 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>consolidate_sensordata &#8212; Sensordata  documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for consolidate_sensordata</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python3</span>
+
+<span class="sd">&quot;&quot;&quot;Import and consolidate incremental development metrics from several sources.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<div class="viewcode-block" id="consolidate_student_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.consolidate_student_data">[docs]</a><span class="k">def</span> <span class="nf">consolidate_student_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raw_inc_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">time_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">launch_totals_path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Import, format, and consolidate incremental development metrics from several sources.</span>
+
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    webcat_path         = String path, None for default, or False to omit</span>
+<span class="sd">    raw_inc_path        = String path, None for default, or False to omit</span>
+<span class="sd">    time_path           = String path, None for default, or False to omit</span>
+<span class="sd">    ref_test_gains_path = String path, None for default, or False to omit </span>
+<span class="sd">    launch_totals_path  = String path to work_session data, None for default, or False to omit </span>
+<span class="sd">    repo_mining_path    = String path, None for default, or False to omit </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">webcat_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">webcat_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/web-cat-students-with-sensordata.csv&#39;</span>
+
+    <span class="k">if</span> <span class="n">raw_inc_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">raw_inc_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/raw_inc.csv&#39;</span>
+
+    <span class="k">if</span> <span class="n">time_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">time_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/time_spent.csv&#39;</span>
+
+    <span class="k">if</span> <span class="n">ref_test_gains_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ref_test_gains_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/ref_test_gains.csv&#39;</span>
+
+    <span class="k">if</span> <span class="n">launch_totals_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">launch_totals_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/work_sessions.csv&#39;</span>
+
+    <span class="n">scoredata</span> <span class="o">=</span> <span class="n">load_final_score_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">)</span> <span class="c1"># get webcat submission data</span>
+
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">scoredata</span>
+
+    <span class="k">if</span> <span class="n">ref_test_gains_path</span><span class="p">:</span>
+        <span class="n">ref_test_gains</span> <span class="o">=</span> <span class="n">load_ref_test_data</span><span class="p">(</span><span class="n">ref_test_gains_path</span><span class="p">)</span> <span class="c1"># get ref-test-gains data and format it</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="n">ref_test_gains</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">raw_inc_path</span><span class="p">:</span>
+        <span class="n">raw_inc_data</span> <span class="o">=</span> <span class="n">load_raw_inc_data</span><span class="p">(</span><span class="n">raw_inc_path</span><span class="p">)</span> <span class="c1"># get raw incremental programming data and format it</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="n">raw_inc_data</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">time_path</span><span class="p">:</span>
+        <span class="n">time_data</span> <span class="o">=</span> <span class="n">load_time_spent_data</span><span class="p">(</span><span class="n">time_path</span><span class="p">)</span> <span class="c1"># get time spent on projects</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="n">time_data</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">launch_totals_path</span><span class="p">:</span>
+        <span class="n">launch_totals</span> <span class="o">=</span> <span class="n">load_launch_totals</span><span class="p">(</span><span class="n">launch_totals_path</span><span class="p">)</span> <span class="c1"># get launch totals from work session data</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="n">launch_totals</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">webcat_path</span> <span class="ow">and</span> <span class="n">time_path</span><span class="p">:</span>
+        <span class="n">days_from_deadline</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged</span><span class="p">[</span><span class="s1">&#39;dueDateRaw&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">merged</span><span class="p">[</span><span class="s1">&#39;projectStartTime&#39;</span><span class="p">])</span>
+        <span class="n">merged</span><span class="p">[</span><span class="s1">&#39;startedDaysFromDeadline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">days_from_deadline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">diff</span><span class="p">:</span> <span class="n">diff</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+
+    <span class="c1"># drop identifying column if anonymized column was loaded for analysis</span>
+    <span class="k">if</span> <span class="n">raw_inc_path</span><span class="p">:</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">merged</span></div>
+
+<div class="viewcode-block" id="load_final_score_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_final_score_data">[docs]</a><span class="k">def</span> <span class="nf">load_final_score_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads final score data from webcat_path. </span>
+<span class="sd">    </span>
+<span class="sd">    Only returns the student&#39;s final submission on each projects. </span>
+<span class="sd">    Submission data is modified so that score.correctness only represents </span>
+<span class="sd">    scores on instructor-written reference tests, and doesn&#39;t include points</span>
+<span class="sd">    from students&#39; own tests.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;userName&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;submissionNo&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;score.correctness&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;max.score.correctness&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;elements&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;elementsCovered&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dueDateRaw&#39;</span>
+    <span class="p">]</span>
+    <span class="n">date_parser</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> \
+        <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">,</span> \
+        <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dueDateRaw&#39;</span><span class="p">,</span> <span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">],</span> \
+        <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;submissionNo&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># get the last submission from each user on each project</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># calculate reftest percentages and discretised project grades</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;max.score.correctness&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">0.98</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.reftest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.reftest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.reftest&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># calculate submission time outcomes </span>
+    <span class="n">hours_from_deadline</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dueDateRaw&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hours_from_deadline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">diff</span><span class="p">:</span> <span class="n">diff</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;onTimeSubmission&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">h</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">h</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="load_ref_test_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_ref_test_data">[docs]</a><span class="k">def</span> <span class="nf">load_ref_test_data</span><span class="p">(</span><span class="n">ref_test_gains_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads reference test gain data.&quot;&quot;&quot;</span>
+
+    <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;userName&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dropCount&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;flatCount&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;flatPercent&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gainCount&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gainEarlyOften&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gainPercent&#39;</span>
+    <span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ref_test_gains_path</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;jitterGain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gainCount&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;gainCount&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dropCount&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="load_raw_inc_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_raw_inc_data">[docs]</a><span class="k">def</span> <span class="nf">load_raw_inc_data</span><span class="p">(</span><span class="n">raw_inc_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads early/often metrics for code editing and launching.</span>
+<span class="sd">    </span>
+<span class="sd">    Note that this does NOT calculate the metrics. raw_inc_path refers</span>
+<span class="sd">    to a CSV file that contains already-calculated values. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">raw_inc_path</span><span class="p">)</span>
+
+    <span class="c1"># each derived metric is calculated once using changes in raw file size, and once using change in statements</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteTestWriting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testByteEarlyOftenIndex&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteTestChecking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testLaunchEarlyOften&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteNormalChecking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalLaunchEarlyOften&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteChecking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;launchEarlyOften&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteEditMedian&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;byteEditSd&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEditMedian&#39;</span><span class="p">])</span> <span class="o">/</span> \
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionByteEditSd&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testByteSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;testByteEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testByteEditMedian&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testByteEditSd&#39;</span><span class="p">]</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtTestWriting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionStmtEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testStmtsEarlyOftenIndex&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtTestChecking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionStmtEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testLaunchEarlyOften&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtNormalChecking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionStmtEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalLaunchEarlyOften&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtChecking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;solutionStmtEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;launchEarlyOften&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtEarlyOftenIndex&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtEditMedian&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stmtEditSd&#39;</span><span class="p">]</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;launchSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;launchEarlyOften&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;launchMedian&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;launchSd&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testLaunchSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;testLaunchEarlyOften&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testLaunchMedian&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;testLaunchSd&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalLaunchSkew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalLaunchEarlyOften&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalLaunchMedian&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalLaunchSd&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span><span class="p">[:</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)])</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="load_time_spent_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_time_spent_data">[docs]</a><span class="k">def</span> <span class="nf">load_time_spent_data</span><span class="p">(</span><span class="n">time_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads the time spent in hours for each student-project.</span>
+<span class="sd">    </span>
+<span class="sd">    Operates on work session data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;email&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;hoursOnProject&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;projectStartTime&#39;</span>
+    <span class="p">]</span>
+    <span class="n">date_parser</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">time_path</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;projectStartTime&#39;</span><span class="p">],</span> <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span><span class="p">[:</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)])</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="load_launch_totals"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_launch_totals">[docs]</a><span class="k">def</span> <span class="nf">load_launch_totals</span><span class="p">(</span><span class="n">ws_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates and loads totals for Normal and Test launches.</span>
+<span class="sd">    </span>
+<span class="sd">    Operates on work session data. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;email&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;normalLaunches&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;testLaunches&#39;</span>
+    <span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ws_path</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span><span class="p">[:</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])[[</span><span class="s1">&#39;testLaunches&#39;</span><span class="p">,</span> <span class="s1">&#39;normalLaunches&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="load_launches"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_launches">[docs]</a><span class="k">def</span> <span class="nf">load_launches</span><span class="p">(</span><span class="n">sensordata_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads raw launch data.</span>
+
+<span class="sd">    Convenience method: filters out everything but Launches from raw sensordata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;TestSucesses&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;TestFailures&#39;</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">}</span>
+    <span class="n">eventtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Launch&#39;</span><span class="p">,</span> <span class="s1">&#39;Termination&#39;</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;~/Developer/sensordata/data/fall-2016/cs3114-sensordata.csv&#39;</span><span class="p">,</span> 
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> \
+        <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Type in @eventtypes&#39;</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span> 
+            <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;TestSucesses&#39;</span><span class="p">:</span> <span class="s1">&#39;TestSuccesses&#39;</span>
+		<span class="p">})</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">userName</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">userName</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">MERGED</span> <span class="o">=</span> <span class="n">consolidate_student_data</span><span class="p">()</span>
+    <span class="n">MERGED</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_or_buf</span><span class="o">=</span><span class="s1">&#39;~/Desktop/consolidated.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ayaan Kazerouni.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>
