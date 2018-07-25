@@ -11,6 +11,9 @@ If you use this work, please cite the following:
 
 * [Documentation](https://ayaankazerouni.github.io/sensordata)
 * [Assumed schema](#assumed-schema)
+* [Dependencies](#dependencies)
+* [JS visualisations](#js-visualisations)
+  - [Skyline plots](#skyline-plots)
 
 ### [Assumed schema]
 The data has the following fields:
