@@ -3,7 +3,7 @@ for an assignment. Includes ids for student-projects along with results
 for all the different measures.
 
 To use:
-    ./generate_project_report.py --help 
+    ./generate_project_report.py -h 
 """
 
 #! /usr/bin/env python3
