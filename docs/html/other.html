@@ -38,8 +38,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-generate_project_report">
-<span id="other-misc-functions"></span><h1>Other misc functions<a class="headerlink" href="#module-generate_project_report" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="other-misc-functions">
+<h1>Other misc functions<a class="headerlink" href="#other-misc-functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-generate_project_report">
+<span id="project-report"></span><h2>Project report<a class="headerlink" href="#module-generate_project_report" title="Permalink to this headline">¶</a></h2>
 <p>Generate a “report” of incremental development metrics from raw sensordata
 for an assignment. Includes ids for student-projects along with results
 for all the different measures.</p>
@@ -47,14 +49,20 @@ for all the different measures.</p>
 <dt>To use:</dt>
 <dd>./generate_project_report.py –help</dd>
 </dl>
-<span class="target" id="module-time_spent"></span><dl class="function">
+</div>
+<div class="section" id="module-time_spent">
+<span id="calculate-time-spent"></span><h2>Calculate time spent<a class="headerlink" href="#module-time_spent" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
 <dt id="time_spent.get_time_spent">
 <code class="descclassname">time_spent.</code><code class="descname">get_time_spent</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em>, <em>deadline=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/time_spent.html#get_time_spent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#time_spent.get_time_spent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in worksession data from the infile and gives back
 the time spent on a project for a student.</p>
 </dd></dl>
 
-<span class="target" id="module-incremental_checking"></span><p>Calculates incremental checking metrics: mean
+</div>
+<div class="section" id="module-incremental_checking">
+<span id="work-done-between-program-launches"></span><h2>Work done between program launches<a class="headerlink" href="#module-incremental_checking" title="Permalink to this headline">¶</a></h2>
+<p>Calculates incremental checking metrics: mean
 amounts of [solution/test] code written between successive
 [solution/test] launches.</p>
 <p>(These measures didn’t return anything interesting)</p>
@@ -77,6 +85,7 @@ outfile – the resultant file (CSV)</p>
 </dd></dl>
 
 </div>
+</div>
 
 
           </div>
@@ -84,6 +93,16 @@ outfile – the resultant file (CSV)</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Other misc functions</a><ul>
+<li><a class="reference internal" href="#module-generate_project_report">Project report</a></li>
+<li><a class="reference internal" href="#module-time_spent">Calculate time spent</a></li>
+<li><a class="reference internal" href="#module-incremental_checking">Work done between program launches</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="consolidate_sensordata.html"
                         title="previous chapter">Consolidating metrics</a></p>
