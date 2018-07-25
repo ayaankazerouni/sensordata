@@ -12,6 +12,7 @@ Documentation
    early_often
    sessions
    consolidate_sensordata
+   other
 
 Indices and tables
 ==================

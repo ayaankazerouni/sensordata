@@ -1,10 +1,14 @@
-#! /usr/bin/env python3
-
 """
 Gets work session data from raw sensordata.
 Work sessions are separeted by a specified number of
 hours of inactivity (3 by default).
+
+To use:
+    from sensordata import worksessions or
+    ./work_sessions_from_raw.py <infile> <outfile> on the command line
 """
+
+#! /usr/bin/env python3
 
 from datetime import datetime
 import argparse
@@ -12,9 +16,9 @@ import pandas as pd
 
 def userworksessions(usergroup, threshold=3):
     """
-    Acts on each submitted project's data.
-    Returns a dataframe of work sessions, where each
-    work session is separated by threshold hours of inactivity.
+    Acts on sensordata for a single student-project. 
+    Returns a dataframe of work sessions, where work sessions are
+    delimited by threshold hours of inactivity.
 
     Keyword arguments:
     usergroup   pd.DataFrame containing all sensordata from the given project
@@ -99,8 +103,13 @@ def userworksessions(usergroup, threshold=3):
 
 
 def worksessions(infile, outfile=None):
-    """Group projects and get work sessions for each."""
-    print('Getting worksessions...')
+    """Given raw sensordata for all students, group events for
+    individual student-projects and compute work sessions.
+
+    Returns summarised work sessions, which includes start times,
+    end times, the number of edits (test and normal) and the number of
+    launches (test and normal).
+    """
     dtypes = {
         'userId': str,
         'projectId': str,
@@ -117,16 +126,15 @@ def worksessions(infile, outfile=None):
         'Current-Methods': object,
         'Current-Size': object
     }
-    print('\tReading raw sensordata')
+
     df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()))
     df.sort_values(by=['time'], ascending=[1], inplace=True)
     df.fillna('', inplace=True)
 
-    print('\tGrouping student projects')
     userdata = df.groupby(['userId'])
-    print('\tCalculating worksessions. This could take some time...')
-    results = userdata.apply(userworksessions, threshold=3)
 
+    results = userdata.apply(userworksessions, threshold=3)
+    
     if outfile is None:
         return results
     else:

@@ -1,3 +1,8 @@
+"""Collapses subsessions into work sessions.
+
+To use:
+    ./work_sessions.py <subsessions file> <outfile>
+"""
 #! /usr/bin/env python3
 
 import csv
@@ -5,7 +10,6 @@ import sys
 
 def get_work_sessions(infile, outfile):
     """Collapses subsession data from infile into work session data in outfile."""
-    print('Getting work sessions...')
 
     fieldnames = [
         'projectId',

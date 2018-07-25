@@ -15,7 +15,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     webcat_path         = String path, None for default, or False to omit
     raw_inc_path        = String path, None for default, or False to omit
     time_path           = String path, None for default, or False to omit
-    ref_test_gains_path = String path, None for default, or False to omit 
     launch_totals_path  = String path to work_session data, None for default, or False to omit 
     repo_mining_path    = String path, None for default, or False to omit 
     """
@@ -28,9 +27,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     if time_path is None:
         time_path = 'data/fall-2016/time_spent.csv'
 
-    if ref_test_gains_path is None:
-        ref_test_gains_path = 'data/fall-2016/ref_test_gains.csv'
-
     if launch_totals_path is None:
         launch_totals_path = 'data/fall-2016/work_sessions.csv'
 
@@ -38,10 +34,6 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
 
     merged = scoredata
 
-    if ref_test_gains_path:
-        ref_test_gains = load_ref_test_data(ref_test_gains_path) # get ref-test-gains data and format it
-        merged = merged.merge(right=ref_test_gains, left_index=True, right_index=True)
-    
     if raw_inc_path:
         raw_inc_data = load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
         merged = merged.merge(right=raw_inc_data, left_index=True, right_index=True)

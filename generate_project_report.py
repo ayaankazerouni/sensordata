@@ -1,3 +1,11 @@
+"""Generate a "report" of incremental development metrics from raw sensordata
+for an assignment. Includes ids for student-projects along with results
+for all the different measures.
+
+To use:
+    ./generate_project_report.py --help 
+"""
+
 #! /usr/bin/env python3
 
 import argparse
@@ -9,7 +17,6 @@ import pandas as pd
 from subsessions import get_subsessions
 from work_sessions_from_subsessions import get_work_sessions
 from time_spent import get_time_spent
-from reference_test_gains import reference_test_gains
 from early_often import earlyoften
 from consolidate_sensordata import consolidate_student_data
 
@@ -36,14 +43,11 @@ def aggregate(args):
     get_work_sessions(path_subsessions, path_worksessions)
     path_timespent = os.path.join(args.output, 'timespent.csv')
     get_time_spent(path_worksessions, path_timespent)
-    path_reftestgains = os.path.join(args.output, 'reftestgains.csv')
-    reference_test_gains(args.submissions, path_reftestgains)
     path_earlyoften = os.path.join(args.output, 'earlyoften.csv')
     earlyoften(args.raw, outfile=path_earlyoften, submissionspath=args.submissions)
     report = consolidate_student_data(webcat_path=args.submissions,
         raw_inc_path=args.raw,
         time_path=path_timespent,
-        ref_test_gains_path=path_reftestgains,
         ws_path=path_worksessions,
         repo_mining_path=path_repo_mining)
     return report
