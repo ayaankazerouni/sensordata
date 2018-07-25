@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Consolidating metrics &#8212; Sensordata  documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Other misc functions" href="other.html" />
+    <link rel="prev" title="Subsessions and work sessions" href="sessions.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="other.html" title="Other misc functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sessions.html" title="Subsessions and work sessions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Sensordata  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-consolidate_sensordata">
+<span id="consolidating-metrics"></span><h1>Consolidating metrics<a class="headerlink" href="#module-consolidate_sensordata" title="Permalink to this headline">¶</a></h1>
+<p>Import and consolidate incremental development metrics from several sources.</p>
+<dl class="function">
+<dt id="consolidate_sensordata.consolidate_student_data">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">consolidate_student_data</code><span class="sig-paren">(</span><em>webcat_path=False</em>, <em>raw_inc_path=False</em>, <em>time_path=False</em>, <em>launch_totals_path=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#consolidate_student_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.consolidate_student_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import, format, and consolidate incremental development metrics from several sources.</p>
+<p>Keyword arguments:
+webcat_path         = String path, None for default, or False to omit
+raw_inc_path        = String path, None for default, or False to omit
+time_path           = String path, None for default, or False to omit
+launch_totals_path  = String path to work_session data, None for default, or False to omit 
+repo_mining_path    = String path, None for default, or False to omit</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_final_score_data">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_final_score_data</code><span class="sig-paren">(</span><em>webcat_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_final_score_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_final_score_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads final score data from webcat_path.</p>
+<p>Only returns the student’s final submission on each projects. 
+Submission data is modified so that score.correctness only represents 
+scores on instructor-written reference tests, and doesn’t include points
+from students’ own tests.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_launch_totals">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_launch_totals</code><span class="sig-paren">(</span><em>ws_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_launch_totals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_launch_totals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates and loads totals for Normal and Test launches.</p>
+<p>Operates on work session data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_launches">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_launches</code><span class="sig-paren">(</span><em>sensordata_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_launches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_launches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads raw launch data.</p>
+<p>Convenience method: filters out everything but Launches from raw sensordata.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_raw_inc_data">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_raw_inc_data</code><span class="sig-paren">(</span><em>raw_inc_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_raw_inc_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_raw_inc_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads early/often metrics for code editing and launching.</p>
+<p>Note that this does NOT calculate the metrics. raw_inc_path refers
+to a CSV file that contains already-calculated values.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_ref_test_data">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_ref_test_data</code><span class="sig-paren">(</span><em>ref_test_gains_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_ref_test_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_ref_test_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads reference test gain data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_time_spent_data">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_time_spent_data</code><span class="sig-paren">(</span><em>time_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_time_spent_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_time_spent_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the time spent in hours for each student-project.</p>
+<p>Operates on work session data.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sessions.html"
+                        title="previous chapter">Subsessions and work sessions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="other.html"
+                        title="next chapter">Other misc functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/consolidate_sensordata.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="other.html" title="Other misc functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sessions.html" title="Subsessions and work sessions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Sensordata  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ayaan Kazerouni.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>
