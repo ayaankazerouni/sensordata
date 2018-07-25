@@ -11,7 +11,7 @@ To use:
     ./early_often.py <input file> <output file> on the command line
 """
 
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 import sys
 import datetime
