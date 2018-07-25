@@ -1,17 +1,17 @@
-Other misc functions
+Misc functions
 ====================
 
-Project report
+generate_project_report.py
 --------------
 .. automodule:: generate_project_report
   :members:
 
-Calculate time spent
+time_spent.py
 --------------------
 .. automodule:: time_spent
   :members:
 
-Work done between program launches
+incremental_checking.py
 ----------------------------------
 .. automodule:: incremental_checking
   :members:
