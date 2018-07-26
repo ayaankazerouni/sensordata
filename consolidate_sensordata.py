@@ -205,32 +205,6 @@ def load_launch_totals(ws_path):
 
     return data
 
-def load_launches(sensordata_path):
-    """Loads raw launch data.
-
-    Convenience method: filters out everything but Launches from raw sensordata.
-    """
-    dtypes = {
-        'email': str,
-        'CASSIGNMENTNAME': str,
-        'time': float,
-        'Type': str,
-        'Subtype': str,
-        'TestSucesses': str,
-        'TestFailures': str
-    }
-    eventtypes = ['Launch', 'Termination']
-    data = pd.read_csv('~/Developer/sensordata/data/fall-2016/cs3114-sensordata.csv', 
-        dtype=dtypes, usecols=dtypes.keys()) \
-        .query('Type in @eventtypes') \
-        .rename(columns={ 
-            'email': 'userName', 
-            'CASSIGNMENTNAME': 'assignment', 
-            'TestSucesses': 'TestSuccesses'
-		})
-    data.userName = l.userName.apply(lambda u: u.split('@')[0])
-    return data
-
 if __name__ == '__main__':
     MERGED = consolidate_student_data()
     MERGED.to_csv(path_or_buf='~/Desktop/consolidated.csv', index=True)
