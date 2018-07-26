@@ -1,8 +1,8 @@
 Misc functions
-====================
+==============
 
 generate_project_report.py
--------------------------
+--------------------------
 .. automodule:: generate_project_report
   :members:
 
