@@ -1,5 +1,5 @@
 Utility functions
 =================
 
-.. automodule:: utils.py
+.. automodule:: utils
   :members:

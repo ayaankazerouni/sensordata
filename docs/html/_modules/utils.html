@@ -1,0 +1,195 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>utils &#8212; Sensordata  documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Convenience methods for common tasks, such as retrieiving</span>
+<span class="sd">subsets of events, converting timestamps, getting a term, etc.</span>
+
+<span class="sd">To use:</span>
+<span class="sd">    import utils </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<div class="viewcode-block" id="load_launches"><a class="viewcode-back" href="../utils.html#utils.load_launches">[docs]</a><span class="k">def</span> <span class="nf">load_launches</span><span class="p">(</span><span class="n">launch_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sensordata_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads raw launch data.</span>
+
+<span class="sd">    Convenience method: filters out everything but Launches from raw sensordata,</span>
+<span class="sd">    or reads launches from an already filtered CSV file. If both are specified,</span>
+<span class="sd">    the launch_path will be given precedence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">launch_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sensordata_path</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either launch_path or sensordata_path must be specified and non-empty.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">launch_path</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">launches</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">launch_path</span><span class="p">)</span> <span class="c1"># no need to do any formatting, either</span>
+            <span class="k">return</span> <span class="n">launches</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sensordata_path</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span> <span class="c1"># nothing at launch_path, sensordata_path was not specified</span>
+
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;TestSucesses&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;TestFailures&#39;</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">}</span>
+    <span class="n">eventtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Launch&#39;</span><span class="p">,</span> <span class="s1">&#39;Termination&#39;</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;~/Developer/sensordata/data/fall-2016/cs3114-sensordata.csv&#39;</span><span class="p">,</span> 
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> \
+        <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Type in @eventtypes&#39;</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span> 
+            <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;TestSucesses&#39;</span><span class="p">:</span> <span class="s1">&#39;TestSuccesses&#39;</span>
+		<span class="p">})</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">userName</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">userName</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="get_term"><a class="viewcode-back" href="../utils.html#utils.get_term">[docs]</a><span class="k">def</span> <span class="nf">get_term</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a term id based on a timestamp in seconds.&quot;&quot;&quot;</span>
+  
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">eventtime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">year</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">month</span>
+
+        <span class="k">if</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;fall</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">:</span> <span class="c1"># TODO: Deal with summer terms?</span>
+            <span class="k">return</span> <span class="s1">&#39;summer-1-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;summer-2-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;spring</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error! Please make sure your timestamp is in seconds.&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="load_edits"><a class="viewcode-back" href="../utils.html#utils.load_edits">[docs]</a><span class="k">def</span> <span class="nf">load_edits</span><span class="p">(</span><span class="n">edit_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sensordata_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads &#39;tangible&#39; edit events.</span>
+
+<span class="sd">    This convenience method filters out Edit events from raw sensordata, or</span>
+<span class="sd">    reads an already filtered CSV file. If both edit_path and sensordata_path</span>
+<span class="sd">    are specified, the already-filtered file (at edit_path) takes precedence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">edit_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sensordata_path</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either edit_path or sensordata_path must be specified and non-empty&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">edit_path</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">edits</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">edits</span><span class="p">)</span> <span class="c1"># no formatting needed</span>
+            <span class="k">return</span> <span class="n">edits</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sensordata_path</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;edit_path is invalid and sensordata_path not specified.&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># edit_path was invalid, so we need to get edit events from all sensordata</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="s1">&#39;Class-Name&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Unit-Type&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Subsubtype&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;onTestCase&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Current-Statements&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Current-Methods&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Current-Size&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="s1">&#39;Current-Test-Assertions&#39;</span><span class="p">:</span> <span class="nb">object</span>
+    <span class="p">}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">sensordata_path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Edit&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Class-Name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span>
+            <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span> <span class="p">})</span>
+        <span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">userName</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ayaan Kazerouni.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

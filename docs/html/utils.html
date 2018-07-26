@@ -38,8 +38,38 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="utility-functions">
-<h1>Utility functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-utils">
+<span id="utility-functions"></span><h1>Utility functions<a class="headerlink" href="#module-utils" title="Permalink to this headline">¶</a></h1>
+<p>Convenience methods for common tasks, such as retrieiving
+subsets of events, converting timestamps, getting a term, etc.</p>
+<dl class="docutils">
+<dt>To use:</dt>
+<dd>import utils</dd>
+</dl>
+<dl class="function">
+<dt id="utils.get_term">
+<code class="descclassname">utils.</code><code class="descname">get_term</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#get_term"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.get_term" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a term id based on a timestamp in seconds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.load_edits">
+<code class="descclassname">utils.</code><code class="descname">load_edits</code><span class="sig-paren">(</span><em>edit_path=None</em>, <em>sensordata_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#load_edits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.load_edits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads ‘tangible’ edit events.</p>
+<p>This convenience method filters out Edit events from raw sensordata, or
+reads an already filtered CSV file. If both edit_path and sensordata_path
+are specified, the already-filtered file (at edit_path) takes precedence.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.load_launches">
+<code class="descclassname">utils.</code><code class="descname">load_launches</code><span class="sig-paren">(</span><em>launch_path=None</em>, <em>sensordata_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#load_launches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.load_launches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads raw launch data.</p>
+<p>Convenience method: filters out everything but Launches from raw sensordata,
+or reads launches from an already filtered CSV file. If both are specified,
+the launch_path will be given precedence.</p>
+</dd></dl>
+
 </div>
 
 
