@@ -30,9 +30,9 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     if launch_totals_path is None:
         launch_totals_path = 'data/fall-2016/work_sessions.csv'
 
-    scoredata = load_final_score_data(webcat_path) # get webcat submission data
+    submissions = load_submission_data(webcat_path) # get webcat submission data
 
-    merged = scoredata
+    merged = submissions
 
     if raw_inc_path:
         raw_inc_data = load_raw_inc_data(raw_inc_path) # get raw incremental programming data and format it
@@ -56,13 +56,16 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
 
     return merged
 
-def load_final_score_data(webcat_path):
-    """Loads final score data from webcat_path. 
-    
-    Only returns the student's final submission on each projects. 
+def load_submission_data(webcat_path, onlyfinal=True):
+    """Loads submission data from webcat_path, which points at a
+    CSV file containing submission data from a Web-CAT server.
+     
     Submission data is modified so that score.correctness only represents 
     scores on instructor-written reference tests, and doesn't include points
     from students' own tests.
+    
+    Keyword arguments:
+    onlyfinal    if True, returns only the last submission for each student-project (i.e., the graded submission)
     """
 
     cols_of_interest = [
@@ -83,8 +86,9 @@ def load_final_score_data(webcat_path):
         date_parser=date_parser)
     data.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0], inplace=True)
 
-    # get the last submission from each user on each project
-    data.drop_duplicates(subset=['assignment', 'userName'], keep='first', inplace=True)
+    if onlyfinal:
+        # get the last submission from each user on each project
+        data.drop_duplicates(subset=['assignment', 'userName'], keep='first', inplace=True)
 
     # calculate reftest percentages and discretised project grades
     data['score.correctness'] = data['score.correctness'] / data['max.score.correctness']

@@ -15,7 +15,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Other misc functions" href="other.html" />
+    <link rel="next" title="Misc functions" href="other.html" />
     <link rel="prev" title="Subsessions and work sessions" href="sessions.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,7 +28,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="other.html" title="Other misc functions"
+          <a href="other.html" title="Misc functions"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sessions.html" title="Subsessions and work sessions"
@@ -55,16 +55,6 @@ raw_inc_path        = String path, None for default, or False to omit
 time_path           = String path, None for default, or False to omit
 launch_totals_path  = String path to work_session data, None for default, or False to omit 
 repo_mining_path    = String path, None for default, or False to omit</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="consolidate_sensordata.load_final_score_data">
-<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_final_score_data</code><span class="sig-paren">(</span><em>webcat_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_final_score_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_final_score_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads final score data from webcat_path.</p>
-<p>Only returns the student’s final submission on each projects. 
-Submission data is modified so that score.correctness only represents 
-scores on instructor-written reference tests, and doesn’t include points
-from students’ own tests.</p>
 </dd></dl>
 
 <dl class="function">
@@ -96,6 +86,18 @@ to a CSV file that contains already-calculated values.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="consolidate_sensordata.load_submission_data">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_data</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>onlyfinal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads submission data from webcat_path, which points at a
+CSV file containing submission data from a Web-CAT server.</p>
+<p>Submission data is modified so that score.correctness only represents 
+scores on instructor-written reference tests, and doesn’t include points
+from students’ own tests.</p>
+<p>Keyword arguments:
+onlyfinal    if True, returns only the last submission for each student-project (i.e., the graded submission)</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="consolidate_sensordata.load_time_spent_data">
 <code class="descclassname">consolidate_sensordata.</code><code class="descname">load_time_spent_data</code><span class="sig-paren">(</span><em>time_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_time_spent_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_time_spent_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads the time spent in hours for each student-project.</p>
@@ -115,7 +117,7 @@ to a CSV file that contains already-calculated values.</p>
                         title="previous chapter">Subsessions and work sessions</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="other.html"
-                        title="next chapter">Other misc functions</a></p>
+                        title="next chapter">Misc functions</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -149,7 +151,7 @@ to a CSV file that contains already-calculated values.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="other.html" title="Other misc functions"
+          <a href="other.html" title="Misc functions"
              >next</a> |</li>
         <li class="right" >
           <a href="sessions.html" title="Subsessions and work sessions"

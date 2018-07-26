@@ -68,9 +68,9 @@
     <span class="k">if</span> <span class="n">launch_totals_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">launch_totals_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/work_sessions.csv&#39;</span>
 
-    <span class="n">scoredata</span> <span class="o">=</span> <span class="n">load_final_score_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">)</span> <span class="c1"># get webcat submission data</span>
+    <span class="n">submissions</span> <span class="o">=</span> <span class="n">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">)</span> <span class="c1"># get webcat submission data</span>
 
-    <span class="n">merged</span> <span class="o">=</span> <span class="n">scoredata</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">submissions</span>
 
     <span class="k">if</span> <span class="n">raw_inc_path</span><span class="p">:</span>
         <span class="n">raw_inc_data</span> <span class="o">=</span> <span class="n">load_raw_inc_data</span><span class="p">(</span><span class="n">raw_inc_path</span><span class="p">)</span> <span class="c1"># get raw incremental programming data and format it</span>
@@ -94,13 +94,16 @@
 
     <span class="k">return</span> <span class="n">merged</span></div>
 
-<div class="viewcode-block" id="load_final_score_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_final_score_data">[docs]</a><span class="k">def</span> <span class="nf">load_final_score_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loads final score data from webcat_path. </span>
-<span class="sd">    </span>
-<span class="sd">    Only returns the student&#39;s final submission on each projects. </span>
+<div class="viewcode-block" id="load_submission_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_submission_data">[docs]</a><span class="k">def</span> <span class="nf">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads submission data from webcat_path, which points at a</span>
+<span class="sd">    CSV file containing submission data from a Web-CAT server.</span>
+<span class="sd">     </span>
 <span class="sd">    Submission data is modified so that score.correctness only represents </span>
 <span class="sd">    scores on instructor-written reference tests, and doesn&#39;t include points</span>
 <span class="sd">    from students&#39; own tests.</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    onlyfinal    if True, returns only the last submission for each student-project (i.e., the graded submission)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
@@ -121,8 +124,9 @@
         <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;submissionNo&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># get the last submission from each user on each project</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">onlyfinal</span><span class="p">:</span>
+        <span class="c1"># get the last submission from each user on each project</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># calculate reftest percentages and discretised project grades</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;max.score.correctness&#39;</span><span class="p">]</span>
