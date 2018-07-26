@@ -51,6 +51,8 @@
 
 <span class="c1">#!/usr/bin/env python3</span>
 
+<span class="kn">from</span> <span class="nn">utils</span> <span class="k">import</span> <span class="n">get_term</span>
+
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -359,28 +361,6 @@
         <span class="n">results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">results</span></div>
-
-<div class="viewcode-block" id="get_term"><a class="viewcode-back" href="../early_often.html#early_often.get_term">[docs]</a><span class="k">def</span> <span class="nf">get_term</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns a term id based on a timestamp in seconds.&quot;&quot;&quot;</span>
-  
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">eventtime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-        <span class="n">year</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">year</span>
-        <span class="n">month</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">month</span>
-
-        <span class="k">if</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;fall</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">:</span> <span class="c1"># TODO: Deal with summer terms?</span>
-            <span class="k">return</span> <span class="s1">&#39;summer-1-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;summer-2-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;spring</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error! Please make sure your timestamp is in seconds.&#39;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../early_often.html#early_often.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>

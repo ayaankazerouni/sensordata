@@ -13,6 +13,8 @@ To use:
 
 #!/usr/bin/env python3
 
+from utils import get_term
+
 import sys
 import datetime
 import re
@@ -321,28 +323,6 @@ def earlyoften(infile, submissionspath, duetimepath, outfile=None):
         results.to_csv(outfile)
     else:
         return results
-
-def get_term(timestamp):
-    """Returns a term id based on a timestamp in seconds."""
-  
-    try:
-        eventtime = datetime.datetime.fromtimestamp(timestamp)
-        year = eventtime.year
-        month = eventtime.month
-
-        if month >= 8:
-            return 'fall%d' % year
-        elif month >= 7: # TODO: Deal with summer terms?
-            return 'summer-1-%d' % year
-        elif month > 5:
-            return 'summer-2-%d' % year
-        elif month >= 1:
-            return 'spring%d' % year
-        else:
-            return None
-    except ValueError:
-        print('Error! Please make sure your timestamp is in seconds.')
-        sys.exit()
 
 
 def main(args):
