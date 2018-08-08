@@ -6,7 +6,10 @@ These scripts deal with data in CSV format.
 
 If you use this work, please cite the following:
 
-* [Ayaan M. Kazerouni, Stephen H. Edwards, T. Simin Hall, and Clifford A. Shaffer. 2017. DevEventTracker: Tracking Development Events to Assess Incremental Development and Procrastination.](https://dl.acm.org/citation.cfm?id=3059050&CFID=816451901&CFTOKEN=34061433)
+* [Ayaan M. Kazerouni, Stephen H. Edwards, and Clifford A. Shaffer. 2017. Quantifying Incremental Development Practices and Their Relationship to Procrastination.](https://dl.acm.org/citation.cfm?id=3106180)
+
+If you're unable to access the paper, please email me and I'll send you a copy.
+
 ---
 
 * [Documentation](https://ayaankazerouni.github.io/sensordata)
