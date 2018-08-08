@@ -34,7 +34,7 @@ def load_launches(launch_path=None, sensordata_path=None):
         'TestFailures': str
     }
     eventtypes = ['Launch', 'Termination']
-    data = pd.read_csv('~/Developer/sensordata/data/fall-2016/cs3114-sensordata.csv', 
+    data = pd.read_csv(sensordata_path, 
         dtype=dtypes, usecols=dtypes.keys()) \
         .query('Type in @eventtypes') \
         .rename(columns={ 
@@ -42,7 +42,7 @@ def load_launches(launch_path=None, sensordata_path=None):
             'CASSIGNMENTNAME': 'assignment', 
             'TestSucesses': 'TestSuccesses'
 		})
-    data.userName = l.userName.apply(lambda u: u.split('@')[0])
+    data.userName = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
     return data
 
