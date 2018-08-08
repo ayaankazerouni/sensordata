@@ -72,7 +72,7 @@
         <span class="s1">&#39;TestFailures&#39;</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">}</span>
     <span class="n">eventtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Launch&#39;</span><span class="p">,</span> <span class="s1">&#39;Termination&#39;</span><span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;~/Developer/sensordata/data/fall-2016/cs3114-sensordata.csv&#39;</span><span class="p">,</span> 
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">sensordata_path</span><span class="p">,</span> 
         <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> \
         <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Type in @eventtypes&#39;</span><span class="p">)</span> \
         <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span> 
@@ -80,7 +80,7 @@
             <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> 
             <span class="s1">&#39;TestSucesses&#39;</span><span class="p">:</span> <span class="s1">&#39;TestSuccesses&#39;</span>
 		<span class="p">})</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">userName</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">userName</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">userName</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">userName</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">data</span></div>
 
