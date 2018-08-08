@@ -43,6 +43,8 @@
 <span class="sd">    import utils </span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">parse</span>
 
 <div class="viewcode-block" id="load_launches"><a class="viewcode-back" href="../utils.html#utils.load_launches">[docs]</a><span class="k">def</span> <span class="nf">load_launches</span><span class="p">(</span><span class="n">launch_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sensordata_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads raw launch data.</span>
@@ -86,7 +88,6 @@
 
 <div class="viewcode-block" id="get_term"><a class="viewcode-back" href="../utils.html#utils.get_term">[docs]</a><span class="k">def</span> <span class="nf">get_term</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns a term id based on a timestamp in seconds.&quot;&quot;&quot;</span>
-  
     <span class="k">try</span><span class="p">:</span>
         <span class="n">eventtime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
         <span class="n">year</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">year</span>
@@ -107,7 +108,7 @@
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="load_edits"><a class="viewcode-back" href="../utils.html#utils.load_edits">[docs]</a><span class="k">def</span> <span class="nf">load_edits</span><span class="p">(</span><span class="n">edit_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sensordata_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loads &#39;tangible&#39; edit events.</span>
+    <span class="sd">&quot;&quot;&quot;Loads edit events that took place on a source file. </span>
 
 <span class="sd">    This convenience method filters out Edit events from raw sensordata, or</span>
 <span class="sd">    reads an already filtered CSV file. If both edit_path and sensordata_path</span>
@@ -151,6 +152,104 @@
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">userName</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="raw_to_csv"><a class="viewcode-back" href="../utils.html#utils.raw_to_csv">[docs]</a><span class="k">def</span> <span class="nf">raw_to_csv</span><span class="p">(</span><span class="n">inpath</span><span class="p">,</span> <span class="n">outpath</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a file of newline separated URLs, writes the URL query params as</span>
+<span class="sd">    rows in CSV format to the specified output file.</span>
+
+<span class="sd">    If your URLs are DevEventTracker posted events, then you probably want the following default fieldnames:</span>
+<span class="sd">    fieldnames = [ </span>
+<span class="sd">        email,</span>
+<span class="sd">        CASSIGNMENTNAME,</span>
+<span class="sd">        time,</span>
+<span class="sd">        Class-Name,</span>
+<span class="sd">        Unit-Type,</span>
+<span class="sd">        Type,</span>
+<span class="sd">        Subtype,</span>
+<span class="sd">        Subsubtype,</span>
+<span class="sd">        onTestCase,</span>
+<span class="sd">        Current-Statements,</span>
+<span class="sd">        Current-Methods,</span>
+<span class="sd">        Current-Size,</span>
+<span class="sd">        Current-Test-Assertions </span>
+<span class="sd">    ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">inpath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fieldnames</span><span class="p">:</span>
+            <span class="n">fieldnames</span> <span class="o">=</span> <span class="p">[</span> 
+                <span class="s1">&#39;email&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;time&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Class-Name&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Unit-Type&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Subtype&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Subsubtype&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;onTestCase&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Current-Statements&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Current-Methods&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Current-Size&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Current-Test-Assertions&#39;</span>
+            <span class="p">]</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">fallout</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">fieldnames</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+             
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">%</span> <span class="mi">1000000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%0.2f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">index</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="mi">8524823</span><span class="p">)))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processed </span><span class="si">%s</span><span class="s1"> of file&#39;</span> <span class="o">%</span> <span class="n">p</span><span class="p">)</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="n">processline</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="processline"><a class="viewcode-back" href="../utils.html#utils.processline">[docs]</a><span class="k">def</span> <span class="nf">processline</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filtertype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a URL, returns a dict object containing the key-value</span>
+<span class="sd">    pairs from its query params. Filters for a specific Type if specified.</span>
+
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    filtertype  =   Only return a dict if the query param for Type == filtertype</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">parse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">parse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+    <span class="n">kvpairs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">_shouldwritekey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">fieldnames</span><span class="p">):</span> 
+            <span class="n">kvpairs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">):</span> <span class="c1"># some items are in the form name0=somekey, value0=somevalue</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="s1">&#39;value</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">_shouldwritekey</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">fieldnames</span><span class="p">):</span> 
+                <span class="n">kvpairs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">1000</span> <span class="c1"># time will always be written</span>
+    <span class="k">if</span> <span class="n">filtertype</span> <span class="ow">and</span> <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">filtertype</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">kvpairs</span></div>
+
+<span class="k">def</span> <span class="nf">_shouldwritekey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">fieldnames</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fieldnames</span><span class="p">:</span>
+       <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fieldnames</span><span class="p">:</span>
+       <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+       <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">_maptousers</span><span class="p">(</span><span class="n">debuggerpath</span><span class="p">,</span> <span class="n">uuidspath</span><span class="p">,</span> <span class="n">crns</span><span class="p">):</span>
+    <span class="n">debug</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">debuggerpath</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">uuids</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">uuidspath</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="n">uuids</span> <span class="o">=</span> <span class="n">uuids</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;project uuid&#39;</span><span class="p">:</span> <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">,</span> <span class="s1">&#39;user uuid&#39;</span><span class="p">:</span> <span class="s1">&#39;userUuid&#39;</span><span class="p">,</span> \
+                                  <span class="s1">&#39;assignment name&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">})</span> \
+        <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;project id&#39;</span><span class="p">,</span> <span class="s1">&#39;course&#39;</span><span class="p">,</span> <span class="s1">&#39;uri&#39;</span><span class="p">])</span> \
+        <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;userUuid&#39;</span><span class="p">,</span> <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">])</span> \
+        <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;CRN in @crns&#39;</span><span class="p">)</span>
+        
+    <span class="n">uuids</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuids</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">u</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">u</span><span class="p">)</span>
+    
+    <span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;userUuid&#39;</span><span class="p">,</span> <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">debug</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="n">uuids</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
 </pre></div>
 
           </div>

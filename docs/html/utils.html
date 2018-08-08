@@ -55,7 +55,7 @@ subsets of events, converting timestamps, getting a term, etc.</p>
 <dl class="function">
 <dt id="utils.load_edits">
 <code class="descclassname">utils.</code><code class="descname">load_edits</code><span class="sig-paren">(</span><em>edit_path=None</em>, <em>sensordata_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#load_edits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.load_edits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads ‘tangible’ edit events.</p>
+<dd><p>Loads edit events that took place on a source file.</p>
 <p>This convenience method filters out Edit events from raw sensordata, or
 reads an already filtered CSV file. If both edit_path and sensordata_path
 are specified, the already-filtered file (at edit_path) takes precedence.</p>
@@ -68,6 +68,39 @@ are specified, the already-filtered file (at edit_path) takes precedence.</p>
 <p>Convenience method: filters out everything but Launches from raw sensordata,
 or reads launches from an already filtered CSV file. If both are specified,
 the launch_path will be given precedence.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.processline">
+<code class="descclassname">utils.</code><code class="descname">processline</code><span class="sig-paren">(</span><em>url</em>, <em>fieldnames=None</em>, <em>filtertype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#processline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.processline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a URL, returns a dict object containing the key-value
+pairs from its query params. Filters for a specific Type if specified.</p>
+<p>Keyword arguments:
+filtertype  =   Only return a dict if the query param for Type == filtertype</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.raw_to_csv">
+<code class="descclassname">utils.</code><code class="descname">raw_to_csv</code><span class="sig-paren">(</span><em>inpath</em>, <em>outpath</em>, <em>fieldnames=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#raw_to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.raw_to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a file of newline separated URLs, writes the URL query params as
+rows in CSV format to the specified output file.</p>
+<p>If your URLs are DevEventTracker posted events, then you probably want the following default fieldnames:
+fieldnames = [</p>
+<blockquote>
+<div>email,
+CASSIGNMENTNAME,
+time,
+Class-Name,
+Unit-Type,
+Type,
+Subtype,
+Subsubtype,
+onTestCase,
+Current-Statements,
+Current-Methods,
+Current-Size,
+Current-Test-Assertions</div></blockquote>
+<p>]</p>
 </dd></dl>
 
 </div>
