@@ -5,6 +5,8 @@ To use:
     import utils 
 """
 import pandas as pd
+import csv
+from urllib import parse
 
 def load_launches(launch_path=None, sensordata_path=None):
     """Loads raw launch data.
@@ -48,7 +50,6 @@ def load_launches(launch_path=None, sensordata_path=None):
 
 def get_term(timestamp):
     """Returns a term id based on a timestamp in seconds."""
-  
     try:
         eventtime = datetime.datetime.fromtimestamp(timestamp)
         year = eventtime.year
@@ -69,7 +70,7 @@ def get_term(timestamp):
         sys.exit()
 
 def load_edits(edit_path=None, sensordata_path=None):
-    """Loads 'tangible' edit events.
+    """Loads edit events that took place on a source file. 
 
     This convenience method filters out Edit events from raw sensordata, or
     reads an already filtered CSV file. If both edit_path and sensordata_path
@@ -113,3 +114,101 @@ def load_edits(edit_path=None, sensordata_path=None):
     data['userName'] = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
     return data
+
+def raw_to_csv(inpath, outpath, fieldnames=None):
+    """
+    Given a file of newline separated URLs, writes the URL query params as
+    rows in CSV format to the specified output file.
+
+    If your URLs are DevEventTracker posted events, then you probably want the following default fieldnames:
+    fieldnames = [ 
+        email,
+        CASSIGNMENTNAME,
+        time,
+        Class-Name,
+        Unit-Type,
+        Type,
+        Subtype,
+        Subsubtype,
+        onTestCase,
+        Current-Statements,
+        Current-Methods,
+        Current-Size,
+        Current-Test-Assertions 
+    ]
+    """
+    with open(inpath, 'r') as infile, open(outpath, 'w') as outfile:
+        if not fieldnames:
+            fieldnames = [ 
+                'email',
+                'CASSIGNMENTNAME',
+                'time',
+                'Class-Name',
+                'Unit-Type',
+                'Type',
+                'Subtype',
+                'Subsubtype',
+                'onTestCase',
+                'Current-Statements',
+                'Current-Methods',
+                'Current-Size',
+                'Current-Test-Assertions'
+            ]
+        writer = csv.DictWriter(fallout, delimiter=',', fieldnames=fieldnames)
+        writer.writeheader()
+             
+        for index, line in enumerate(infile):
+            if (index % 1000000 == 0):
+                p = float(("%0.2f"%(index * 100 / 8524823)))
+                print('Processed %s of file' % p)
+            event = processline(line)
+            if event is not None:
+                writer.writerow(event)
+
+def processline(url, fieldnames=None, filtertype=None):
+    """
+    Given a URL, returns a dict object containing the key-value
+    pairs from its query params. Filters for a specific Type if specified.
+
+    Keyword arguments:
+    filtertype  =   Only return a dict if the query param for Type == filtertype
+    """
+    url = url.split(':', 1)[-1]
+    items = parse.parse_qs(parse.urlparse(url).query)
+    kvpairs = {}
+    for key, value in items.items():
+        if _shouldwritekey(key, fieldnames): 
+            kvpairs[key] = value[0].rstrip('\n\r')
+        elif key.startswith('name'): # some items are in the form name0=somekey, value0=somevalue
+            k = value[0]
+            v = items['value%s' % key[-1]][0]
+            if _shouldwritekey(k, fieldnames): 
+                kvpairs[k] = v.rstrip('\n\r')
+    kvpairs['time'] = int(float(kvpairs['time'])) / 1000 # time will always be written
+    if filtertype and kvpairs['Type'] != filtertype:
+        return None
+    return kvpairs
+
+def _shouldwritekey(key, fieldnames):
+    if not fieldnames:
+       return True
+    elif key in fieldnames:
+       return True
+    else:
+       return False
+
+def _maptousers(debuggerpath, uuidspath, crns):
+    debug = pd.read_csv(debuggerpath, low_memory=False).fillna('')
+    uuids = pd.read_csv(uuidspath).fillna('')
+    
+    uuids = uuids.rename(columns={'project uuid': 'studentProjectUuid', 'user uuid': 'userUuid', \
+                                  'assignment name': 'assignment', 'email': 'userName'}) \
+        .drop(columns=['project id', 'course', 'uri']) \
+        .set_index(keys=['userUuid', 'studentProjectUuid']) \
+        .query('CRN in @crns')
+        
+    uuids['userName'] = uuids['userName'].apply(lambda u: u.split('@')[0] if u != '' else u)
+    
+    debug = debug.set_index(keys=['userUuid', 'studentProjectUuid'])
+    return debug.merge(right=uuids, right_index=True, left_index=True) \
+        .reset_index().set_index(keys=['userName', 'assignment'])
