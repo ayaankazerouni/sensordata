@@ -3,7 +3,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Setup items
 pd.options.display.float_format = '{:.2f}'.format
@@ -16,13 +15,6 @@ def countbreakpointsession(sessions):
     Takes a dataframe of summarised debugger sessions as input.
     """
     return len(sessions.query('hitBreakpoints > 0'))
-
-def timespentdebugging(sessions):
-    """Count the time spent debugging on each project.
-    
-    Takes a dataframe of summarised debugger sessions as input. 
-    """
-    return np.sum((session.endTime - session.time).total_seconds()) / 3600
 
 def dateparser(d, s=True): 
     """Parse timestamps
