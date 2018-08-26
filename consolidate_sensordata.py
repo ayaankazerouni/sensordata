@@ -162,10 +162,7 @@ def load_raw_inc_data(raw_inc_path):
     return data
 
 def load_time_spent_data(time_path):
-    """Loads the time spent in hours for each student-project.
-    
-    Operates on work session data.
-    """
+    """Loads the time spent in hours for each student-project."""
 
     cols_of_interest = [
         'email',

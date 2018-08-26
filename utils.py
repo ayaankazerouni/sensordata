@@ -6,6 +6,7 @@ To use:
 """
 import pandas as pd
 import csv
+import datetime
 from urllib import parse
 
 def load_launches(launch_path=None, sensordata_path=None):
@@ -69,7 +70,7 @@ def get_term(timestamp):
         print('Error! Please make sure your timestamp is in seconds.')
         sys.exit()
 
-def load_edits(edit_path=None, sensordata_path=None):
+def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'):
     """Loads edit events that took place on a source file. 
 
     This convenience method filters out Edit events from raw sensordata, or
@@ -81,7 +82,7 @@ def load_edits(edit_path=None, sensordata_path=None):
 
     if edit_path:
         try:
-            edits = pd.read_csv(edits) # no formatting needed
+            edits = pd.read_csv(edit_path) # no formatting needed
             return edits
         except FileNotFoundError:
             if not sensordata_path:
@@ -90,7 +91,7 @@ def load_edits(edit_path=None, sensordata_path=None):
     # edit_path was invalid, so we need to get edit events from all sensordata
     dtypes = {
         'email': str,
-        'CASSIGNMENTNAME': str,
+        assignment_col: str,
         'time': int,
         'Class-Name': object,
         'Unit-Type': object,
@@ -108,8 +109,8 @@ def load_edits(edit_path=None, sensordata_path=None):
     data = (
             data
             .fillna('')
-            .sort_values(by=['email', 'CASSIGNMENTNAME', 'time'], ascending=[1,1,1])
-            .rename(columns={ 'email': 'userName', 'CASSIGNMENTNAME': 'assignment' })
+            .sort_values(by=['email', assignment_col, 'time'], ascending=[1,1,1])
+            .rename(columns={ 'email': 'userName', assignment_col: 'assignment' })
         )
     data['userName'] = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
