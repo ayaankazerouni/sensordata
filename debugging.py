@@ -31,9 +31,11 @@ def timespentdebugging(sessions):
     """Given a list of summarised debugger sessions, get the number of minutes spent 
     using the Eclipse debugger.
     """
-    time = np.sum(sessions.apply(axis=1, 
-        func=lambda s: (s.endTime - s.time).total_seconds())) / 60
-    return pd.Series({ 'timeSpentDebugging': time })
+    return pd.Series({
+            'totalTime': np.sum(sessions['length']),
+            'avgTime': np.mean(sessions['length']),
+            'medianTime': np.median(sessions['length'])
+        })
 
 
 def sessionsummary(session):
@@ -49,8 +51,9 @@ def sessionsummary(session):
         stepinto = counts.get('Step into', 0)
         starttime = session.iloc[0].time
         endtime = session.iloc[-1].time
+        length = (endtime - starttime).total_seconds()
     else:
-        bpset = bphit = stepover = stepinto = starttime = endtime = 0
+        bpset = bphit = stepover = stepinto = starttime = endtime = length = 0
 
     result = {
         'time': starttime, # call it 'time' so we can concat with other data
@@ -58,7 +61,8 @@ def sessionsummary(session):
         'setBreakpoints': bpset,
         'hitBreakpoints': bphit,
         'stepOver': stepover,
-        'stepInto': stepinto
+        'stepInto': stepinto,
+        'length': length
     }
     return pd.Series(result)
 
