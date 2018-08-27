@@ -22,9 +22,9 @@ def incremental_checking(infile, outfile, deadline = None):
     * Average solution edit size weighted by the time (in hours) until the next test launch
     * Average test edit size weighted by the time (in hours) until the next test launch
 
-    Keyword arguments:
-    infile  -- the input file (cleaned CSV sensordata)
-    outfile -- the resultant file (CSV)
+    Args:
+    infile (str): path to the input file (CSV)
+    outfile (str): path to the resultant file (CSV)
     """
     fieldnames = [
         'projectId',

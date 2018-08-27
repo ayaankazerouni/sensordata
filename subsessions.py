@@ -12,9 +12,9 @@ def get_subsessions(infile, outfile, threshold=3, cleaned=None):
     Subsessions are separated by launch events. Work sessions
     are separated by a gap of 3 hours without activity.
 
-    Keyword arguments:
-    infile  -- the input file (CSV)
-    outfile -- the resultant file (CSV)
+    Args:
+        infile (str): path to the input file (CSV)
+        outfile (str): path to the resultant file (CSV)
     """
     print('Getting subsessions...')
     assignment_field = 'CASSIGNMENTNAME'
@@ -174,13 +174,6 @@ def get_subsessions(infile, outfile, threshold=3, cleaned=None):
             prev_row = row
 
 def to_int(num):
-    """
-    Converts a string to an integer; can handle
-    scientific notation.
-
-    Will throw an exception if string is not an integer in scientific
-    notation or otherwise.
-    """
     return int(float(num))
 
 def main(args):

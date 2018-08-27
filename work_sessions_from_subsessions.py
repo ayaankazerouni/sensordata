@@ -1,9 +1,10 @@
+#! /usr/bin/env python3
+
 """Collapses subsessions into work sessions.
 
 To use:
     ./work_sessions.py <subsessions file> <outfile>
 """
-#! /usr/bin/env python3
 
 import csv
 import sys
