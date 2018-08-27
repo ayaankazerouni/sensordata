@@ -41,8 +41,8 @@ export function makeSkylinePlot(dataFile) {
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  const assignment = 'assignment2';
-  const termName = 'Spring 2016';
+  const assignment = 'assignment3';
+  const termName = 'Fall 2016';
   const term = termName.toLowerCase().replace(/\s+/, '');
 
   const ms1 = moment(+dueTimes[term][assignment]['milestone1']);

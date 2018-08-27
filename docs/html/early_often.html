@@ -53,21 +53,24 @@ for [solution/test] code writing and [solution/test] launches.</p>
 <dl class="docutils">
 <dt>To use:</dt>
 <dd>from early_often import earlyoften, or
-./early_often.py &lt;input file&gt; &lt;output file&gt; on the command line</dd>
+./early_often.py &lt;input file&gt; &lt;web-cat submissions file&gt; &lt;duedates file&gt; &lt;output file&gt; on the command line</dd>
 </dl>
 <dl class="function">
 <dt id="early_often.earlyoften">
-<code class="descclassname">early_often.</code><code class="descname">earlyoften</code><span class="sig-paren">(</span><em>infile</em>, <em>submissionspath</em>, <em>duetimepath</em>, <em>outfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#earlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.earlyoften" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">early_often.</code><code class="descname">earlyoften</code><span class="sig-paren">(</span><em>infile</em>, <em>submissionpath</em>, <em>duetimepath</em>, <em>outfile=None</em>, <em>dtypes=None</em>, <em>date_parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#earlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.earlyoften" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate Early/Often indices for developers based on IDE events.
 Early/Often refers to the mean time of a certain type of event, in terms of
-“days until the deadline”.</p>
+“days until the deadline”. Applying the same concept, we also calculate
+medians and standard deviations.</p>
 <p>Keyword arguments:
 infile          – Path to a file containing raw SensorData
-outfile         – Path to a file where combined early often metrics should be written (optional).</p>
+outfile         – (Optional) Path to a file where combined early often metrics should be written (optional).</p>
 <blockquote>
 <div>If None, output is written to a Pandas DataFrame.</div></blockquote>
-<p>submissionspath – Path to Web-CAT submissions. Used only to determine the time of the final submission.
-duetimepath     – Path to a JSON file containing due date data for assignments in different terms.</p>
+<p>submissionpath  – Path to Web-CAT submissions. Used only to determine the time of the final submission.
+duetimepath     – Path to a JSON file containing due date data for assignments in different terms.
+dtypes          – (Optional, no-CLI) Column data types (also only reads the specified columns)
+date_parser      – (Optional, no-CLI). A function or lambda to parse timestamps</p>
 </dd></dl>
 
 <dl class="function">
@@ -78,13 +81,16 @@ duetimepath     – Path to a JSON file containing due date data for assignments
 
 <dl class="function">
 <dt id="early_often.userearlyoften">
-<code class="descclassname">early_often.</code><code class="descname">userearlyoften</code><span class="sig-paren">(</span><em>usergroup</em>, <em>due_date_data</em>, <em>submissions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#userearlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.userearlyoften" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">early_often.</code><code class="descname">userearlyoften</code><span class="sig-paren">(</span><em>usergroup</em>, <em>due_date_data</em>, <em>submissions</em>, <em>usercol='userId'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#userearlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.userearlyoften" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function acts on data for one student’s sensordata.
 Generally, it is invoked by earlyoften in a split-apply-combine procedure.</p>
 <p>Keyword arguments:
 usergroup       – Event stream for a student working on a single project
 due_date_data   – Dictionary containing due dates in millisecond timestamps 
-submissions     – Last submission from each student`</p>
+submissions     – Last submission from each student
+usercol         – Name of the column identifying the user (default “userId”)</p>
+<blockquote>
+<div>Used to decide if id needs to be scrubbed (e.g. remove email domain, etc.)</div></blockquote>
 </dd></dl>
 
 </div>
@@ -144,7 +150,7 @@ submissions     – Last submission from each student`</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Ayaan Kazerouni.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.7.
     </div>
   </body>
 </html>

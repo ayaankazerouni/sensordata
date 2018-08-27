@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Calculates incremental development metrics in the form
 of Early/Often indices. 
 
@@ -8,12 +10,11 @@ for [solution/test] code writing and [solution/test] launches.
 
 To use:
     from early_often import earlyoften, or
-    ./early_often.py <input file> <output file> on the command line
+    ./early_often.py <input file> <web-cat submissions file> <duedates file> <output file> on the command line
 """
 
-#!/usr/bin/env python3
-
 from utils import get_term
+from consolidate_sensordata import load_submission_data
 
 import sys
 import datetime
@@ -22,7 +23,7 @@ import json
 import pandas as pd
 import numpy as np
 
-def userearlyoften(usergroup, due_date_data, submissions):
+def userearlyoften(usergroup, due_date_data, submissions, usercol='userId'):
     """
     This function acts on data for one student's sensordata.
     Generally, it is invoked by earlyoften in a split-apply-combine procedure.
@@ -30,7 +31,9 @@ def userearlyoften(usergroup, due_date_data, submissions):
     Keyword arguments:
     usergroup       -- Event stream for a student working on a single project
     due_date_data   -- Dictionary containing due dates in millisecond timestamps 
-    submissions     -- Last submission from each student`
+    submissions     -- Last submission from each student
+    usercol         -- Name of the column identifying the user (default "userId")
+                        Used to decide if id needs to be scrubbed (e.g. remove email domain, etc.)
     """
     prev_row = None
     total_weighted_edits_bytes = []
@@ -54,34 +57,44 @@ def userearlyoften(usergroup, due_date_data, submissions):
     total_weighted_normal_launches = []
     total_test_assertions = []
     total_weighted_test_assertions = []
+    total_weighted_debug_sessions = []
 
     curr_sizes_bytes = {}
     curr_sizes_stmts = {}
     curr_sizes_methods = {}
     curr_test_assertions = {} # for each file
 
-    assignment_field = 'CASSIGNMENTNAME'
-    if 'cleaned_assignment' in usergroup.columns:
-        assignment_field = 'cleaned_assignment'
+    user_id, assignment = usergroup.name # returns a tuple
 
+    # get the term and assignment due date
     first = usergroup.iloc[0]
-    first_time = int(first['time'] / 1000)
+    first_time = first['time']
+    epoch = datetime.datetime.utcfromtimestamp(0) # seconds
+    first_time = (first_time - epoch).total_seconds()
+        
     term = get_term(first_time)
-    first_assignment = first[assignment_field]
-    assignment_number = int(re.search(r'\d', first_assignment).group())
-    user_id = first['email'].split('@')[0]
+    assignment_number = int(re.search(r'\d', assignment).group())
 
     due_time = due_date_data[term]['assignment%d' % (assignment_number)]['dueTime']
     due_time = int(due_time)
     due_date = datetime.date.fromtimestamp(due_time / 1000)
 
-    lastsubmissiontime = submissions.loc[user_id, 'Project %d' % assignment_number]['submissionTimeRaw']
+    if usercol == 'email':
+        user_id = user_id.split('@')[0]
+    
+    try:
+        lastsubmissiontime = submissions.loc[user_id, 'Project {}'.format(assignment_number)]['submissionTimeRaw']
+    except KeyError:
+        # Either the user or the assignment is not present in the submission list.
+        # Extract the information manually.
+        print('Cannot find final submission for {} on Project {}'.format(user_id, assignment_number))
+        return None
 
     for index, row in usergroup.iterrows():
         prev_row = row if prev_row is None else prev_row
-
-        time = int(float(row['time']))
-        date = datetime.date.fromtimestamp(time / 1000)
+    
+        time = row['time']
+        date = time.date()
         days_to_deadline = (due_date - date).days
 
         if time > lastsubmissiontime or days_to_deadline < -4:
@@ -155,168 +168,188 @@ def userearlyoften(usergroup, due_date_data, submissions):
                 total_weighted_test_launches.append(days_to_deadline)
             elif (repr(row['Subtype']) == repr('Normal')):
                 total_weighted_normal_launches.append(days_to_deadline)
+        elif (repr(row['Type']) == repr('DebugSession')):
+            length = float(row['length'])
+            if length > 30:
+                total_weighted_debug_sessions.append(days_to_deadline)
 
         prev_row = row
 
-    if len(total_edits_bytes) > 0:
-        byte_early_often_index = np.sum(total_weighted_edits_bytes) / np.sum(total_edits_bytes)
-        stmt_early_often_index = np.sum(total_weighted_edits_stmts) / np.sum(total_edits_stmts)
-        solution_byte_early_often_index = np.sum(total_weighted_solution_bytes) / np.sum(total_solution_bytes)
-        solution_stmt_early_often_index = np.sum(total_weighted_solution_stmts) / np.sum(total_solution_stmts)
-        solution_meth_early_often_index = np.sum(total_weighted_solution_methods) / np.sum(total_solution_methods)
-        test_byte_early_often_index = np.sum(total_weighted_test_bytes) / np.sum(total_test_bytes)
-        test_stmt_early_often_index = np.sum(total_weighted_test_stmts) / np.sum(total_test_stmts)
-        test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
-        test_assrt_early_often_index = np.sum(total_weighted_test_assertions) / np.sum(total_test_assertions)
-        launch_early_often = np.mean(total_weighted_launches)
-        launch_median = np.median(total_weighted_launches)
-        launch_sd = np.std(total_weighted_launches)
-        test_launch_early_often = np.mean(total_weighted_test_launches)
-        test_launch_median = np.median(total_weighted_test_launches)
-        test_launch_sd = np.std(total_weighted_test_launches)
-        normal_launch_early_often = np.mean(total_weighted_normal_launches)
-        normal_launch_median = np.median(total_weighted_normal_launches)
-        normal_launch_sd = np.std(total_weighted_normal_launches)
+    byte_early_often_index = np.sum(total_weighted_edits_bytes) / np.sum(total_edits_bytes)
+    stmt_early_often_index = np.sum(total_weighted_edits_stmts) / np.sum(total_edits_stmts)
+    solution_byte_early_often_index = np.sum(total_weighted_solution_bytes) / np.sum(total_solution_bytes)
+    solution_stmt_early_often_index = np.sum(total_weighted_solution_stmts) / np.sum(total_solution_stmts)
+    solution_meth_early_often_index = np.sum(total_weighted_solution_methods) / np.sum(total_solution_methods)
+    test_byte_early_often_index = np.sum(total_weighted_test_bytes) / np.sum(total_test_bytes)
+    test_stmt_early_often_index = np.sum(total_weighted_test_stmts) / np.sum(total_test_stmts)
+    test_meth_early_often_index = np.sum(total_weighted_test_methods) / np.sum(total_test_methods)
+    test_assrt_early_often_index = np.sum(total_weighted_test_assertions) / np.sum(total_test_assertions)
+    launch_early_often = np.mean(total_weighted_launches)
+    launch_median = np.median(total_weighted_launches)
+    launch_sd = np.std(total_weighted_launches)
+    test_launch_early_often = np.mean(total_weighted_test_launches)
+    test_launch_median = np.median(total_weighted_test_launches)
+    test_launch_sd = np.std(total_weighted_test_launches)
+    normal_launch_early_often = np.mean(total_weighted_normal_launches)
+    normal_launch_median = np.median(total_weighted_normal_launches)
+    normal_launch_sd = np.std(total_weighted_normal_launches)
+    debug_session_early_often = np.mean(total_weighted_debug_sessions)
+    debug_session_median = np.median(total_weighted_debug_sessions)
+    debug_session_sd = np.std(total_weighted_debug_sessions)
 
-        stretched_bytes = []
-        for weighted, unweighted in zip(total_weighted_edits_bytes, total_edits_bytes):
-            relative_time = weighted / unweighted
-            for i in range(weighted):
-                stretched_bytes.append(relative_time)
+    stretched_bytes = []
+    for weighted, unweighted in zip(total_weighted_edits_bytes, total_edits_bytes):
+        relative_time = weighted / unweighted
+        for i in range(weighted):
+            stretched_bytes.append(relative_time)
 
-        byte_edit_median = np.median(stretched_bytes)
-        byte_edit_sd = np.std(stretched_bytes)
+    byte_edit_median = np.median(stretched_bytes)
+    byte_edit_sd = np.std(stretched_bytes)
 
-        stretched_solution_bytes = []
-        for weighted, unweighted in zip(total_weighted_solution_bytes, total_solution_bytes):
-            relative_time = weighted / unweighted
-            for i in range(weighted):
-                stretched_solution_bytes.append(relative_time)
+    stretched_solution_bytes = []
+    for weighted, unweighted in zip(total_weighted_solution_bytes, total_solution_bytes):
+        relative_time = weighted / unweighted
+        for i in range(weighted):
+            stretched_solution_bytes.append(relative_time)
 
-        solution_byte_edit_median = np.median(stretched_solution_bytes)
-        solution_byte_edit_sd = np.std(stretched_solution_bytes)
+    solution_byte_edit_median = np.median(stretched_solution_bytes)
+    solution_byte_edit_sd = np.std(stretched_solution_bytes)
 
-        stretched_test_bytes = []
-        for weighted, unweighted in zip(total_weighted_test_bytes, total_test_bytes):
-            relative_time = weighted / unweighted
-            for i in range(weighted):
-                stretched_test_bytes.append(relative_time)
+    stretched_test_bytes = []
+    for weighted, unweighted in zip(total_weighted_test_bytes, total_test_bytes):
+        relative_time = weighted / unweighted
+        for i in range(weighted):
+            stretched_test_bytes.append(relative_time)
 
-        test_byte_edit_median = np.median(stretched_test_bytes)
-        test_byte_edit_sd = np.std(stretched_test_bytes)
+    test_byte_edit_median = np.median(stretched_test_bytes)
+    test_byte_edit_sd = np.std(stretched_test_bytes)
 
-        stretched_stmts = []
-        for weighted, unweighted in zip(total_weighted_edits_stmts, total_edits_stmts):
-            relative_time = weighted / unweighted
-            for i in range(weighted):
-                stretched_stmts.append(relative_time)
+    stretched_stmts = []
+    for weighted, unweighted in zip(total_weighted_edits_stmts, total_edits_stmts):
+        relative_time = weighted / unweighted
+        for i in range(weighted):
+            stretched_stmts.append(relative_time)
 
-        stmt_edit_median = np.median(stretched_stmts)
-        stmt_edit_sd = np.std(stretched_stmts)
+    stmt_edit_median = np.median(stretched_stmts)
+    stmt_edit_sd = np.std(stretched_stmts)
 
-        stretched_assertions = []
-        for weighted, unweighted in zip(total_weighted_test_assertions, total_test_assertions):
-            relative_time = weighted / unweighted
-            for i in range(weighted):
-                stretched_assertions.append(relative_time)
+    stretched_assertions = []
+    for weighted, unweighted in zip(total_weighted_test_assertions, total_test_assertions):
+        relative_time = weighted / unweighted
+        for i in range(weighted):
+            stretched_assertions.append(relative_time)
 
-        test_assertion_median = np.median(stretched_assertions)
-        test_assertion_sd = np.std(stretched_assertions)
+    test_assertion_median = np.median(stretched_assertions)
+    test_assertion_sd = np.std(stretched_assertions)
 
-        to_write = {
-            'projectId': prev_row['projectId'],
-            'assignment': prev_row['CASSIGNMENTNAME'],
-            'email': prev_row['email'],
-            'byteEarlyOftenIndex': byte_early_often_index,
-            'byteEditMedian': byte_edit_median,
-            'byteEditSd': byte_edit_sd,
-            'stmtEarlyOftenIndex': stmt_early_often_index,
-            'stmtEditMedian': stmt_edit_median,
-            'stmtEditSd': stmt_edit_sd,
-            'solutionByteEarlyOftenIndex': solution_byte_early_often_index,
-            'solutionByteEditMedian': solution_byte_edit_median,
-            'solutionByteEditSd': solution_byte_edit_sd,
-            'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
-            'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
-            'testByteEarlyOftenIndex': test_byte_early_often_index,
-            'testByteEditMedian': test_byte_edit_median,
-            'testByteEditSd': test_byte_edit_sd,
-            'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
-            'testMethodsEarlyOftenIndex': test_meth_early_often_index,
-            'assertionsEarlyOftenIndex': test_assrt_early_often_index,
-            'assertionsMedian': test_assertion_median,
-            'assertionSd': test_assertion_sd,
-            'launchEarlyOften': launch_early_often,
-            'launchMedian': launch_median,
-            'launchSd': launch_sd,
-            'testLaunchEarlyOften': test_launch_early_often,
-            'testLaunchMedian': test_launch_median,
-            'testLaunchSd': test_launch_sd,
-            'normalLaunchEarlyOften': normal_launch_early_often,
-            'normalLaunchMedian': normal_launch_median,
-            'normalLaunchSd': normal_launch_sd
-        }
+    to_write = {
+        'byteEarlyOftenIndex': byte_early_often_index,
+        'byteEditMedian': byte_edit_median,
+        'byteEditSd': byte_edit_sd,
+        'stmtEarlyOftenIndex': stmt_early_often_index,
+        'stmtEditMedian': stmt_edit_median,
+        'stmtEditSd': stmt_edit_sd,
+        'solutionByteEarlyOftenIndex': solution_byte_early_often_index,
+        'solutionByteEditMedian': solution_byte_edit_median,
+        'solutionByteEditSd': solution_byte_edit_sd,
+        'solutionStmtEarlyOftenIndex': solution_stmt_early_often_index,
+        'solutionMethodsEarlyOftenIndex': solution_meth_early_often_index,
+        'testByteEarlyOftenIndex': test_byte_early_often_index,
+        'testByteEditMedian': test_byte_edit_median,
+        'testByteEditSd': test_byte_edit_sd,
+        'testStmtsEarlyOftenIndex': test_stmt_early_often_index,
+        'testMethodsEarlyOftenIndex': test_meth_early_often_index,
+        'assertionsEarlyOftenIndex': test_assrt_early_often_index,
+        'assertionsMedian': test_assertion_median,
+        'assertionSd': test_assertion_sd,
+        'launchEarlyOften': launch_early_often,
+        'launchMedian': launch_median,
+        'launchSd': launch_sd,
+        'testLaunchEarlyOften': test_launch_early_often,
+        'testLaunchMedian': test_launch_median,
+        'testLaunchSd': test_launch_sd,
+        'normalLaunchEarlyOften': normal_launch_early_often,
+        'normalLaunchMedian': normal_launch_median,
+        'normalLaunchSd': normal_launch_sd,
+        'debugSessionEarlyOften': debug_session_early_often,
+        'debugSessionMedian': debug_session_median,
+        'debugSessionSd': debug_session_sd
+    }
 
-        return pd.Series(to_write)
-    else:
-        return None
+    return pd.Series(to_write)
 
-def earlyoften(infile, submissionspath, duetimepath, outfile=None):
+def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, date_parser=None):
     """Calculate Early/Often indices for developers based on IDE events.
     Early/Often refers to the mean time of a certain type of event, in terms of
-    "days until the deadline".
+    "days until the deadline". Applying the same concept, we also calculate
+    medians and standard deviations.
     
     Keyword arguments:
     infile          -- Path to a file containing raw SensorData
-    outfile         -- Path to a file where combined early often metrics should be written (optional).
+    outfile         -- (Optional) Path to a file where combined early often metrics should be written (optional).
                        If None, output is written to a Pandas DataFrame.
-    submissionspath -- Path to Web-CAT submissions. Used only to determine the time of the final submission.
+    submissionpath  -- Path to Web-CAT submissions. Used only to determine the time of the final submission.
     duetimepath     -- Path to a JSON file containing due date data for assignments in different terms.
+    dtypes          -- (Optional, no-CLI) Column data types (also only reads the specified columns)
+    date_parser      -- (Optional, no-CLI). A function or lambda to parse timestamps
     """
-    # Grab the last submission from each student
-    dtypes = {
-        'userName': str,
-        'assignment': str,
-        'submissionNo': int,
-        'submissionTimeRaw': float
-    }
-    submissions = pd.read_csv(submissionspath, dtype=dtypes, usecols=list(dtypes.keys()))
-    submissions.sort_values(by=['userName', 'assignment', 'submissionNo'], ascending=[1,1,0], inplace=True)
-    submissions = submissions.groupby(['userName', 'assignment']).first()
+    submissions = load_submission_data(submissionpath)
     print('0. Finished reading submission data.')
 
     # Import event stream for all students 
-    dtypes = {
-        'userId': str,
-        'projectId': str,
-        'email': str,
-        'CASSIGNMENTNAME': str,
-        'time': int,
-        'Class-Name': object,
-        'Unit-Type': object,
-        'Type': object,
-        'Subtype': object,
-        'Subsubtype': object,
-        'onTestCase': object,
-        'Current-Statements': object,
-        'Current-Methods': object,
-        'Current-Size': object,
-        'Current-Test-Assertions': object
-    }
-    df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()))
-    df.sort_values(by=['time'], ascending=[1], inplace=True)
-    df.fillna('', inplace=True)
+    if not dtypes:
+        dtypes = {
+            'userId': str,
+            'projectId': str,
+            'email': str,
+            'CASSIGNMENTNAME': str,
+            'time': str,
+            'Class-Name': object,
+            'Unit-Type': object,
+            'Type': object,
+            'Subtype': object,
+            'Subsubtype': object,
+            'onTestCase': object,
+            'Current-Statements': object,
+            'Current-Methods': object,
+            'Current-Size': object,
+            'Current-Test-Assertions': object
+        }
+
+    if not date_parser:
+        # assume timestamps are in milliseconds since the epoch unless specified
+        date_parser = lambda d: datetime.datetime.fromtimestamp(int(d) / 1000)
+    df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()), 
+            date_parser=date_parser, parse_dates=['time']) \
+            .sort_values(by=['time'], ascending=[1]) \
+            .fillna('')
     print('1. Finished reading raw sensordata.')
-
+    
     # Group data by student and project 
-    userdata = df.groupby(['userId'])
-    print('2. Finished grouping data. Calculating measures now. This could take some time...')
+    if 'userId' in df.columns:
+        user_id = 'userId'
+    elif 'email' in df.columns:
+        user_id = 'email' 
+    else:
+        user_id = 'userName'
 
+    assignmentcol = 'assignment'
+    if 'cleaned_assignment' in df.columns:
+        assignmentcol = 'cleaned_assignment'
+    elif 'CASSIGNMENTNAME' in df.columns:
+        assignmentcol = 'CASSIGNMENTNAME'
+
+    grouped = df.groupby([user_id, assignmentcol])
+    print('2. Finished grouping data. Calculating measures now. This could take some time...')
+    
     due_date_data = None
     with open(duetimepath) as data_file:
         due_date_data = json.load(data_file)
 
-    results = userdata.apply(userearlyoften, due_date_data=due_date_data, submissions=submissions)
+    results = grouped.apply(userearlyoften, 
+                due_date_data=due_date_data, 
+                submissions=submissions, 
+                usercol=user_id)
 
     # Write out
     if outfile:
@@ -328,16 +361,21 @@ def earlyoften(infile, submissionspath, duetimepath, outfile=None):
 def main(args):
     """Parses CLI arguments and begins execution."""
     infile = args[0]
-    outfile = args[1]
+    submissionpath = args[1]
+    duetimepath = args[2]
+    outfile = args[3]
+    if args.length > 4:
+        dateformat = args[4]
+    else:
+        dateformat = None
 
     try:
-       results = earlyoften(infile, outfile) # If outfile is None, stores results in memory
+       results = earlyoften(infile=infile, submissionpath=submissionpath, duetimepath=duetimepath, outfile=outfile, dateformat=dateformat) # If outfile is None, stores results in memory
     except FileNotFoundError:
         print("Error! File '%s' does not exist." % infile)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print('Calculates edit statistics for students from raw sensordata.')
-        print('Usage:\n\t./early_often.py <input file> <output file>')
+    if len(sys.argv) < 5:
+        print(__doc__)
         sys.exit()
     main(sys.argv[1:])

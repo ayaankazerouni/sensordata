@@ -3,7 +3,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Setup items
 pd.options.display.float_format = '{:.2f}'.format
@@ -17,13 +16,6 @@ def countbreakpointsession(sessions):
     """
     return len(sessions.query('hitBreakpoints > 0'))
 
-def timespentdebugging(sessions):
-    """Count the time spent debugging on each project.
-    
-    Takes a dataframe of summarised debugger sessions as input. 
-    """
-    return np.sum((session.endTime - session.time).total_seconds()) / 3600
-
 def dateparser(d, s=True): 
     """Parse timestamps
 
@@ -34,6 +26,17 @@ def dateparser(d, s=True):
         return datetime.fromtimestamp(int(float(d)))
     else:
         return datetime.fromtimestamp(int(float(d / 1000)))
+
+def timespentdebugging(sessions):
+    """Given a list of summarised debugger sessions, get the number of minutes spent 
+    using the Eclipse debugger.
+    """
+    return pd.Series({
+            'totalTime': np.sum(sessions['length']),
+            'avgTime': np.mean(sessions['length']),
+            'medianTime': np.median(sessions['length'])
+        })
+
 
 def sessionsummary(session):
     """Get a summary for a single debug session.
@@ -48,8 +51,9 @@ def sessionsummary(session):
         stepinto = counts.get('Step into', 0)
         starttime = session.iloc[0].time
         endtime = session.iloc[-1].time
+        length = (endtime - starttime).total_seconds()
     else:
-        bpset = bphit = stepover = stepinto = starttime = endtime = 0
+        bpset = bphit = stepover = stepinto = starttime = endtime = length = 0
 
     result = {
         'time': starttime, # call it 'time' so we can concat with other data
@@ -57,7 +61,8 @@ def sessionsummary(session):
         'setBreakpoints': bpset,
         'hitBreakpoints': bphit,
         'stepOver': stepover,
-        'stepInto': stepinto
+        'stepInto': stepinto,
+        'length': length
     }
     return pd.Series(result)
 
@@ -80,10 +85,25 @@ def userdebugsessions(userevents):
     sessions = userevents.groupby(['session']).apply(sessionsummary) 
     return sessions
 
-def getdebugsessions(debugpath):
+def getdebugsessions(debuggerusepath=None, sessionspath=None):
     """Given raw Debug events for all students on all projects, 
-    reduce them to session summaries for each student-project
+    reduce them to session summaries for each student-project.
+
+    If sessionspath is provided, read already-computed Debug sessions
+    from the specified file.
     """
+    if debuggerusepath is None and sessionspath is None:
+        raise ValueError('Either debuggerusepath or sessionspath must be specified.')
+
+    if sessionspath:
+        try:
+            sessions = pd.read_csv('data/fall-2016/debugger-sessions.csv',
+                    index_col=['userName', 'assignment'], parse_dates=['time', 'endTime'])
+            return sessions
+        except FileNotFoundError:
+            if not debuggerusepath:
+                raise ValueError('sessionspath was invalid, and debuggerusepath was not specified')
+
     dtypes = {
         'userName': str,
         'assignment': str,
@@ -94,7 +114,7 @@ def getdebugsessions(debugpath):
         'Subtype': str
     }
     assignments = [ 'Project 1', 'Project 2', 'Project 3', 'Project 4' ]
-    events = pd.read_csv(filepath_or_buffer=debugpath, low_memory=False, date_parser=dateparser,
+    events = pd.read_csv(filepath_or_buffer=debuggerusepath, low_memory=False, date_parser=dateparser,
         parse_dates=['time'], dtype=dtypes, usecols=dtypes.keys()) \
         .query("Subtype != 'Unknown' and assignment in @assignments") \
         .sort_values(['userName', 'assignment', 'time'], ascending=[1, 1, 1])

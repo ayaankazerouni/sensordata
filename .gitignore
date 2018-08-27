@@ -25,6 +25,9 @@ sandbox.py
 __pycache__/
 .spyproject/
 
+# plotly plots
+temp-plot.html
+
 # no npm extras
 */node_modules/
 npm-debug.log

@@ -2,11 +2,12 @@
 
 A collection of scripts for measuring and visualising aspects of incremental software development, using SensorData collected by [DevEventTracker](https://github.com/web-cat/eclipse-plugins-importer-exporter/tree/DevEventTrackerAddition).
 
-These scripts deal with data in CSV format.
-
 If you use this work, please cite the following:
 
-* [Ayaan M. Kazerouni, Stephen H. Edwards, T. Simin Hall, and Clifford A. Shaffer. 2017. DevEventTracker: Tracking Development Events to Assess Incremental Development and Procrastination.](https://dl.acm.org/citation.cfm?id=3059050&CFID=816451901&CFTOKEN=34061433)
+* [Ayaan M. Kazerouni, Stephen H. Edwards, and Clifford A. Shaffer. 2017. Quantifying Incremental Development Practices and Their Relationship to Procrastination.](https://dl.acm.org/citation.cfm?id=3106180)
+
+If you're unable to access the paper, please email me and I'll send you a copy.
+
 ---
 
 * [Documentation](https://ayaankazerouni.github.io/sensordata)
@@ -15,7 +16,7 @@ If you use this work, please cite the following:
 * [JS visualisations](#js-visualisations)
   - [Skyline plots](#skyline-plots)
 
-### [Assumed schema]
+### Assumed schema
 The data has the following fields:
 
 * **time** (*required*) - UNIX timestamp in milliseconds
