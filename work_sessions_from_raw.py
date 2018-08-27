@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 """
 Gets work session data from raw sensordata.
 Work sessions are separeted by a specified number of
@@ -8,8 +10,6 @@ To use:
     ./work_sessions_from_raw.py <infile> <outfile> on the command line
 """
 
-#! /usr/bin/env python3
-
 from datetime import datetime
 import argparse
 import pandas as pd
@@ -18,12 +18,16 @@ def userworksessions(usergroup, threshold=3):
     """
     Acts on sensordata for a single student-project. 
     Returns a dataframe of work sessions, where work sessions are
-    delimited by threshold hours of inactivity.
+    delimited by *threshold* hours of inactivity. This is typically called
+    by *worksessions* as part of a split-apply-combine procedure.
 
-    Keyword arguments:
-    usergroup   pd.DataFrame containing all sensordata from the given project
-    threshold   the number of hours of inactivity that should separate a work session.
-                default 3.
+    Args:
+        usergroup (DataFrame): containing all sensordata from the given project
+        threshold (int, optional): number of hours of inactivity that should separate a work session.
+            Defaults to 3.
+
+    Returns:
+        A *DataFrame* containing the work sessions for the given user on a given assignment.
     """
     prev_row = None
     test_launches = 0

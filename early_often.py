@@ -28,12 +28,14 @@ def userearlyoften(usergroup, due_date_data, submissions, usercol='userId'):
     This function acts on data for one student's sensordata.
     Generally, it is invoked by earlyoften in a split-apply-combine procedure.
 
-    Keyword arguments:
-    usergroup       -- Event stream for a student working on a single project
-    due_date_data   -- Dictionary containing due dates in millisecond timestamps 
-    submissions     -- Last submission from each student
-    usercol         -- Name of the column identifying the user (default "userId")
-                        Used to decide if id needs to be scrubbed (e.g. remove email domain, etc.)
+    Args:
+        usergroup (DataFrame): Event stream for a student working on a single project
+        due_date_data (dict): Dictionary containing due dates in millisecond timestamps 
+        submissions (DataFrame): Last submission from each student
+        usercol (str): Name of the column identifying the user (default "userId")
+
+    Returns:
+        A *DataFrame* containing the early often measurements for the user on a given assignment.
     """
     prev_row = None
     total_weighted_edits_bytes = []
@@ -284,14 +286,17 @@ def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, d
     "days until the deadline". Applying the same concept, we also calculate
     medians and standard deviations.
     
-    Keyword arguments:
-    infile          -- Path to a file containing raw SensorData
-    outfile         -- (Optional) Path to a file where combined early often metrics should be written (optional).
-                       If None, output is written to a Pandas DataFrame.
-    submissionpath  -- Path to Web-CAT submissions. Used only to determine the time of the final submission.
-    duetimepath     -- Path to a JSON file containing due date data for assignments in different terms.
-    dtypes          -- (Optional, no-CLI) Column data types (also only reads the specified columns)
-    date_parser      -- (Optional, no-CLI). A function or lambda to parse timestamps
+    Args:
+        infile (str): Path to a file containing raw SensorData
+        outfile (str, optional): Path to a file where combined early often metrics should be written (optional). 
+            If *None*, output is written to a Pandas DataFrame.
+        submissionpath (str): Path to Web-CAT submissions. Used only to determine the time of the final submission.
+        duetimepath (str): Path to a JSON file containing due date data for assignments in different terms.
+        dtypes (dict, optional, no-CLI): Column data types (also only reads the specified columns)
+        date_parser (func, optional, no-CLI): A function or lambda to parse timestamps.
+
+    Returns:
+        A *DataFrame* if no *outfile* is specified. *None* otherwise.
     """
     submissions = load_submission_data(submissionpath)
     print('0. Finished reading submission data.')

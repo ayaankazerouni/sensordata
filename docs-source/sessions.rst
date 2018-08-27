@@ -1,14 +1,14 @@
 Subsessions and work sessions
 =============================
 
-subsessions.py
---------------
+Subsessions
+-----------
 
 .. automodule:: subsessions
   :members:
 
-work_sessions.py
-----------------
+Work sessions
+-------------
 
 .. automodule:: work_sessions_from_subsessions
   :members:

@@ -11,12 +11,12 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
     """
     Import, format, and consolidate incremental development metrics from several sources.
 
-    Keyword arguments:
-    webcat_path         = String path, None for default, or False to omit
-    raw_inc_path        = String path, None for default, or False to omit
-    time_path           = String path, None for default, or False to omit
-    launch_totals_path  = String path to work_session data, None for default, or False to omit 
-    repo_mining_path    = String path, None for default, or False to omit 
+    Args:
+        webcat_path (str): String path, None for default, or False to omit
+        raw_inc_path (str): String path, None for default, or False to omit
+        time_path (str): String path, None for default, or False to omit
+        launch_totals_path (str): String path to work_session data, None for default, or False to omit 
+        repo_mining_path (str): String path, None for default, or False to omit 
     """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'
@@ -64,8 +64,10 @@ def load_submission_data(webcat_path, onlyfinal=True):
     scores on instructor-written reference tests, and doesn't include points
     from students' own tests.
     
-    Keyword arguments:
-    onlyfinal    if True, returns only the last submission for each student-project (i.e., the graded submission)
+    Args:
+        webcat_path (str): Path to web-cat submission data. 
+        onlyfinal (bool, optional): Return only the last submission for each student-project?
+            Defaults to True
     """
 
     cols_of_interest = [
