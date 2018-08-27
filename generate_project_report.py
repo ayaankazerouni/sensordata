@@ -1,3 +1,5 @@
+#! /usr/bin/env python3 
+
 """Generate a "report" of incremental development metrics from raw sensordata
 for an assignment. Includes ids for student-projects along with results
 for all the different measures.
@@ -5,8 +7,6 @@ for all the different measures.
 To use:
     ./generate_project_report.py -h 
 """
-
-#! /usr/bin/env python3
 
 import argparse
 import os
