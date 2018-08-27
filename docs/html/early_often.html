@@ -62,20 +62,26 @@ for [solution/test] code writing and [solution/test] launches.</p>
 Early/Often refers to the mean time of a certain type of event, in terms of
 “days until the deadline”. Applying the same concept, we also calculate
 medians and standard deviations.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><p class="first">infile (str): Path to a file containing raw SensorData
-outfile (str, optional): Path to a file where combined early often metrics should be written (optional).</p>
-<blockquote>
-<div>If <em>None</em>, output is written to a Pandas DataFrame.</div></blockquote>
-<p class="last">submissionpath (str): Path to Web-CAT submissions. Used only to determine the time of the final submission.
-duetimepath (str): Path to a JSON file containing due date data for assignments in different terms.
-dtypes (dict, optional, no-CLI): Column data types (also only reads the specified columns)
-date_parser (func, optional, no-CLI): A function or lambda to parse timestamps.</p>
-</dd>
-<dt>Returns:</dt>
-<dd>A <em>DataFrame</em> if no <em>outfile</em> is specified. <em>None</em> otherwise.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>infile</strong> (<em>str</em>) – Path to a file containing raw SensorData</li>
+<li><strong>outfile</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to a file where combined early often metrics should be written (optional).
+If <em>None</em>, output is written to a Pandas DataFrame.</li>
+<li><strong>submissionpath</strong> (<em>str</em>) – Path to Web-CAT submissions. Used only to determine the time of the final submission.</li>
+<li><strong>duetimepath</strong> (<em>str</em>) – Path to a JSON file containing due date data for assignments in different terms.</li>
+<li><strong>dtypes</strong> (<em>dict</em><em>, </em><em>optional</em><em>, </em><em>no-CLI</em>) – Column data types (also only reads the specified columns)</li>
+<li><strong>date_parser</strong> (<em>func</em><em>, </em><em>optional</em><em>, </em><em>no-CLI</em>) – A function or lambda to parse timestamps.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <em>DataFrame</em> if no <em>outfile</em> is specified. <em>None</em> otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -89,15 +95,23 @@ date_parser (func, optional, no-CLI): A function or lambda to parse timestamps.<
 <code class="descclassname">early_often.</code><code class="descname">userearlyoften</code><span class="sig-paren">(</span><em>usergroup</em>, <em>due_date_data</em>, <em>submissions</em>, <em>usercol='userId'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#userearlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.userearlyoften" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function acts on data for one student’s sensordata.
 Generally, it is invoked by earlyoften in a split-apply-combine procedure.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>usergroup (DataFrame): Event stream for a student working on a single project
-due_date_data (dict): Dictionary containing due dates in millisecond timestamps 
-submissions (DataFrame): Last submission from each student
-usercol (str): Name of the column identifying the user (default “userId”)</dd>
-<dt>Returns:</dt>
-<dd>A <em>DataFrame</em> containing the early often measurements for the user on a given assignment.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>usergroup</strong> (<em>DataFrame</em>) – Event stream for a student working on a single project</li>
+<li><strong>due_date_data</strong> (<em>dict</em>) – Dictionary containing due dates in millisecond timestamps</li>
+<li><strong>submissions</strong> (<em>DataFrame</em>) – Last submission from each student</li>
+<li><strong>usercol</strong> (<em>str</em>) – Name of the column identifying the user (default “userId”)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <em>DataFrame</em> containing the early often measurements for the user on a given assignment.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

@@ -52,11 +52,18 @@
 <dd><p>Clusters data into work sessions and subsessions.</p>
 <p>Subsessions are separated by launch events. Work sessions
 are separated by a gap of 3 hours without activity.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>infile (str): path to the input file (CSV)
-outfile (str): path to the resultant file (CSV)</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>infile</strong> (<em>str</em>) – path to the input file (CSV)</li>
+<li><strong>outfile</strong> (<em>str</em>) – path to the resultant file (CSV)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -84,20 +91,26 @@ hours of inactivity (3 by default).</p>
 <dl class="function">
 <dt id="work_sessions_from_raw.userworksessions">
 <code class="descclassname">work_sessions_from_raw.</code><code class="descname">userworksessions</code><span class="sig-paren">(</span><em>usergroup</em>, <em>threshold=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions_from_raw.html#userworksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions_from_raw.userworksessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acts on sensordata for a single student-project. 
+<dd><p>Acts on sensordata for a single student-project.
 Returns a dataframe of work sessions, where work sessions are
 delimited by <em>threshold</em> hours of inactivity. This is typically called
 by <em>worksessions</em> as part of a split-apply-combine procedure.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><p class="first">usergroup (DataFrame): containing all sensordata from the given project
-threshold (int, optional): number of hours of inactivity that should separate a work session.</p>
-<blockquote class="last">
-<div>Defaults to 3.</div></blockquote>
-</dd>
-<dt>Returns:</dt>
-<dd>A <em>DataFrame</em> containing the work sessions for the given user on a given assignment.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>usergroup</strong> (<em>DataFrame</em>) – containing all sensordata from the given project</li>
+<li><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – number of hours of inactivity that should separate a work session.
+Defaults to 3.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <em>DataFrame</em> containing the work sessions for the given user on a given assignment.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

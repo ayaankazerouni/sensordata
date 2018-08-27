@@ -49,14 +49,21 @@
 <dt id="consolidate_sensordata.consolidate_student_data">
 <code class="descclassname">consolidate_sensordata.</code><code class="descname">consolidate_student_data</code><span class="sig-paren">(</span><em>webcat_path=False</em>, <em>raw_inc_path=False</em>, <em>time_path=False</em>, <em>launch_totals_path=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#consolidate_student_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.consolidate_student_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Import, format, and consolidate incremental development metrics from several sources.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>webcat_path (str): String path, None for default, or False to omit
-raw_inc_path (str): String path, None for default, or False to omit
-time_path (str): String path, None for default, or False to omit
-launch_totals_path (str): String path to work_session data, None for default, or False to omit 
-repo_mining_path (str): String path, None for default, or False to omit</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webcat_path</strong> (<em>str</em>) – String path, None for default, or False to omit</li>
+<li><strong>raw_inc_path</strong> (<em>str</em>) – String path, None for default, or False to omit</li>
+<li><strong>time_path</strong> (<em>str</em>) – String path, None for default, or False to omit</li>
+<li><strong>launch_totals_path</strong> (<em>str</em>) – String path to work_session data, None for default, or False to omit</li>
+<li><strong>repo_mining_path</strong> (<em>str</em>) – String path, None for default, or False to omit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -85,17 +92,22 @@ to a CSV file that contains already-calculated values.</p>
 <code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_data</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>onlyfinal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads submission data from webcat_path, which points at a
 CSV file containing submission data from a Web-CAT server.</p>
-<p>Submission data is modified so that score.correctness only represents 
+<p>Submission data is modified so that score.correctness only represents
 scores on instructor-written reference tests, and doesn’t include points
 from students’ own tests.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><p class="first">webcat_path (str): Path to web-cat submission data. 
-onlyfinal (bool, optional): Return only the last submission for each student-project?</p>
-<blockquote class="last">
-<div>Defaults to True</div></blockquote>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webcat_path</strong> (<em>str</em>) – Path to web-cat submission data.</li>
+<li><strong>onlyfinal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return only the last submission for each student-project?
+Defaults to True</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
