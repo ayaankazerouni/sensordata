@@ -45,30 +45,23 @@
   <div class="section" id="subsessions-and-work-sessions">
 <h1>Subsessions and work sessions<a class="headerlink" href="#subsessions-and-work-sessions" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-subsessions">
-<span id="subsessions-py"></span><h2>subsessions.py<a class="headerlink" href="#module-subsessions" title="Permalink to this headline">¶</a></h2>
+<span id="subsessions"></span><h2>Subsessions<a class="headerlink" href="#module-subsessions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="subsessions.get_subsessions">
 <code class="descclassname">subsessions.</code><code class="descname">get_subsessions</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em>, <em>threshold=3</em>, <em>cleaned=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#get_subsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.get_subsessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clusters data into work sessions and subsessions.</p>
 <p>Subsessions are separated by launch events. Work sessions
 are separated by a gap of 3 hours without activity.</p>
-<p>Keyword arguments:
-infile  – the input file (CSV)
-outfile – the resultant file (CSV)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="subsessions.to_int">
-<code class="descclassname">subsessions.</code><code class="descname">to_int</code><span class="sig-paren">(</span><em>num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#to_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.to_int" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts a string to an integer; can handle
-scientific notation.</p>
-<p>Will throw an exception if string is not an integer in scientific
-notation or otherwise.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>infile (str): path to the input file (CSV)
+outfile (str): path to the resultant file (CSV)</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="module-work_sessions_from_subsessions">
-<span id="work-sessions-py"></span><h2>work_sessions.py<a class="headerlink" href="#module-work_sessions_from_subsessions" title="Permalink to this headline">¶</a></h2>
+<span id="work-sessions"></span><h2>Work sessions<a class="headerlink" href="#module-work_sessions_from_subsessions" title="Permalink to this headline">¶</a></h2>
 <p>Collapses subsessions into work sessions.</p>
 <dl class="docutils">
 <dt>To use:</dt>
@@ -93,12 +86,18 @@ hours of inactivity (3 by default).</p>
 <code class="descclassname">work_sessions_from_raw.</code><code class="descname">userworksessions</code><span class="sig-paren">(</span><em>usergroup</em>, <em>threshold=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions_from_raw.html#userworksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions_from_raw.userworksessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acts on sensordata for a single student-project. 
 Returns a dataframe of work sessions, where work sessions are
-delimited by threshold hours of inactivity.</p>
-<p>Keyword arguments:
-usergroup   pd.DataFrame containing all sensordata from the given project
-threshold   the number of hours of inactivity that should separate a work session.</p>
-<blockquote>
-<div>default 3.</div></blockquote>
+delimited by <em>threshold</em> hours of inactivity. This is typically called
+by <em>worksessions</em> as part of a split-apply-combine procedure.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">usergroup (DataFrame): containing all sensordata from the given project
+threshold (int, optional): number of hours of inactivity that should separate a work session.</p>
+<blockquote class="last">
+<div>Defaults to 3.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>A <em>DataFrame</em> containing the work sessions for the given user on a given assignment.</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -123,8 +122,8 @@ launches (test and normal).</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Subsessions and work sessions</a><ul>
-<li><a class="reference internal" href="#module-subsessions">subsessions.py</a></li>
-<li><a class="reference internal" href="#module-work_sessions_from_subsessions">work_sessions.py</a></li>
+<li><a class="reference internal" href="#module-subsessions">Subsessions</a></li>
+<li><a class="reference internal" href="#module-work_sessions_from_subsessions">Work sessions</a></li>
 </ul>
 </li>
 </ul>
@@ -178,7 +177,7 @@ launches (test and normal).</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Ayaan Kazerouni.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.7.
     </div>
   </body>
 </html>

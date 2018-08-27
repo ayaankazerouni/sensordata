@@ -50,9 +50,9 @@
 <span class="sd">    Subsessions are separated by launch events. Work sessions</span>
 <span class="sd">    are separated by a gap of 3 hours without activity.</span>
 
-<span class="sd">    Keyword arguments:</span>
-<span class="sd">    infile  -- the input file (CSV)</span>
-<span class="sd">    outfile -- the resultant file (CSV)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        infile (str): path to the input file (CSV)</span>
+<span class="sd">        outfile (str): path to the resultant file (CSV)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting subsessions...&#39;</span><span class="p">)</span>
     <span class="n">assignment_field</span> <span class="o">=</span> <span class="s1">&#39;CASSIGNMENTNAME&#39;</span>
@@ -211,15 +211,8 @@
 
             <span class="n">prev_row</span> <span class="o">=</span> <span class="n">row</span></div>
 
-<div class="viewcode-block" id="to_int"><a class="viewcode-back" href="../sessions.html#subsessions.to_int">[docs]</a><span class="k">def</span> <span class="nf">to_int</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a string to an integer; can handle</span>
-<span class="sd">    scientific notation.</span>
-
-<span class="sd">    Will throw an exception if string is not an integer in scientific</span>
-<span class="sd">    notation or otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">))</span></div>
+<span class="k">def</span> <span class="nf">to_int</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
     <span class="n">infile</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>

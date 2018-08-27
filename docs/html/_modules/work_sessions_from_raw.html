@@ -36,7 +36,9 @@
           <div class="body" role="main">
             
   <h1>Source code for work_sessions_from_raw</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="ch">#! /usr/bin/env python3</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Gets work session data from raw sensordata.</span>
 <span class="sd">Work sessions are separeted by a specified number of</span>
 <span class="sd">hours of inactivity (3 by default).</span>
@@ -46,8 +48,6 @@
 <span class="sd">    ./work_sessions_from_raw.py &lt;infile&gt; &lt;outfile&gt; on the command line</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1">#! /usr/bin/env python3</span>
-
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -56,12 +56,16 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Acts on sensordata for a single student-project. </span>
 <span class="sd">    Returns a dataframe of work sessions, where work sessions are</span>
-<span class="sd">    delimited by threshold hours of inactivity.</span>
+<span class="sd">    delimited by *threshold* hours of inactivity. This is typically called</span>
+<span class="sd">    by *worksessions* as part of a split-apply-combine procedure.</span>
 
-<span class="sd">    Keyword arguments:</span>
-<span class="sd">    usergroup   pd.DataFrame containing all sensordata from the given project</span>
-<span class="sd">    threshold   the number of hours of inactivity that should separate a work session.</span>
-<span class="sd">                default 3.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        usergroup (DataFrame): containing all sensordata from the given project</span>
+<span class="sd">        threshold (int, optional): number of hours of inactivity that should separate a work session.</span>
+<span class="sd">            Defaults to 3.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A *DataFrame* containing the work sessions for the given user on a given assignment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">prev_row</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">test_launches</span> <span class="o">=</span> <span class="mi">0</span>

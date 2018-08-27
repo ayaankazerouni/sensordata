@@ -62,15 +62,20 @@ for [solution/test] code writing and [solution/test] launches.</p>
 Early/Often refers to the mean time of a certain type of event, in terms of
 “days until the deadline”. Applying the same concept, we also calculate
 medians and standard deviations.</p>
-<p>Keyword arguments:
-infile          – Path to a file containing raw SensorData
-outfile         – (Optional) Path to a file where combined early often metrics should be written (optional).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">infile (str): Path to a file containing raw SensorData
+outfile (str, optional): Path to a file where combined early often metrics should be written (optional).</p>
 <blockquote>
-<div>If None, output is written to a Pandas DataFrame.</div></blockquote>
-<p>submissionpath  – Path to Web-CAT submissions. Used only to determine the time of the final submission.
-duetimepath     – Path to a JSON file containing due date data for assignments in different terms.
-dtypes          – (Optional, no-CLI) Column data types (also only reads the specified columns)
-date_parser      – (Optional, no-CLI). A function or lambda to parse timestamps</p>
+<div>If <em>None</em>, output is written to a Pandas DataFrame.</div></blockquote>
+<p class="last">submissionpath (str): Path to Web-CAT submissions. Used only to determine the time of the final submission.
+duetimepath (str): Path to a JSON file containing due date data for assignments in different terms.
+dtypes (dict, optional, no-CLI): Column data types (also only reads the specified columns)
+date_parser (func, optional, no-CLI): A function or lambda to parse timestamps.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>A <em>DataFrame</em> if no <em>outfile</em> is specified. <em>None</em> otherwise.</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -84,13 +89,15 @@ date_parser      – (Optional, no-CLI). A function or lambda to parse timestamp
 <code class="descclassname">early_often.</code><code class="descname">userearlyoften</code><span class="sig-paren">(</span><em>usergroup</em>, <em>due_date_data</em>, <em>submissions</em>, <em>usercol='userId'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#userearlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.userearlyoften" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function acts on data for one student’s sensordata.
 Generally, it is invoked by earlyoften in a split-apply-combine procedure.</p>
-<p>Keyword arguments:
-usergroup       – Event stream for a student working on a single project
-due_date_data   – Dictionary containing due dates in millisecond timestamps 
-submissions     – Last submission from each student
-usercol         – Name of the column identifying the user (default “userId”)</p>
-<blockquote>
-<div>Used to decide if id needs to be scrubbed (e.g. remove email domain, etc.)</div></blockquote>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>usergroup (DataFrame): Event stream for a student working on a single project
+due_date_data (dict): Dictionary containing due dates in millisecond timestamps 
+submissions (DataFrame): Last submission from each student
+usercol (str): Name of the column identifying the user (default “userId”)</dd>
+<dt>Returns:</dt>
+<dd>A <em>DataFrame</em> containing the early often measurements for the user on a given assignment.</dd>
+</dl>
 </dd></dl>
 
 </div>

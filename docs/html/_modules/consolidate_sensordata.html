@@ -49,12 +49,12 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Import, format, and consolidate incremental development metrics from several sources.</span>
 
-<span class="sd">    Keyword arguments:</span>
-<span class="sd">    webcat_path         = String path, None for default, or False to omit</span>
-<span class="sd">    raw_inc_path        = String path, None for default, or False to omit</span>
-<span class="sd">    time_path           = String path, None for default, or False to omit</span>
-<span class="sd">    launch_totals_path  = String path to work_session data, None for default, or False to omit </span>
-<span class="sd">    repo_mining_path    = String path, None for default, or False to omit </span>
+<span class="sd">    Args:</span>
+<span class="sd">        webcat_path (str): String path, None for default, or False to omit</span>
+<span class="sd">        raw_inc_path (str): String path, None for default, or False to omit</span>
+<span class="sd">        time_path (str): String path, None for default, or False to omit</span>
+<span class="sd">        launch_totals_path (str): String path to work_session data, None for default, or False to omit </span>
+<span class="sd">        repo_mining_path (str): String path, None for default, or False to omit </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">webcat_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">webcat_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/web-cat-students-with-sensordata.csv&#39;</span>
@@ -102,8 +102,10 @@
 <span class="sd">    scores on instructor-written reference tests, and doesn&#39;t include points</span>
 <span class="sd">    from students&#39; own tests.</span>
 <span class="sd">    </span>
-<span class="sd">    Keyword arguments:</span>
-<span class="sd">    onlyfinal    if True, returns only the last submission for each student-project (i.e., the graded submission)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        webcat_path (str): Path to web-cat submission data. </span>
+<span class="sd">        onlyfinal (bool, optional): Return only the last submission for each student-project?</span>
+<span class="sd">            Defaults to True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>

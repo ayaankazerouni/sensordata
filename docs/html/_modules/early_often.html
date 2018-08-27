@@ -66,12 +66,14 @@
 <span class="sd">    This function acts on data for one student&#39;s sensordata.</span>
 <span class="sd">    Generally, it is invoked by earlyoften in a split-apply-combine procedure.</span>
 
-<span class="sd">    Keyword arguments:</span>
-<span class="sd">    usergroup       -- Event stream for a student working on a single project</span>
-<span class="sd">    due_date_data   -- Dictionary containing due dates in millisecond timestamps </span>
-<span class="sd">    submissions     -- Last submission from each student</span>
-<span class="sd">    usercol         -- Name of the column identifying the user (default &quot;userId&quot;)</span>
-<span class="sd">                        Used to decide if id needs to be scrubbed (e.g. remove email domain, etc.)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        usergroup (DataFrame): Event stream for a student working on a single project</span>
+<span class="sd">        due_date_data (dict): Dictionary containing due dates in millisecond timestamps </span>
+<span class="sd">        submissions (DataFrame): Last submission from each student</span>
+<span class="sd">        usercol (str): Name of the column identifying the user (default &quot;userId&quot;)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A *DataFrame* containing the early often measurements for the user on a given assignment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">prev_row</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">total_weighted_edits_bytes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -322,14 +324,17 @@
 <span class="sd">    &quot;days until the deadline&quot;. Applying the same concept, we also calculate</span>
 <span class="sd">    medians and standard deviations.</span>
 <span class="sd">    </span>
-<span class="sd">    Keyword arguments:</span>
-<span class="sd">    infile          -- Path to a file containing raw SensorData</span>
-<span class="sd">    outfile         -- (Optional) Path to a file where combined early often metrics should be written (optional).</span>
-<span class="sd">                       If None, output is written to a Pandas DataFrame.</span>
-<span class="sd">    submissionpath  -- Path to Web-CAT submissions. Used only to determine the time of the final submission.</span>
-<span class="sd">    duetimepath     -- Path to a JSON file containing due date data for assignments in different terms.</span>
-<span class="sd">    dtypes          -- (Optional, no-CLI) Column data types (also only reads the specified columns)</span>
-<span class="sd">    date_parser      -- (Optional, no-CLI). A function or lambda to parse timestamps</span>
+<span class="sd">    Args:</span>
+<span class="sd">        infile (str): Path to a file containing raw SensorData</span>
+<span class="sd">        outfile (str, optional): Path to a file where combined early often metrics should be written (optional). </span>
+<span class="sd">            If *None*, output is written to a Pandas DataFrame.</span>
+<span class="sd">        submissionpath (str): Path to Web-CAT submissions. Used only to determine the time of the final submission.</span>
+<span class="sd">        duetimepath (str): Path to a JSON file containing due date data for assignments in different terms.</span>
+<span class="sd">        dtypes (dict, optional, no-CLI): Column data types (also only reads the specified columns)</span>
+<span class="sd">        date_parser (func, optional, no-CLI): A function or lambda to parse timestamps.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A *DataFrame* if no *outfile* is specified. *None* otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">submissions</span> <span class="o">=</span> <span class="n">load_submission_data</span><span class="p">(</span><span class="n">submissionpath</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;0. Finished reading submission data.&#39;</span><span class="p">)</span>

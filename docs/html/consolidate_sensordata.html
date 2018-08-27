@@ -49,12 +49,14 @@
 <dt id="consolidate_sensordata.consolidate_student_data">
 <code class="descclassname">consolidate_sensordata.</code><code class="descname">consolidate_student_data</code><span class="sig-paren">(</span><em>webcat_path=False</em>, <em>raw_inc_path=False</em>, <em>time_path=False</em>, <em>launch_totals_path=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#consolidate_student_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.consolidate_student_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Import, format, and consolidate incremental development metrics from several sources.</p>
-<p>Keyword arguments:
-webcat_path         = String path, None for default, or False to omit
-raw_inc_path        = String path, None for default, or False to omit
-time_path           = String path, None for default, or False to omit
-launch_totals_path  = String path to work_session data, None for default, or False to omit 
-repo_mining_path    = String path, None for default, or False to omit</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>webcat_path (str): String path, None for default, or False to omit
+raw_inc_path (str): String path, None for default, or False to omit
+time_path (str): String path, None for default, or False to omit
+launch_totals_path (str): String path to work_session data, None for default, or False to omit 
+repo_mining_path (str): String path, None for default, or False to omit</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -86,8 +88,14 @@ CSV file containing submission data from a Web-CAT server.</p>
 <p>Submission data is modified so that score.correctness only represents 
 scores on instructor-written reference tests, and doesn’t include points
 from students’ own tests.</p>
-<p>Keyword arguments:
-onlyfinal    if True, returns only the last submission for each student-project (i.e., the graded submission)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">webcat_path (str): Path to web-cat submission data. 
+onlyfinal (bool, optional): Return only the last submission for each student-project?</p>
+<blockquote class="last">
+<div>Defaults to True</div></blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
