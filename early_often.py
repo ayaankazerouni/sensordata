@@ -23,7 +23,7 @@ import json
 import pandas as pd
 import numpy as np
 
-def userearlyoften(usergroup, due_date_data, submissions, dateformat=None, assignmentcol='assignment', usercol='userId'):
+def userearlyoften(usergroup, due_date_data, submissions, usercol='userId'):
     """
     This function acts on data for one student's sensordata.
     Generally, it is invoked by earlyoften in a split-apply-combine procedure.
@@ -32,9 +32,8 @@ def userearlyoften(usergroup, due_date_data, submissions, dateformat=None, assig
     usergroup       -- Event stream for a student working on a single project
     due_date_data   -- Dictionary containing due dates in millisecond timestamps 
     submissions     -- Last submission from each student
-    dateformat      -- strptime format, so dates can be parsed (leave None if dates are in
-                        milliseconds since the epoch)
-    assignmentcol   -- Name of the column storing the assignment
+    usercol         -- Name of the column identifying the user (default "userId")
+                        Used to decide if id needs to be scrubbed (e.g. remove email domain, etc.)
     """
     prev_row = None
     total_weighted_edits_bytes = []
@@ -65,49 +64,37 @@ def userearlyoften(usergroup, due_date_data, submissions, dateformat=None, assig
     curr_sizes_methods = {}
     curr_test_assertions = {} # for each file
 
-    timeint = True # is the timestamp in milliseconds since the epoch?
-    epoch = datetime.datetime.utcfromtimestamp(0) # seconds
+    user_id, assignment = usergroup.name # returns a tuple
 
-    if 'cleaned_assignment' in usergroup.columns:
-        assignmentcol = 'cleaned_assignment'
-
+    # get the term and assignment due date
     first = usergroup.iloc[0]
-    try:
-        first_time = int(int(first['time']) / 1000)
-    except ValueError:
-        # datetime was not parseable as a number 
-        timeint = False
-        if dateformat:
-            time = datetime.datetime.strptime(first['time'], dateformat)
-            first_time = (time - epoch).total_seconds() # seconds since the epoch
-        else:
-            raise ValueError('Timestamps were not automatically parseable, and a dateformat was not specified.') 
+    first_time = first['time']
+    epoch = datetime.datetime.utcfromtimestamp(0) # seconds
+    first_time = (first_time - epoch).total_seconds()
         
     term = get_term(first_time)
-    first_assignment = first[assignmentcol]
-    assignment_number = int(re.search(r'\d', first_assignment).group())
+    assignment_number = int(re.search(r'\d', assignment).group())
 
     due_time = due_date_data[term]['assignment%d' % (assignment_number)]['dueTime']
     due_time = int(due_time)
     due_date = datetime.date.fromtimestamp(due_time / 1000)
 
     if usercol == 'email':
-        user_id = usergroup.name.split('@')[0]
-    else:
-        user_id = usergroup.name 
-
-    lastsubmissiontime = submissions.loc[user_id, 'Project {}'.format(assignment_number)]['submissionTimeRaw']
+        user_id = user_id.split('@')[0]
+    
+    try:
+        lastsubmissiontime = submissions.loc[user_id, 'Project {}'.format(assignment_number)]['submissionTimeRaw']
+    except KeyError:
+        # Either the user or the assignment is not present in the submission list.
+        # Extract the information manually.
+        print('Cannot find final submission for {} on Project {}'.format(user_id, assignment_number))
+        return None
 
     for index, row in usergroup.iterrows():
         prev_row = row if prev_row is None else prev_row
     
-        if timeint:
-            time = int(float(row['time']))
-            date = datetime.date.fromtimestamp(time / 1000)
-        else:
-            time = datetime.datetime.strptime(row['time'], dateformat)
-            date = time.date() 
-
+        time = row['time']
+        date = time.date()
         days_to_deadline = (due_date - date).days
 
         if time > lastsubmissiontime or days_to_deadline < -4:
@@ -182,7 +169,9 @@ def userearlyoften(usergroup, due_date_data, submissions, dateformat=None, assig
             elif (repr(row['Subtype']) == repr('Normal')):
                 total_weighted_normal_launches.append(days_to_deadline)
         elif (repr(row['Type']) == repr('DebugSession')):
-            total_weighted_debug_sessions.append(days_to_deadline)
+            length = float(row['length'])
+            if length > 30:
+                total_weighted_debug_sessions.append(days_to_deadline)
 
         prev_row = row
 
@@ -254,8 +243,6 @@ def userearlyoften(usergroup, due_date_data, submissions, dateformat=None, assig
     test_assertion_sd = np.std(stretched_assertions)
 
     to_write = {
-        'assignment': prev_row[assignmentcol],
-        'userName': usergroup.name, 
         'byteEarlyOftenIndex': byte_early_often_index,
         'byteEditMedian': byte_edit_median,
         'byteEditSd': byte_edit_sd,
@@ -291,19 +278,20 @@ def userearlyoften(usergroup, due_date_data, submissions, dateformat=None, assig
 
     return pd.Series(to_write)
 
-def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, dateformat=None):
+def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, date_parser=None):
     """Calculate Early/Often indices for developers based on IDE events.
     Early/Often refers to the mean time of a certain type of event, in terms of
-    "days until the deadline".
+    "days until the deadline". Applying the same concept, we also calculate
+    medians and standard deviations.
     
     Keyword arguments:
     infile          -- Path to a file containing raw SensorData
-    outfile         -- Path to a file where combined early often metrics should be written (optional).
+    outfile         -- (Optional) Path to a file where combined early often metrics should be written (optional).
                        If None, output is written to a Pandas DataFrame.
-    submissionpath -- Path to Web-CAT submissions. Used only to determine the time of the final submission.
+    submissionpath  -- Path to Web-CAT submissions. Used only to determine the time of the final submission.
     duetimepath     -- Path to a JSON file containing due date data for assignments in different terms.
-    dtypes          -- Column data types (also only reads the specified columns)
-    dateformat      -- Can specify a date format if dates are not in milliseconds since the epoch
+    dtypes          -- (Optional, no-CLI) Column data types (also only reads the specified columns)
+    date_parser      -- (Optional, no-CLI). A function or lambda to parse timestamps
     """
     submissions = load_submission_data(submissionpath)
     print('0. Finished reading submission data.')
@@ -315,7 +303,7 @@ def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, d
             'projectId': str,
             'email': str,
             'CASSIGNMENTNAME': str,
-            'time': int,
+            'time': str,
             'Class-Name': object,
             'Unit-Type': object,
             'Type': object,
@@ -327,7 +315,12 @@ def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, d
             'Current-Size': object,
             'Current-Test-Assertions': object
         }
-    df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys())) \
+
+    if not date_parser:
+        # assume timestamps are in milliseconds since the epoch unless specified
+        date_parser = lambda d: datetime.datetime.fromtimestamp(int(d) / 1000)
+    df = pd.read_csv(infile, dtype=dtypes, na_values=[], low_memory=False, usecols=list(dtypes.keys()), 
+            date_parser=date_parser, parse_dates=['time']) \
             .sort_values(by=['time'], ascending=[1]) \
             .fillna('')
     print('1. Finished reading raw sensordata.')
@@ -340,18 +333,23 @@ def earlyoften(infile, submissionpath, duetimepath, outfile=None, dtypes=None, d
     else:
         user_id = 'userName'
 
-    userdata = df.groupby(user_id)
+    assignmentcol = 'assignment'
+    if 'cleaned_assignment' in df.columns:
+        assignmentcol = 'cleaned_assignment'
+    elif 'CASSIGNMENTNAME' in df.columns:
+        assignmentcol = 'CASSIGNMENTNAME'
+
+    grouped = df.groupby([user_id, assignmentcol])
     print('2. Finished grouping data. Calculating measures now. This could take some time...')
     
     due_date_data = None
     with open(duetimepath) as data_file:
         due_date_data = json.load(data_file)
 
-    results = userdata.apply(userearlyoften, 
-            due_date_data=due_date_data, 
-            submissions=submissions, 
-            dateformat=dateformat,
-            usercol=user_id)
+    results = grouped.apply(userearlyoften, 
+                due_date_data=due_date_data, 
+                submissions=submissions, 
+                usercol=user_id)
 
     # Write out
     if outfile:
