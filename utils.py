@@ -4,9 +4,10 @@ subsets of events, converting timestamps, getting a term, etc.
 To use:
     import utils 
 """
-import pandas as pd
 import csv
+import re
 import datetime
+import pandas as pd
 from urllib import parse
 
 def load_launches(launch_path=None, sensordata_path=None):
@@ -16,8 +17,9 @@ def load_launches(launch_path=None, sensordata_path=None):
     or reads launches from an already filtered CSV file. If both are specified,
     the launch_path will be given precedence.
     """
+    errormessage = "Either launch_path or sensordata_path must be specified and non-empty."
     if not launch_path and not sensordata_path:
-        raise ValueError("Either launch_path or sensordata_path must be specified and non-empty.")
+        raise ValueError(errormessage)
 
     if launch_path:
         try:
@@ -25,7 +27,7 @@ def load_launches(launch_path=None, sensordata_path=None):
             return launches
         except FileNotFoundError:
             if not sensordata_path:
-                return None # nothing at launch_path, sensordata_path was not specified
+                raise ValueError(errormessage)
 
     dtypes = {
         'email': str,
@@ -153,16 +155,17 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
                 'Current-Statements',
                 'Current-Methods',
                 'Current-Size',
-                'Current-Test-Assertions'
+                'Current-Test-Assertions',
+                'ConsoleOutput'
             ]
-        writer = csv.DictWriter(fallout, delimiter=',', fieldnames=fieldnames)
+        writer = csv.DictWriter(outfile, delimiter=',', fieldnames=fieldnames)
         writer.writeheader()
              
         for index, line in enumerate(infile):
             if (index % 1000000 == 0):
                 p = float(("%0.2f"%(index * 100 / 8524823)))
                 print('Processed %s of file' % p)
-            event = processline(line)
+            event = processline(line, fieldnames)
             if event is not None:
                 writer.writerow(event)
 
@@ -174,15 +177,17 @@ def processline(url, fieldnames=None, filtertype=None):
     Keyword arguments:
     filtertype  =   Only return a dict if the query param for Type == filtertype
     """
-    url = url.split(':', 1)[-1]
+    if 'http' in url:
+        url = url.split(':', 1)[-1]
     items = parse.parse_qs(parse.urlparse(url).query)
     kvpairs = {}
     for key, value in items.items():
         if _shouldwritekey(key, fieldnames): 
             kvpairs[key] = value[0].rstrip('\n\r')
         elif key.startswith('name'): # some items are in the form name0=somekey, value0=somevalue
-            k = value[0]
-            v = items['value%s' % key[-1]][0]
+            k = value[0] # e.g., "name0=k"
+            num = re.search('(\d+)$', key).group(0)
+            v = items.get('value{}'.format(num), [''])[0] # e.g., "value0=v", "value0="
             if _shouldwritekey(k, fieldnames): 
                 kvpairs[k] = v.rstrip('\n\r')
     kvpairs['time'] = int(float(kvpairs['time'])) / 1000 # time will always be written
