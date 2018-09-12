@@ -11,6 +11,7 @@ nohup.out
 
 # no data files
 results/
+data/
 *.xlsx
 *.csv
 *.zip
