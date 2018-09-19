@@ -190,7 +190,8 @@ def processline(url, fieldnames=None, filtertype=None):
             v = items.get('value{}'.format(num), [''])[0] # e.g., "value0=v", "value0="
             if _shouldwritekey(k, fieldnames): 
                 kvpairs[k] = v.rstrip('\n\r')
-    kvpairs['time'] = int(float(kvpairs['time'])) / 1000 # time will always be written
+    time = int(float(kvpairs.get('time', 0))) / 1000 # time is not guaranteed to be present
+    kvpairs['time'] = time if time != 0 else ''
     if filtertype and kvpairs['Type'] != filtertype:
         return None
     return kvpairs
