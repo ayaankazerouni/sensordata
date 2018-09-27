@@ -2,11 +2,9 @@
 
 A collection of scripts for measuring and visualising aspects of incremental software development, using SensorData collected by [DevEventTracker](https://github.com/web-cat/eclipse-plugins-importer-exporter/tree/DevEventTrackerAddition).
 
-If you use this work, please cite the following:
+The following paper details some of the measures described here:
 
-* [Ayaan M. Kazerouni, Stephen H. Edwards, and Clifford A. Shaffer. 2017. Quantifying Incremental Development Practices and Their Relationship to Procrastination.](https://dl.acm.org/citation.cfm?id=3106180)
-
-If you're unable to access the paper, please email me and I'll send you a copy.
+* [Ayaan M. Kazerouni, Stephen H. Edwards, and Clifford A. Shaffer. 2017. Quantifying Incremental Development Practices and Their Relationship to Procrastination.](https://people.cs.vt.edu/ayaan/assets/publications/p191-kazerouni.pdf)
 
 ---
 
