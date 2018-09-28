@@ -52,25 +52,26 @@ def load_launches(launch_path=None, sensordata_path=None):
     return data
 
 def get_term(timestamp):
-    """Returns a term id based on a timestamp in seconds."""
-    try:
-        eventtime = datetime.datetime.fromtimestamp(timestamp)
-        year = eventtime.year
-        month = eventtime.month
+    """Returns a term id based on a timestamp in seconds. If the provided timestamp is in milliseconds
+    this method will truncate the timestamp to seconds.
+    """
+    inmillis = len(str(abs(timestmap))) >= 13
+    if inmillis:
+        timestamp = int(timestamp / 1000)
+    eventtime = datetime.datetime.fromtimestamp(timestamp)
+    year = eventtime.year
+    month = eventtime.month
 
-        if month >= 8:
-            return 'fall%d' % year
-        elif month >= 7: # TODO: Deal with summer terms?
-            return 'summer-1-%d' % year
-        elif month > 5:
-            return 'summer-2-%d' % year
-        elif month >= 1:
-            return 'spring%d' % year
-        else:
-            return None
-    except ValueError:
-        print('Error! Please make sure your timestamp is in seconds.')
-        sys.exit()
+    if month >= 8:
+        return 'fall%d' % year
+    elif month >= 7: # TODO: Deal with summer terms?
+        return 'summer-1-%d' % year
+    elif month > 5:
+        return 'summer-2-%d' % year
+    elif month >= 1:
+        return 'spring%d' % year
+    else:
+        return None
 
 def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'):
     """Loads edit events that took place on a source file. 
@@ -190,7 +191,7 @@ def processline(url, fieldnames=None, filtertype=None):
             v = items.get('value{}'.format(num), [''])[0] # e.g., "value0=v", "value0="
             if _shouldwritekey(k, fieldnames): 
                 kvpairs[k] = v.rstrip('\n\r')
-    time = int(float(kvpairs.get('time', 0))) / 1000 # time is not guaranteed to be present
+    time = int(float(kvpairs.get('time', 0))) # time is not guaranteed to be present
     kvpairs['time'] = time if time != 0 else ''
     if filtertype and kvpairs['Type'] != filtertype:
         return None
