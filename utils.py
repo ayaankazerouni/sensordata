@@ -55,7 +55,7 @@ def get_term(timestamp):
     """Returns a term id based on a timestamp in seconds. If the provided timestamp is in milliseconds
     this method will truncate the timestamp to seconds.
     """
-    inmillis = len(str(abs(timestmap))) >= 13
+    inmillis = len(str(abs(timestamp))) >= 13
     if inmillis:
         timestamp = int(timestamp / 1000)
     eventtime = datetime.datetime.fromtimestamp(timestamp)
