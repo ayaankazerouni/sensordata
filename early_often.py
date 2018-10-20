@@ -23,7 +23,7 @@ import json
 import pandas as pd
 import numpy as np
 
-def userearlyoften(usergroup, due_date_data, submissions, usercol='userId'):
+def userearlyoften(usergroup, due_date_data, submissions, usercol='userId', lognosubs=False):
     """
     This function acts on data for one student's sensordata.
     Generally, it is invoked by earlyoften in a split-apply-combine procedure.
@@ -33,6 +33,7 @@ def userearlyoften(usergroup, due_date_data, submissions, usercol='userId'):
         due_date_data (dict): Dictionary containing due dates in millisecond timestamps 
         submissions (DataFrame): Last submission from each student
         usercol (str): Name of the column identifying the user (default "userId")
+        lognosubs (bool): Print a message for users for whom submissions were not found?
 
     Returns:
         A *DataFrame* containing the early often measurements for the user on a given assignment.
@@ -89,7 +90,8 @@ def userearlyoften(usergroup, due_date_data, submissions, usercol='userId'):
     except KeyError:
         # Either the user or the assignment is not present in the submission list.
         # Extract the information manually.
-        print('Cannot find final submission for {} on Project {}'.format(user_id, assignment_number))
+        if lognosubs:
+            print('Cannot find final submission for {} on Project {}'.format(user_id, assignment_number))
         return None
 
     for index, row in usergroup.iterrows():
