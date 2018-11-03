@@ -96,8 +96,8 @@ def load_submission_data(webcat_path, onlyfinal=True):
     data['score.correctness'] = data['score.correctness'] / data['max.score.correctness']
     data['elementsCovered'] = (data['elementsCovered'] / data['elements']) / 0.98
     data['elementsCovered'] = data['elementsCovered'].apply(lambda x: x if x <= 1 else 1)
-    data['score.reftest'] = data['score.correctness'] / data['elementsCovered']
-    data['score.reftest'] = data['score.reftest'].apply(lambda x: x if x <= 1 else 1)
+    data['score'] = data['score.correctness'] / data['elementsCovered']
+    data['score'] = data['score'].apply(lambda x: x if x <= 1 else 1)
 
     # calculate submission time outcomes 
     hours_from_deadline = (data['dueDateRaw'] - data['submissionTimeRaw'])
