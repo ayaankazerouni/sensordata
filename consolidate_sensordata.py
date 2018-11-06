@@ -56,7 +56,7 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
 
     return merged
 
-def load_submission_data(webcat_path, onlyfinal=True):
+def load_submission_data(webcat_path, onlyfinal=True, pluscols=[]):
     """Loads submission data from webcat_path, which points at a
     CSV file containing submission data from a Web-CAT server.
      
@@ -68,8 +68,9 @@ def load_submission_data(webcat_path, onlyfinal=True):
         webcat_path (str): Path to web-cat submission data. 
         onlyfinal (bool, optional): Return only the last submission for each student-project?
             Defaults to True
+        pluscols (list, optional): Columns to load from raw CSV in addition to correctness, code
+            coverage, and submission time data. Defaults to an empty list
     """
-
     cols_of_interest = [
         'userName',
         'assignment',
@@ -80,7 +81,7 @@ def load_submission_data(webcat_path, onlyfinal=True):
         'elementsCovered',
         'submissionTimeRaw',
         'dueDateRaw'
-    ]
+    ] + pluscols
     date_parser = lambda d: datetime.datetime.fromtimestamp(int(float(d)) / 1000)
     data = pd.read_csv(webcat_path, \
         usecols=cols_of_interest, \
@@ -105,25 +106,6 @@ def load_submission_data(webcat_path, onlyfinal=True):
     data['onTimeSubmission'] = data['finishedHoursFromDeadline'].apply(lambda h: 1 if h >= 0 else 0)
 
     data.set_index(['userName', 'assignment'], inplace=True)
-    return data
-
-def load_ref_test_data(ref_test_gains_path):
-    """Loads reference test gain data."""
-
-    cols_of_interest = [
-        'assignment',
-        'userName',
-        'dropCount',
-        'flatCount',
-        'flatPercent',
-        'gainCount',
-        'gainEarlyOften',
-        'gainPercent'
-    ]
-    data = pd.read_csv(ref_test_gains_path, usecols=cols_of_interest)
-    data['jitterGain'] = data['gainCount'] / (data['gainCount'] + data['dropCount'])
-    data.set_index(['userName', 'assignment'], inplace=True)
-
     return data
 
 def load_raw_inc_data(raw_inc_path):
