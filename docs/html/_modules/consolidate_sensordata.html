@@ -94,7 +94,7 @@
 
     <span class="k">return</span> <span class="n">merged</span></div>
 
-<div class="viewcode-block" id="load_submission_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_submission_data">[docs]</a><span class="k">def</span> <span class="nf">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="load_submission_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_submission_data">[docs]</a><span class="k">def</span> <span class="nf">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pluscols</span><span class="o">=</span><span class="p">[]):</span>
     <span class="sd">&quot;&quot;&quot;Loads submission data from webcat_path, which points at a</span>
 <span class="sd">    CSV file containing submission data from a Web-CAT server.</span>
 <span class="sd">     </span>
@@ -106,8 +106,9 @@
 <span class="sd">        webcat_path (str): Path to web-cat submission data. </span>
 <span class="sd">        onlyfinal (bool, optional): Return only the last submission for each student-project?</span>
 <span class="sd">            Defaults to True</span>
+<span class="sd">        pluscols (list, optional): Columns to load from raw CSV in addition to correctness, code</span>
+<span class="sd">            coverage, and submission time data. Defaults to an empty list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;userName&#39;</span><span class="p">,</span>
         <span class="s1">&#39;assignment&#39;</span><span class="p">,</span>
@@ -118,7 +119,7 @@
         <span class="s1">&#39;elementsCovered&#39;</span><span class="p">,</span>
         <span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">,</span>
         <span class="s1">&#39;dueDateRaw&#39;</span>
-    <span class="p">]</span>
+    <span class="p">]</span> <span class="o">+</span> <span class="n">pluscols</span>
     <span class="n">date_parser</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> \
         <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">,</span> \
@@ -134,8 +135,8 @@
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;max.score.correctness&#39;</span><span class="p">]</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">0.98</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.reftest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.reftest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.reftest&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># calculate submission time outcomes </span>
     <span class="n">hours_from_deadline</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dueDateRaw&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">])</span>
@@ -143,25 +144,6 @@
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;onTimeSubmission&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">h</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">h</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span></div>
-
-<div class="viewcode-block" id="load_ref_test_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_ref_test_data">[docs]</a><span class="k">def</span> <span class="nf">load_ref_test_data</span><span class="p">(</span><span class="n">ref_test_gains_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loads reference test gain data.&quot;&quot;&quot;</span>
-
-    <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s1">&#39;assignment&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;userName&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;dropCount&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;flatCount&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;flatPercent&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;gainCount&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;gainEarlyOften&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;gainPercent&#39;</span>
-    <span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ref_test_gains_path</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;jitterGain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gainCount&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;gainCount&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dropCount&#39;</span><span class="p">])</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
     <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="load_raw_inc_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_raw_inc_data">[docs]</a><span class="k">def</span> <span class="nf">load_raw_inc_data</span><span class="p">(</span><span class="n">raw_inc_path</span><span class="p">):</span>

@@ -90,25 +90,26 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="get_term"><a class="viewcode-back" href="../utils.html#utils.get_term">[docs]</a><span class="k">def</span> <span class="nf">get_term</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns a term id based on a timestamp in seconds.&quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">eventtime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-        <span class="n">year</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">year</span>
-        <span class="n">month</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">month</span>
+    <span class="sd">&quot;&quot;&quot;Returns a term id based on a timestamp in seconds. If the provided timestamp is in milliseconds</span>
+<span class="sd">    this method will truncate the timestamp to seconds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inmillis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">13</span>
+    <span class="k">if</span> <span class="n">inmillis</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">eventtime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">year</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="n">eventtime</span><span class="o">.</span><span class="n">month</span>
 
-        <span class="k">if</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;fall</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">:</span> <span class="c1"># TODO: Deal with summer terms?</span>
-            <span class="k">return</span> <span class="s1">&#39;summer-1-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;summer-2-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;spring</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error! Please make sure your timestamp is in seconds.&#39;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;fall</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+    <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">:</span> <span class="c1"># TODO: Deal with summer terms?</span>
+        <span class="k">return</span> <span class="s1">&#39;summer-1-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+    <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;summer-2-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+    <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;spring</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">year</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="load_edits"><a class="viewcode-back" href="../utils.html#utils.load_edits">[docs]</a><span class="k">def</span> <span class="nf">load_edits</span><span class="p">(</span><span class="n">edit_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sensordata_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">assignment_col</span><span class="o">=</span><span class="s1">&#39;assignment&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads edit events that took place on a source file. </span>
@@ -228,7 +229,7 @@
             <span class="n">v</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">),</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># e.g., &quot;value0=v&quot;, &quot;value0=&quot;</span>
             <span class="k">if</span> <span class="n">_shouldwritekey</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">fieldnames</span><span class="p">):</span> 
                 <span class="n">kvpairs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">kvpairs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">1000</span> <span class="c1"># time is not guaranteed to be present</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">kvpairs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span> <span class="c1"># time is not guaranteed to be present</span>
     <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span> <span class="k">if</span> <span class="n">time</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
     <span class="k">if</span> <span class="n">filtertype</span> <span class="ow">and</span> <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">filtertype</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>

@@ -49,7 +49,8 @@ subsets of events, converting timestamps, getting a term, etc.</p>
 <dl class="function">
 <dt id="utils.get_term">
 <code class="descclassname">utils.</code><code class="descname">get_term</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#get_term"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.get_term" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a term id based on a timestamp in seconds.</p>
+<dd><p>Returns a term id based on a timestamp in seconds. If the provided timestamp is in milliseconds
+this method will truncate the timestamp to seconds.</p>
 </dd></dl>
 
 <dl class="function">

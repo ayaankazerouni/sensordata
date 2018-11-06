@@ -61,7 +61,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<div class="viewcode-block" id="userearlyoften"><a class="viewcode-back" href="../early_often.html#early_often.userearlyoften">[docs]</a><span class="k">def</span> <span class="nf">userearlyoften</span><span class="p">(</span><span class="n">usergroup</span><span class="p">,</span> <span class="n">due_date_data</span><span class="p">,</span> <span class="n">submissions</span><span class="p">,</span> <span class="n">usercol</span><span class="o">=</span><span class="s1">&#39;userId&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="userearlyoften"><a class="viewcode-back" href="../early_often.html#early_often.userearlyoften">[docs]</a><span class="k">def</span> <span class="nf">userearlyoften</span><span class="p">(</span><span class="n">usergroup</span><span class="p">,</span> <span class="n">due_date_data</span><span class="p">,</span> <span class="n">submissions</span><span class="p">,</span> <span class="n">usercol</span><span class="o">=</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="n">lognosubs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function acts on data for one student&#39;s sensordata.</span>
 <span class="sd">    Generally, it is invoked by earlyoften in a split-apply-combine procedure.</span>
@@ -71,6 +71,7 @@
 <span class="sd">        due_date_data (dict): Dictionary containing due dates in millisecond timestamps </span>
 <span class="sd">        submissions (DataFrame): Last submission from each student</span>
 <span class="sd">        usercol (str): Name of the column identifying the user (default &quot;userId&quot;)</span>
+<span class="sd">        lognosubs (bool): Print a message for users for whom submissions were not found?</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A *DataFrame* containing the early often measurements for the user on a given assignment.</span>
@@ -127,7 +128,8 @@
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="c1"># Either the user or the assignment is not present in the submission list.</span>
         <span class="c1"># Extract the information manually.</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot find final submission for </span><span class="si">{}</span><span class="s1"> on Project </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">assignment_number</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">lognosubs</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot find final submission for </span><span class="si">{}</span><span class="s1"> on Project </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">assignment_number</span><span class="p">))</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">usergroup</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>

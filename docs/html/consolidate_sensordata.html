@@ -82,14 +82,8 @@ to a CSV file that contains already-calculated values.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="consolidate_sensordata.load_ref_test_data">
-<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_ref_test_data</code><span class="sig-paren">(</span><em>ref_test_gains_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_ref_test_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_ref_test_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads reference test gain data.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="consolidate_sensordata.load_submission_data">
-<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_data</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>onlyfinal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_data" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_data</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>onlyfinal=True</em>, <em>pluscols=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads submission data from webcat_path, which points at a
 CSV file containing submission data from a Web-CAT server.</p>
 <p>Submission data is modified so that score.correctness only represents
@@ -103,6 +97,8 @@ from students’ own tests.</p>
 <li><strong>webcat_path</strong> (<em>str</em>) – Path to web-cat submission data.</li>
 <li><strong>onlyfinal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return only the last submission for each student-project?
 Defaults to True</li>
+<li><strong>pluscols</strong> (<em>list</em><em>, </em><em>optional</em>) – Columns to load from raw CSV in addition to correctness, code
+coverage, and submission time data. Defaults to an empty list</li>
 </ul>
 </td>
 </tr>

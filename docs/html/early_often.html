@@ -92,7 +92,7 @@ If <em>None</em>, output is written to a Pandas DataFrame.</li>
 
 <dl class="function">
 <dt id="early_often.userearlyoften">
-<code class="descclassname">early_often.</code><code class="descname">userearlyoften</code><span class="sig-paren">(</span><em>usergroup</em>, <em>due_date_data</em>, <em>submissions</em>, <em>usercol='userId'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#userearlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.userearlyoften" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">early_often.</code><code class="descname">userearlyoften</code><span class="sig-paren">(</span><em>usergroup</em>, <em>due_date_data</em>, <em>submissions</em>, <em>usercol='userId'</em>, <em>lognosubs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/early_often.html#userearlyoften"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#early_often.userearlyoften" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function acts on data for one student’s sensordata.
 Generally, it is invoked by earlyoften in a split-apply-combine procedure.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -104,6 +104,7 @@ Generally, it is invoked by earlyoften in a split-apply-combine procedure.</p>
 <li><strong>due_date_data</strong> (<em>dict</em>) – Dictionary containing due dates in millisecond timestamps</li>
 <li><strong>submissions</strong> (<em>DataFrame</em>) – Last submission from each student</li>
 <li><strong>usercol</strong> (<em>str</em>) – Name of the column identifying the user (default “userId”)</li>
+<li><strong>lognosubs</strong> (<em>bool</em>) – Print a message for users for whom submissions were not found?</li>
 </ul>
 </td>
 </tr>
