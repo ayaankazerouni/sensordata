@@ -10,6 +10,7 @@ nohup.out
 *.Rproj
 
 # no data files
+analysis/
 results/
 data/
 *.xlsx

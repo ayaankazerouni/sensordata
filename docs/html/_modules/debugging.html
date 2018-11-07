@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>debugging &#8212; Sensordata  documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for debugging</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Methods for wrangling Eclipse debugger event data.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># Setup items</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">float_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span>
+
+<span class="n">DEBUGPATH</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/debugger-use.csv&#39;</span>
+
+<div class="viewcode-block" id="countbreakpointsession"><a class="viewcode-back" href="../debugging.html#debugging.countbreakpointsession">[docs]</a><span class="k">def</span> <span class="nf">countbreakpointsession</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Count the number of debugger sessions that included at least one Breakpoint.</span>
+<span class="sd">    </span>
+<span class="sd">    Takes a dataframe of summarised debugger sessions as input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;hitBreakpoints &gt; 0&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="dateparser"><a class="viewcode-back" href="../debugging.html#debugging.dateparser">[docs]</a><span class="k">def</span> <span class="nf">dateparser</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;Parse timestamps</span>
+
+<span class="sd">    Arguments </span>
+<span class="sd">        s (bool):   `True` if timestamps are in seconds, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="timespentdebugging"><a class="viewcode-back" href="../debugging.html#debugging.timespentdebugging">[docs]</a><span class="k">def</span> <span class="nf">timespentdebugging</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a list of summarised debugger sessions, get the number of minutes spent </span>
+<span class="sd">    using the Eclipse debugger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+            <span class="s1">&#39;totalTime&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;avgTime&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;medianTime&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">])</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="sessionsummary"><a class="viewcode-back" href="../debugging.html#debugging.sessionsummary">[docs]</a><span class="k">def</span> <span class="nf">sessionsummary</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get a summary for a single debug session.</span>
+
+<span class="sd">    Includes the start time, end time, and number of breakpoints and steps.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;Subtype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+        <span class="n">bpset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Set == &#39;set&#39;&quot;</span><span class="p">))</span>
+        <span class="n">bphit</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Breakpoint&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">stepover</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Step over&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">stepinto</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Step into&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">starttime</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">endtime</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">endtime</span> <span class="o">-</span> <span class="n">starttime</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bpset</span> <span class="o">=</span> <span class="n">bphit</span> <span class="o">=</span> <span class="n">stepover</span> <span class="o">=</span> <span class="n">stepinto</span> <span class="o">=</span> <span class="n">starttime</span> <span class="o">=</span> <span class="n">endtime</span> <span class="o">=</span> <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">starttime</span><span class="p">,</span> <span class="c1"># call it &#39;time&#39; so we can concat with other data</span>
+        <span class="s1">&#39;endTime&#39;</span><span class="p">:</span> <span class="n">endtime</span><span class="p">,</span>
+        <span class="s1">&#39;setBreakpoints&#39;</span><span class="p">:</span> <span class="n">bpset</span><span class="p">,</span>
+        <span class="s1">&#39;hitBreakpoints&#39;</span><span class="p">:</span> <span class="n">bphit</span><span class="p">,</span>
+        <span class="s1">&#39;stepOver&#39;</span><span class="p">:</span> <span class="n">stepover</span><span class="p">,</span>
+        <span class="s1">&#39;stepInto&#39;</span><span class="p">:</span> <span class="n">stepinto</span><span class="p">,</span>
+        <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="n">length</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="userdebugsessions"><a class="viewcode-back" href="../debugging.html#debugging.userdebugsessions">[docs]</a><span class="k">def</span> <span class="nf">userdebugsessions</span><span class="p">(</span><span class="n">userevents</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given all Debug events from a student on a project, </span>
+<span class="sd">    organise them into debug sessions and summarise. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">userevents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">]</span>
+    <span class="n">userevents</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">userevents</span><span class="o">.</span><span class="n">session</span>
+        <span class="c1"># fill backwards from termination</span>
+        <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;bfill&#39;</span><span class="p">)</span>
+        <span class="c1"># fills operations after the last termination</span>
+        <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;ffill&#39;</span><span class="p">)</span>
+        <span class="c1"># fills -1 if there were no start/terminate events</span>
+        <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;session&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">sessionsummary</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="n">sessions</span></div>
+
+<div class="viewcode-block" id="getdebugsessions"><a class="viewcode-back" href="../debugging.html#debugging.getdebugsessions">[docs]</a><span class="k">def</span> <span class="nf">getdebugsessions</span><span class="p">(</span><span class="n">debuggerusepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sessionspath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given raw Debug events for all students on all projects, </span>
+<span class="sd">    reduce them to session summaries for each student-project.</span>
+
+<span class="sd">    If sessionspath is provided, read already-computed Debug sessions</span>
+<span class="sd">    from the specified file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">debuggerusepath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sessionspath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Either debuggerusepath or sessionspath must be specified.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sessionspath</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sessions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;data/fall-2016/debugger-sessions.csv&#39;</span><span class="p">,</span>
+                    <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;endTime&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">sessions</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">debuggerusepath</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sessionspath was invalid, and debuggerusepath was not specified&#39;</span><span class="p">)</span>
+
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;userName&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="s1">&#39;Line&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;Set&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">}</span>
+    <span class="n">assignments</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;Project 1&#39;</span><span class="p">,</span> <span class="s1">&#39;Project 2&#39;</span><span class="p">,</span> <span class="s1">&#39;Project 3&#39;</span><span class="p">,</span> <span class="s1">&#39;Project 4&#39;</span> <span class="p">]</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath_or_buffer</span><span class="o">=</span><span class="n">debuggerusepath</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">date_parser</span><span class="o">=</span><span class="n">dateparser</span><span class="p">,</span>
+        <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> \
+        <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Subtype != &#39;Unknown&#39; and assignment in @assignments&quot;</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">userdebugsessions</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sessions</span></div>
+
+<div class="viewcode-block" id="collapsesessions"><a class="viewcode-back" href="../debugging.html#debugging.collapsesessions">[docs]</a><span class="k">def</span> <span class="nf">collapsesessions</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summarise debugger session summaries.&quot;&quot;&quot;</span>
+    <span class="c1"># get counts</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span> <span class="s1">&#39;debugSessionCount&#39;</span><span class="p">:</span> <span class="n">sessions</span> \
+                            <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span> \
+                            <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">countbreakpointsession</span><span class="p">)</span> <span class="p">})</span>
+
+    <span class="c1"># get mean and median stepOver, stepInto, breakpoints, and session lengths</span>
+    <span class="n">consolidated</span> <span class="o">=</span> <span class="n">sessions</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span> \
+                <span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;median&#39;</span><span class="p">])</span>
+    <span class="n">consolidated</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">consolidated</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="p">]</span>
+
+    <span class="c1"># put it all together</span>
+    <span class="n">consolidated</span> <span class="o">=</span> <span class="n">consolidated</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="n">counts</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">consolidated</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ayaan Kazerouni.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.7.
+    </div>
+  </body>
+</html>

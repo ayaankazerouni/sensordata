@@ -9,10 +9,11 @@ Documentation
 .. toctree::
    :caption: Contents:
 
-   early_often
-   sessions
    consolidate_sensordata
+   debugging
+   early_often
    other
+   sessions
    utils
 
 Indices and tables
