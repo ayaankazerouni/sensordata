@@ -172,10 +172,7 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
         writer = csv.DictWriter(outfile, delimiter=',', fieldnames=fieldnames)
         writer.writeheader()
 
-        for index, line in enumerate(infile):
-            if index % 1000000 == 0:
-                completed_percent = float(("%0.2f"%(index * 100 / 8524823)))
-                print('Processed %s of file' % completed_percent)
+        for line in infile:
             event = processline(line, fieldnames)
             if event is not None:
                 writer.writerow(event)
