@@ -37,3 +37,6 @@ npm-debug.log
 # no webpack-generated stuff
 build/
 env/
+
+# IDE stuff
+.vscode

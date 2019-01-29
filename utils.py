@@ -2,13 +2,14 @@
 subsets of events, converting timestamps, getting a term, etc.
 
 To use:
-    import utils 
+    import utils
 """
 import csv
 import re
 import datetime
-import pandas as pd
 from urllib import parse
+
+import pandas as pd
 
 def load_launches(launch_path=None, sensordata_path=None):
     """Loads raw launch data.
@@ -38,22 +39,22 @@ def load_launches(launch_path=None, sensordata_path=None):
         'TestSucesses': str,
         'TestFailures': str
     }
+    # pylint: disable=unused-variable
     eventtypes = ['Launch', 'Termination']
-    data = pd.read_csv(sensordata_path, 
-        dtype=dtypes, usecols=dtypes.keys()) \
-        .query('Type in @eventtypes') \
-        .rename(columns={ 
-            'email': 'userName', 
-            'CASSIGNMENTNAME': 'assignment', 
-            'TestSucesses': 'TestSuccesses'
-		})
+    data = pd.read_csv(sensordata_path, dtype=dtypes, usecols=dtypes.keys()) \
+             .query('Type in @eventtypes') \
+             .rename(columns={
+                 'email': 'userName',
+                 'CASSIGNMENTNAME': 'assignment',
+                 'TestSucesses': 'TestSuccesses'
+             })
     data.userName = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
     return data
 
 def get_term(timestamp):
-    """Returns a term id based on a timestamp in seconds. If the provided timestamp is in milliseconds
-    this method will truncate the timestamp to seconds.
+    """Returns a term id based on a timestamp in seconds. If the provided
+    timestamp is in milliseconds this method will truncate the timestamp to seconds.
     """
     inmillis = len(str(abs(timestamp))) >= 13
     if inmillis:
@@ -64,17 +65,20 @@ def get_term(timestamp):
 
     if month >= 8:
         return 'fall%d' % year
-    elif month >= 7: # TODO: Deal with summer terms?
+
+    if month >= 7: # TODO: Deal with summer terms?
         return 'summer-1-%d' % year
-    elif month > 5:
+
+    if month > 5:
         return 'summer-2-%d' % year
-    elif month >= 1:
+
+    if month >= 1:
         return 'spring%d' % year
-    else:
-        return None
+
+    return None
 
 def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'):
-    """Loads edit events that took place on a source file. 
+    """Loads edit events that took place on a source file.
 
     This convenience method filters out Edit events from raw sensordata, or
     reads an already filtered CSV file. If both edit_path and sensordata_path
@@ -90,7 +94,7 @@ def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'
         except FileNotFoundError:
             if not sensordata_path:
                 raise ValueError("edit_path is invalid and sensordata_path not specified.")
-    
+
     # edit_path was invalid, so we need to get edit events from all sensordata
     dtypes = {
         'email': str,
@@ -109,12 +113,9 @@ def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'
     }
     data = pd.read_csv(sensordata_path, dtype=dtypes, usecols=dtypes.keys())
     data = data[(data['Type'] == 'Edit') & (data['Class-Name'] != '')]
-    data = (
-            data
-            .fillna('')
-            .sort_values(by=['email', assignment_col, 'time'], ascending=[1,1,1])
-            .rename(columns={ 'email': 'userName', assignment_col: 'assignment' })
-        )
+    data = data.fillna('') \
+               .sort_values(by=['email', assignment_col, 'time'], ascending=[1, 1, 1]) \
+               .rename(columns={'email': 'userName', assignment_col: 'assignment'})
     data['userName'] = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
     return data
@@ -124,26 +125,30 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
     Given a file of newline separated URLs, writes the URL query params as
     rows in CSV format to the specified output file.
 
-    If your URLs are DevEventTracker posted events, then you probably want the following default fieldnames:
-    fieldnames = [ 
-        email,
-        CASSIGNMENTNAME,
-        time,
-        Class-Name,
-        Unit-Type,
-        Type,
-        Subtype,
-        Subsubtype,
-        onTestCase,
-        Current-Statements,
-        Current-Methods,
-        Current-Size,
-        Current-Test-Assertions 
-    ]
+    If your URLs are DevEventTracker posted events, then you probably want
+    the following default fieldnames:
+
+    .. code-block:: python
+
+        fieldnames = [
+            email,
+            CASSIGNMENTNAME,
+            time,
+            Class-Name,
+            Unit-Type,
+            Type,
+            Subtype,
+            Subsubtype,
+            onTestCase,
+            Current-Statements,
+            Current-Methods,
+            Current-Size,
+            Current-Test-Assertions
+        ]
     """
     with open(inpath, 'r') as infile, open(outpath, 'w') as outfile:
         if not fieldnames:
-            fieldnames = [ 
+            fieldnames = [
                 'email',
                 'CASSIGNMENTNAME',
                 'time',
@@ -161,11 +166,11 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
             ]
         writer = csv.DictWriter(outfile, delimiter=',', fieldnames=fieldnames)
         writer.writeheader()
-             
+
         for index, line in enumerate(infile):
-            if (index % 1000000 == 0):
-                p = float(("%0.2f"%(index * 100 / 8524823)))
-                print('Processed %s of file' % p)
+            if index % 1000000 == 0:
+                completed_percent = float(("%0.2f"%(index * 100 / 8524823)))
+                print('Processed %s of file' % completed_percent)
             event = processline(line, fieldnames)
             if event is not None:
                 writer.writerow(event)
@@ -183,14 +188,14 @@ def processline(url, fieldnames=None, filtertype=None):
     items = parse.parse_qs(parse.urlparse(url).query)
     kvpairs = {}
     for key, value in items.items():
-        if _shouldwritekey(key, fieldnames): 
+        if _shouldwritekey(key, fieldnames):
             kvpairs[key] = value[0].rstrip('\n\r')
         elif key.startswith('name'): # some items are in the form name0=somekey, value0=somevalue
             k = value[0] # e.g., "name0=k"
-            num = re.search('(\d+)$', key).group(0)
-            v = items.get('value{}'.format(num), [''])[0] # e.g., "value0=v", "value0="
-            if _shouldwritekey(k, fieldnames): 
-                kvpairs[k] = v.rstrip('\n\r')
+            num = re.search(r'(\d+)$', key).group(0)
+            val = items.get('value{}'.format(num), [''])[0] # e.g., "value0=v", "value0="
+            if _shouldwritekey(k, fieldnames):
+                kvpairs[k] = val.rstrip('\n\r')
     time = int(float(kvpairs.get('time', 0))) # time is not guaranteed to be present
     kvpairs['time'] = time if time != 0 else ''
     if filtertype and kvpairs['Type'] != filtertype:
@@ -199,24 +204,25 @@ def processline(url, fieldnames=None, filtertype=None):
 
 def _shouldwritekey(key, fieldnames):
     if not fieldnames:
-       return True
-    elif key in fieldnames:
-       return True
-    else:
-       return False
+        return True
 
-def _maptousers(debuggerpath, uuidspath, crns):
+    if key in fieldnames:
+        return True
+
+    return False
+
+def _maptousers(debuggerpath, uuidspath, crns): # pylint: disable=unused-argument
     debug = pd.read_csv(debuggerpath, low_memory=False).fillna('')
     uuids = pd.read_csv(uuidspath).fillna('')
-    
+
     uuids = uuids.rename(columns={'project uuid': 'studentProjectUuid', 'user uuid': 'userUuid', \
                                   'assignment name': 'assignment', 'email': 'userName'}) \
         .drop(columns=['project id', 'course', 'uri']) \
         .set_index(keys=['userUuid', 'studentProjectUuid']) \
         .query('CRN in @crns')
-        
+
     uuids['userName'] = uuids['userName'].apply(lambda u: u.split('@')[0] if u != '' else u)
-    
+
     debug = debug.set_index(keys=['userUuid', 'studentProjectUuid'])
     return debug.merge(right=uuids, right_index=True, left_index=True) \
         .reset_index().set_index(keys=['userName', 'assignment'])
