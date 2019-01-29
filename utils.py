@@ -11,12 +11,22 @@ from urllib import parse
 
 import pandas as pd
 
-def load_launches(launch_path=None, sensordata_path=None):
+def load_launches(launch_path=None, sensordata_path=None, newformat=True):
     """Loads raw launch data.
 
     Convenience method: filters out everything but Launches from raw sensordata,
     or reads launches from an already filtered CSV file. If both are specified,
     the launch_path will be given precedence.
+
+    Newformat info: The new format encodes test success info differently; the old format included columns 
+        'TestSucesses' (notice the typo) and 'TestFailures'; the new format instead includes columns 
+        'TestMethodName'. The new format also includes ConsoleOutput, which was not present earlier. Use 
+        the default True for data collected after Fall 2018, False for earlier.
+
+    Args:
+        launch_path (str): Path to file containing already filtered launch data
+        sensordata_path (str): Path to file containing raw sensordata
+        newformat (bool, default=True): Use the new format? 
     """
     errormessage = "Either launch_path or sensordata_path must be specified and non-empty."
     if not launch_path and not sensordata_path:
@@ -36,17 +46,22 @@ def load_launches(launch_path=None, sensordata_path=None):
         'time': float,
         'Type': str,
         'Subtype': str,
-        'TestSucesses': str,
-        'TestFailures': str
+        'Subsubtype': str,
     }
+    if newformat:
+        dtypes['TestMethodName'] = str
+        dtypes['ConsoleOutput'] = str
+    else:
+        dtypes['TestSucesses'] = str
+        dtypes['TestFailures'] = str
+
     # pylint: disable=unused-variable
     eventtypes = ['Launch', 'Termination']
     data = pd.read_csv(sensordata_path, dtype=dtypes, usecols=dtypes.keys()) \
              .query('Type in @eventtypes') \
              .rename(columns={
                  'email': 'userName',
-                 'CASSIGNMENTNAME': 'assignment',
-                 'TestSucesses': 'TestSuccesses'
+                 'CASSIGNMENTNAME': 'assignment'
              })
     data.userName = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
