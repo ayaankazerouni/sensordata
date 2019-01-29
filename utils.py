@@ -120,6 +120,23 @@ def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'
     data = data.set_index(['userName', 'assignment'])
     return data
 
+DEFAULT_FIELDNAMES =  [
+    'email',
+    'CASSIGNMENTNAME',
+    'time',
+    'Class-Name',
+    'Unit-Type',
+    'Unit-Name',
+    'Type',
+    'Subtype',
+    'Subsubtype',
+    'onTestCase',
+    'Current-Statements',
+    'Current-Methods',
+    'Current-Size',
+    'Current-Test-Assertions',
+    'ConsoleOutput'
+]
 def raw_to_csv(inpath, outpath, fieldnames=None):
     """
     Given a file of newline separated URLs, writes the URL query params as
@@ -136,6 +153,7 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
             time,
             Class-Name,
             Unit-Type,
+            Unit-Name,
             Type,
             Subtype,
             Subsubtype,
@@ -145,25 +163,12 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
             Current-Size,
             Current-Test-Assertions
         ]
+    These fieldnames can be imported as `utils.DEFAULT_FIELDNAMES` and modified
+    as needed.
     """
     with open(inpath, 'r') as infile, open(outpath, 'w') as outfile:
         if not fieldnames:
-            fieldnames = [
-                'email',
-                'CASSIGNMENTNAME',
-                'time',
-                'Class-Name',
-                'Unit-Type',
-                'Type',
-                'Subtype',
-                'Subsubtype',
-                'onTestCase',
-                'Current-Statements',
-                'Current-Methods',
-                'Current-Size',
-                'Current-Test-Assertions',
-                'ConsoleOutput'
-            ]
+            fieldnames = DEFAULT_FIELDNAMES
         writer = csv.DictWriter(outfile, delimiter=',', fieldnames=fieldnames)
         writer.writeheader()
 
