@@ -127,21 +127,24 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
 
     If your URLs are DevEventTracker posted events, then you probably want
     the following default fieldnames:
-    fieldnames = [
-        email,
-        CASSIGNMENTNAME,
-        time,
-        Class-Name,
-        Unit-Type,
-        Type,
-        Subtype,
-        Subsubtype,
-        onTestCase,
-        Current-Statements,
-        Current-Methods,
-        Current-Size,
-        Current-Test-Assertions
-    ]
+
+    .. code-block:: python
+
+        fieldnames = [
+            email,
+            CASSIGNMENTNAME,
+            time,
+            Class-Name,
+            Unit-Type,
+            Type,
+            Subtype,
+            Subsubtype,
+            onTestCase,
+            Current-Statements,
+            Current-Methods,
+            Current-Size,
+            Current-Test-Assertions
+        ]
     """
     with open(inpath, 'r') as infile, open(outpath, 'w') as outfile:
         if not fieldnames:
