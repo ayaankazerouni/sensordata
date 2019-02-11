@@ -22,15 +22,16 @@ def load_launches(launch_path=None, sensordata_path=None, newformat=True):
     or reads launches from an already filtered CSV file. If both are specified,
     the launch_path will be given precedence.
 
-    Newformat info: The new format encodes test success info differently; the old format included columns 
-        'TestSucesses' (notice the typo) and 'TestFailures'; the new format instead includes columns 
-        'TestMethodName'. The new format also includes ConsoleOutput, which was not present earlier. Use 
-        the default True for data collected after Fall 2018, False for earlier.
+    Newformat info: The new format encodes test success info differently; the old format
+    included columns 'TestSucesses' (notice the typo) and 'TestFailures'; the new format
+    instead include the column 'Unit-Name'. The new format also includes ConsoleOutput,
+    which was not present earlier. Use the default True for data collected after Fall 2018,
+    False for earlier.
 
     Args:
         launch_path (str): Path to file containing already filtered launch data
         sensordata_path (str): Path to file containing raw sensordata
-        newformat (bool, default=True): Use the new format? 
+        newformat (bool, default=True): Use the new format?
     """
     errormessage = "Either launch_path or sensordata_path must be specified and non-empty."
     if not launch_path and not sensordata_path:
@@ -53,7 +54,7 @@ def load_launches(launch_path=None, sensordata_path=None, newformat=True):
         'Subsubtype': str,
     }
     if newformat:
-        dtypes['TestMethodName'] = str
+        dtypes['Unit-Name'] = str
         dtypes['ConsoleOutput'] = str
     else:
         dtypes['TestSucesses'] = str
