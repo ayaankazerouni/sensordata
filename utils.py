@@ -4,12 +4,16 @@ subsets of events, converting timestamps, getting a term, etc.
 To use:
     import utils
 """
-import csv
 import re
+import csv
+import copy
+import logging
 import datetime
 from urllib import parse
 
 import pandas as pd
+
+logging.basicConfig(filename='sensordata-utils.log', filemode='w', level=logging.WARN)
 
 def load_launches(launch_path=None, sensordata_path=None):
     """Loads raw launch data.
@@ -120,7 +124,7 @@ def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'
     data = data.set_index(['userName', 'assignment'])
     return data
 
-DEFAULT_FIELDNAMES =  [
+DEFAULT_FIELDNAMES = [
     'email',
     'CASSIGNMENTNAME',
     'time',
@@ -137,6 +141,7 @@ DEFAULT_FIELDNAMES =  [
     'Current-Test-Assertions',
     'ConsoleOutput'
 ]
+
 def raw_to_csv(inpath, outpath, fieldnames=None):
     """
     Given a file of newline separated URLs, writes the URL query params as
@@ -175,7 +180,11 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
         for line in infile:
             event = processline(line, fieldnames)
             if event is not None:
-                writer.writerow(event)
+                if isinstance(event, list):
+                    for item in event:
+                        writer.writerow(item)
+                else:
+                    writer.writerow(event)
 
 def processline(url, fieldnames=None, filtertype=None):
     """
@@ -183,8 +192,12 @@ def processline(url, fieldnames=None, filtertype=None):
     pairs from its query params. Filters for a specific Type if specified.
 
     Keyword arguments:
-    filtertype  =   Only return a dict if the query param for Type == filtertype
+        fieldnames (list, default=None): The list of fieldnames to capture. If `None`,
+                                         uses `DEFAULT_FIELDNAMES`.
+        filtertype (bool): Only return a dict if the query param for Type == filtertype
     """
+    if not fieldnames:
+        fieldnames = DEFAULT_FIELDNAMES
     if 'http' in url:
         url = url.split(':', 1)[-1]
     items = parse.parse_qs(parse.urlparse(url).query)
@@ -202,7 +215,29 @@ def processline(url, fieldnames=None, filtertype=None):
     kvpairs['time'] = time if time != 0 else ''
     if filtertype and kvpairs['Type'] != filtertype:
         return None
+    if 'Type' in kvpairs and kvpairs['Type'] == 'Termination':
+        return _split_termination(kvpairs)
     return kvpairs
+
+def _split_termination(kvpairs):
+    try:
+        if kvpairs['Type'] != 'Termination' or kvpairs['Subtype'] != 'Test':
+            return kvpairs
+
+        tests = kvpairs['Unit-Name'].strip('|').split('|')
+        outcomes = kvpairs['Subsubtype'].strip('|').split('|')
+        expandedevents = []
+        for test, outcome in zip(tests, outcomes):
+            newevent = copy.deepcopy(kvpairs)
+            newevent['Unit-Name'] = test
+            newevent['Subsubtype'] = outcome
+            expandedevents.append(newevent)
+    except KeyError:
+        logging.error('Missing some required keys to split termination event. Need \
+            Type, Subtype, and Subsubtype. Doing nothing.')
+        return kvpairs
+
+    return expandedevents
 
 def _shouldwritekey(key, fieldnames):
     if not fieldnames:
