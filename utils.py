@@ -231,7 +231,12 @@ def processline(url, fieldnames=None, filtertype=None):
     kvpairs['time'] = time if time != 0 else ''
     if filtertype and kvpairs['Type'] != filtertype:
         return None
-    if 'Type' in kvpairs and kvpairs['Type'] == 'Termination':
+
+    if kvpairs.get('Class-Name', '').endswith('Test') and \
+        kvpairs.get('Current-Test-Assertions', 0) != 0:
+        kvpairs['onTestCase'] = 1
+
+    if kvpairs.get('Type', '') == 'Termination':
         return _split_termination(kvpairs)
     return kvpairs
 
