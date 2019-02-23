@@ -4,8 +4,8 @@ A collection of scripts for measuring and visualising aspects of incremental sof
 
 The following papers detail some of the measures described here:
 
-* [Ayaan M. Kazerouni, Stephen H. Edwards, T. Simin Hall. Clifford A. Shaffer. 2017. DevEventTracker: Tracking Development Events to Assess Incremental Development and Procrastination](http://people.cs.vt.edu/ayaan/assets/publications/deveventtracker.pdf)
 * [Ayaan M. Kazerouni, Stephen H. Edwards, and Clifford A. Shaffer. 2017. Quantifying Incremental Development Practices and Their Relationship to Procrastination.](https://people.cs.vt.edu/ayaan/assets/publications/quantifying-incremental-development-procrastination.pdf)
+* [Ayaan M. Kazerouni, Stephen H. Edwards, T. Simin Hall. Clifford A. Shaffer. 2017. DevEventTracker: Tracking Development Events to Assess Incremental Development and Procrastination](http://people.cs.vt.edu/ayaan/assets/publications/deveventtracker.pdf)
 
 ---
 
