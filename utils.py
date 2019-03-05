@@ -269,18 +269,51 @@ def _shouldwritekey(key, fieldnames):
 
     return False
 
-def _maptousers(debuggerpath, uuidspath, crns): # pylint: disable=unused-argument
-    debug = pd.read_csv(debuggerpath, low_memory=False).fillna('')
-    uuids = pd.read_csv(uuidspath).fillna('')
+def maptouuids(sdpath, uuidpath, crnfilter=None, crncol='crn', 
+        usercol='email', assignmentcol='CASSIGNMENTNAME'):
+    """Map sensordata to users and assignments based on studentProjectUuids.
 
-    uuids = uuids.rename(columns={'project uuid': 'studentProjectUuid', 'user uuid': 'userUuid', \
-                                  'assignment name': 'assignment', 'email': 'userName'}) \
-        .drop(columns=['project id', 'course', 'uri']) \
-        .set_index(keys=['userUuid', 'studentProjectUuid']) \
-        .query('CRN in @crns')
+    Args:
+        sdpath (str): Path to raw sensordata (CSV)
+        uuidpath (str): Path to UUID file. The file is expected to contain columns
+                        ['studentProjectUuid', {crncol}, {usercol}, {assignmentcol}]
+                        at least
+        crnfilter (str): A CRN to filter UUIDs on
+        crncol (str): Name of the column containing course CRNs
+        assignmentcol (str): Name of the column containing assignment names. Defaults to
+                             'CASSIGNMENTNAME'. This will get renamed to 'assignment'.
+        usercol (str): Name of the column containing user information. This will get
+                       renamed to userName, and domains will be removed from emails.
+    Returns:
+       A `pd.DataFrame` containing the result of a left join on sensordata and uuids.
+    """
+    # read sensordata
+    sensordata = pd.read_csv(sdpath, low_memory=False)
 
-    uuids['userName'] = uuids['userName'].apply(lambda u: u.split('@')[0] if u != '' else u)
+    # read uuids
+    cols = ['studentProjectUuid', assignmentcol, usercol]
+    if crnfilter:
+        cols = cols + crncol
+    uuids = pd.read_csv(uuidpath, usecols=cols) \
+              .rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
+    umap = lambda u: u.split('@')[0] if str(u) != 'nan' and u != '' else u
+    uuids['userName'] = uuids['userName'].apply(umap) 
 
-    debug = debug.set_index(keys=['userUuid', 'studentProjectUuid'])
-    return debug.merge(right=uuids, right_index=True, left_index=True) \
-        .reset_index().set_index(keys=['userName', 'assignment'])
+    # filter uuids by crn if provided
+    if crnfilter:
+        uuids = uuids[(uuids[crncol].notnull()) & (uuids[crncol].str.contains(crnfilter))]
+        uuids = uuids.drop(columns=[crncol])
+     
+    # create oracle
+    oracle = {spu: (assignment, username) for _, (spu, assignment, username)
+                in uuids.iterrows() 
+                if str(assignment) != 'nan' and str(username) != 'nan'}
+    oracle = pd.DataFrame([(spu, assignment, username) for spu, (assignment, username) in oracle.items()], 
+                          columns=uuids.columns).set_index('studentProjectUuid')
+    
+    # join
+    merged = sensordata.join(oracle, on='studentProjectUuid')
+    merged = merged.query('assignment.notnull() and userName.notnull()') \
+                   .set_index(['userName', 'assignment'])
+
+    return merged
