@@ -236,8 +236,8 @@ def processline(url, fieldnames=None, filtertype=None):
         kvpairs.get('Current-Test-Assertions', 0) != 0:
         kvpairs['onTestCase'] = 1
 
-    if kvpairs.get('Type', '') == 'Termination':
-        return _split_termination(kvpairs)
+   if kvpairs.get('Type', '') == 'Termination':
+       return _split_termination(kvpairs)
     return kvpairs
 
 def _split_termination(kvpairs):
@@ -269,15 +269,18 @@ def _shouldwritekey(key, fieldnames):
 
     return False
 
-def maptouuids(sdpath, uuidpath, crnfilter=None, crncol='crn', 
+def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilter=None, crncol='crn', 
         usercol='email', assignmentcol='CASSIGNMENTNAME'):
     """Map sensordata to users and assignments based on studentProjectUuids.
 
     Args:
-        sdpath (str): Path to raw sensordata (CSV)
+        sensordata (pd.DataFrame): A DataFrame containing sensordata
+        sdpath (str): Path to raw sensordata (CSV). Either this or `sensordata`
+                      must be provided.
+        uuids (pd.DataFrame): A DataFrame containined uuids
         uuidpath (str): Path to UUID file. The file is expected to contain columns
                         ['studentProjectUuid', {crncol}, {usercol}, {assignmentcol}]
-                        at least
+                        at least. Either this or uuids must be provided.
         crnfilter (str): A CRN to filter UUIDs on
         crncol (str): Name of the column containing course CRNs
         assignmentcol (str): Name of the column containing assignment names. Defaults to
@@ -287,15 +290,23 @@ def maptouuids(sdpath, uuidpath, crnfilter=None, crncol='crn',
     Returns:
        A `pd.DataFrame` containing the result of a left join on sensordata and uuids.
     """
+    # check required params
+    if sensordata is None and sdpath is None:
+        raise ValueError('Either sensordata or sdpath must be provided. Got None for both.')
+    if uuids is None and uuidpath is None:
+        raise ValueError('Either uuids or uuidpath must be provided. Got None for both.')
+
     # read sensordata
-    sensordata = pd.read_csv(sdpath, low_memory=False)
+    if sensordata is None:
+        sensordata = pd.read_csv(sdpath, low_memory=False)
 
     # read uuids
     cols = ['studentProjectUuid', assignmentcol, usercol]
     if crnfilter:
-        cols = cols + crncol
-    uuids = pd.read_csv(uuidpath, usecols=cols) \
-              .rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
+        cols.append(crncol)
+    if uuids is None:
+        uuids = pd.read_csv(uuidpath, usecols=cols) \
+                  .rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
     umap = lambda u: u.split('@')[0] if str(u) != 'nan' and u != '' else u
     uuids['userName'] = uuids['userName'].apply(umap) 
 
@@ -305,15 +316,15 @@ def maptouuids(sdpath, uuidpath, crnfilter=None, crncol='crn',
         uuids = uuids.drop(columns=[crncol])
      
     # create oracle
-    oracle = {spu: (assignment, username) for _, (spu, assignment, username)
+    oracle = {uuid: (assignment, username) for _, (uuid, assignment, username)
                 in uuids.iterrows() 
-                if str(assignment) != 'nan' and str(username) != 'nan'}
-    oracle = pd.DataFrame([(spu, assignment, username) for spu, (assignment, username) in oracle.items()], 
-                          columns=uuids.columns).set_index('studentProjectUuid')
+                if str(username) != 'nan' and str(assignment) != 'nan'}
+    oracle = pd.DataFrame([(uuid, assignment, username) for uuid, (assignment, username) 
+                            in oracle.items()], columns=uuids.columns) \
+               .set_index('studentProjectUuid')
     
     # join
     merged = sensordata.join(oracle, on='studentProjectUuid')
-    merged = merged.query('assignment.notnull() and userName.notnull()') \
-                   .set_index(['userName', 'assignment'])
+    merged = merged.query('userName.notnull()')
 
     return merged
