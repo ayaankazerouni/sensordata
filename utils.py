@@ -236,8 +236,6 @@ def processline(url, fieldnames=None, filtertype=None):
         kvpairs.get('Current-Test-Assertions', 0) != 0:
         kvpairs['onTestCase'] = 1
 
-   if kvpairs.get('Type', '') == 'Termination':
-       return _split_termination(kvpairs)
     return kvpairs
 
 def _split_termination(kvpairs):
@@ -269,8 +267,8 @@ def _shouldwritekey(key, fieldnames):
 
     return False
 
-def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilter=None, crncol='crn', 
-        usercol='email', assignmentcol='CASSIGNMENTNAME'):
+def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilter=None,
+               crncol='crn', usercol='email', assignmentcol='CASSIGNMENTNAME'):
     """Map sensordata to users and assignments based on studentProjectUuids.
 
     Args:
@@ -308,21 +306,21 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
         uuids = pd.read_csv(uuidpath, usecols=cols) \
                   .rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
     umap = lambda u: u.split('@')[0] if str(u) != 'nan' and u != '' else u
-    uuids['userName'] = uuids['userName'].apply(umap) 
+    uuids['userName'] = uuids['userName'].apply(umap)
 
     # filter uuids by crn if provided
     if crnfilter:
         uuids = uuids[(uuids[crncol].notnull()) & (uuids[crncol].str.contains(crnfilter))]
         uuids = uuids.drop(columns=[crncol])
-     
+
     # create oracle
     oracle = {uuid: (assignment, username) for _, (uuid, assignment, username)
-                in uuids.iterrows() 
-                if str(username) != 'nan' and str(assignment) != 'nan'}
-    oracle = pd.DataFrame([(uuid, assignment, username) for uuid, (assignment, username) 
-                            in oracle.items()], columns=uuids.columns) \
+              in uuids.iterrows()
+              if str(username) != 'nan' and str(assignment) != 'nan'}
+    oracle = pd.DataFrame([(uuid, assignment, username) for uuid, (assignment, username)
+                           in oracle.items()], columns=uuids.columns) \
                .set_index('studentProjectUuid')
-    
+
     # join
     merged = sensordata.join(oracle, on='studentProjectUuid')
     merged = merged.query('userName.notnull()')
