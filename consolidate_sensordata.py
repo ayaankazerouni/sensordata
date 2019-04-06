@@ -100,6 +100,8 @@ def load_submission_data(webcat_path, onlyfinal=True, pluscols=[]):
     data['score'] = data['score.correctness'] / data['elementsCovered']
     data['score'] = data['score'].apply(lambda x: x if x <= 1 else 1)
 
+    data.drop(columns=['score.correctness'], inplace=True)
+
     # calculate submission time outcomes 
     hours_from_deadline = (data['dueDateRaw'] - data['submissionTimeRaw'])
     data['finishedHoursFromDeadline'] = hours_from_deadline.apply(lambda diff: diff.total_seconds() / 3600)
