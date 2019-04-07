@@ -42,7 +42,7 @@ def userworksessions(usergroup, threshold=3):
 
     userresult = None
 
-    for row in usergroup.iterrows():
+    for _, row in usergroup.iterrows():
         prev_row = row if prev_row is None else prev_row
 
         prev_time = int(float(prev_row['time']))
