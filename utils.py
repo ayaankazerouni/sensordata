@@ -303,8 +303,8 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
     if crnfilter:
         cols.append(crncol)
     if uuids is None:
-        uuids = pd.read_csv(uuidpath, usecols=cols) \
-                  .rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
+        uuids = pd.read_csv(uuidpath, usecols=cols)
+    uuids = uuids.rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
     umap = lambda u: u.split('@')[0] if str(u) != 'nan' and u != '' else u
     uuids['userName'] = uuids['userName'].apply(umap)
 
