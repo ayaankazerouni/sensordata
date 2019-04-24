@@ -313,6 +313,8 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
         uuids = uuids[(uuids[crncol].notnull()) & (uuids[crncol].str.contains(crnfilter))]
         uuids = uuids.drop(columns=[crncol])
 
+    uuids = uuids[['studentProjectUuid', 'assignment', 'userName']] 
+
     # create oracle
     oracle = {uuid: (assignment, username) for _, (uuid, assignment, username)
               in uuids.iterrows()
@@ -326,3 +328,19 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
     merged = merged.query('userName.notnull()')
 
     return merged
+
+def with_edit_sizes(df):
+    """Given a data frame with Edit events containing Current-Sizes, group by
+    Class-Name and return the dataframe with a column called 'edit_size', which
+    contains the size of the edit made to the given file.
+    """
+    edits = df[(~df['Class-Name'].isna()) & (df['Type'] == 'Edit')] \
+            .groupby(['userName', 'Class-Name']) \
+            .apply(__get_edit_sizes)
+    df.loc[df.index.isin(edits.index), 'edit_size'] = edits['edit_size']
+    return df
+
+def __get_edit_sizes(df):
+    df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
+    return df
+
