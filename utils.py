@@ -4,19 +4,34 @@ subsets of events, converting timestamps, getting a term, etc.
 To use:
     import utils
 """
-import csv
 import re
+import csv
+import copy
+import logging
 import datetime
 from urllib import parse
 
 import pandas as pd
 
-def load_launches(launch_path=None, sensordata_path=None):
+logging.basicConfig(filename='sensordata-utils.log', filemode='w', level=logging.WARN)
+
+def load_launches(launch_path=None, sensordata_path=None, newformat=True):
     """Loads raw launch data.
 
     Convenience method: filters out everything but Launches from raw sensordata,
     or reads launches from an already filtered CSV file. If both are specified,
     the launch_path will be given precedence.
+
+    Newformat info: The new format encodes test success info differently; the old format
+    included columns 'TestSucesses' (notice the typo) and 'TestFailures'; the new format
+    instead include the column 'Unit-Name'. The new format also includes ConsoleOutput,
+    which was not present earlier. Use the default True for data collected after Fall 2018,
+    False for earlier.
+
+    Args:
+        launch_path (str): Path to file containing already filtered launch data
+        sensordata_path (str): Path to file containing raw sensordata
+        newformat (bool, default=True): Use the new format?
     """
     errormessage = "Either launch_path or sensordata_path must be specified and non-empty."
     if not launch_path and not sensordata_path:
@@ -36,17 +51,22 @@ def load_launches(launch_path=None, sensordata_path=None):
         'time': float,
         'Type': str,
         'Subtype': str,
-        'TestSucesses': str,
-        'TestFailures': str
+        'Subsubtype': str,
     }
+    if newformat:
+        dtypes['Unit-Name'] = str
+        dtypes['ConsoleOutput'] = str
+    else:
+        dtypes['TestSucesses'] = str
+        dtypes['TestFailures'] = str
+
     # pylint: disable=unused-variable
     eventtypes = ['Launch', 'Termination']
     data = pd.read_csv(sensordata_path, dtype=dtypes, usecols=dtypes.keys()) \
              .query('Type in @eventtypes') \
              .rename(columns={
                  'email': 'userName',
-                 'CASSIGNMENTNAME': 'assignment',
-                 'TestSucesses': 'TestSuccesses'
+                 'CASSIGNMENTNAME': 'assignment'
              })
     data.userName = data.userName.apply(lambda u: u.split('@')[0])
     data = data.set_index(['userName', 'assignment'])
@@ -120,6 +140,24 @@ def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'
     data = data.set_index(['userName', 'assignment'])
     return data
 
+DEFAULT_FIELDNAMES = [
+    'email',
+    'CASSIGNMENTNAME',
+    'time',
+    'Class-Name',
+    'Unit-Type',
+    'Unit-Name',
+    'Type',
+    'Subtype',
+    'Subsubtype',
+    'onTestCase',
+    'Current-Statements',
+    'Current-Methods',
+    'Current-Size',
+    'Current-Test-Assertions',
+    'ConsoleOutput'
+]
+
 def raw_to_csv(inpath, outpath, fieldnames=None):
     """
     Given a file of newline separated URLs, writes the URL query params as
@@ -136,6 +174,7 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
             time,
             Class-Name,
             Unit-Type,
+            Unit-Name,
             Type,
             Subtype,
             Subsubtype,
@@ -145,35 +184,23 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
             Current-Size,
             Current-Test-Assertions
         ]
+    These fieldnames can be imported as `utils.DEFAULT_FIELDNAMES` and modified
+    as needed.
     """
     with open(inpath, 'r') as infile, open(outpath, 'w') as outfile:
         if not fieldnames:
-            fieldnames = [
-                'email',
-                'CASSIGNMENTNAME',
-                'time',
-                'Class-Name',
-                'Unit-Type',
-                'Type',
-                'Subtype',
-                'Subsubtype',
-                'onTestCase',
-                'Current-Statements',
-                'Current-Methods',
-                'Current-Size',
-                'Current-Test-Assertions',
-                'ConsoleOutput'
-            ]
+            fieldnames = DEFAULT_FIELDNAMES
         writer = csv.DictWriter(outfile, delimiter=',', fieldnames=fieldnames)
         writer.writeheader()
 
-        for index, line in enumerate(infile):
-            if index % 1000000 == 0:
-                completed_percent = float(("%0.2f"%(index * 100 / 8524823)))
-                print('Processed %s of file' % completed_percent)
+        for line in infile:
             event = processline(line, fieldnames)
             if event is not None:
-                writer.writerow(event)
+                if isinstance(event, list):
+                    for item in event:
+                        writer.writerow(item)
+                else:
+                    writer.writerow(event)
 
 def processline(url, fieldnames=None, filtertype=None):
     """
@@ -181,8 +208,12 @@ def processline(url, fieldnames=None, filtertype=None):
     pairs from its query params. Filters for a specific Type if specified.
 
     Keyword arguments:
-    filtertype  =   Only return a dict if the query param for Type == filtertype
+        fieldnames (list, default=None): The list of fieldnames to capture. If `None`,
+                                         uses `DEFAULT_FIELDNAMES`.
+        filtertype (bool): Only return a dict if the query param for Type == filtertype
     """
+    if not fieldnames:
+        fieldnames = DEFAULT_FIELDNAMES
     if 'http' in url:
         url = url.split(':', 1)[-1]
     items = parse.parse_qs(parse.urlparse(url).query)
@@ -200,7 +231,32 @@ def processline(url, fieldnames=None, filtertype=None):
     kvpairs['time'] = time if time != 0 else ''
     if filtertype and kvpairs['Type'] != filtertype:
         return None
+
+    if kvpairs.get('Class-Name', '').endswith('Test') and \
+        kvpairs.get('Current-Test-Assertions', 0) != 0:
+        kvpairs['onTestCase'] = 1
+
     return kvpairs
+
+def _split_termination(kvpairs):
+    try:
+        if kvpairs['Type'] != 'Termination' or kvpairs['Subtype'] != 'Test':
+            return kvpairs
+
+        tests = kvpairs['Unit-Name'].strip('|').split('|')
+        outcomes = kvpairs['Subsubtype'].strip('|').split('|')
+        expandedevents = []
+        for test, outcome in zip(tests, outcomes):
+            newevent = copy.deepcopy(kvpairs)
+            newevent['Unit-Name'] = test
+            newevent['Subsubtype'] = outcome
+            expandedevents.append(newevent)
+    except KeyError:
+        logging.error('Missing some required keys to split termination event. Need \
+            Type, Subtype, and Subsubtype. Doing nothing.')
+        return kvpairs
+
+    return expandedevents
 
 def _shouldwritekey(key, fieldnames):
     if not fieldnames:
@@ -211,18 +267,80 @@ def _shouldwritekey(key, fieldnames):
 
     return False
 
-def _maptousers(debuggerpath, uuidspath, crns): # pylint: disable=unused-argument
-    debug = pd.read_csv(debuggerpath, low_memory=False).fillna('')
-    uuids = pd.read_csv(uuidspath).fillna('')
+def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilter=None,
+               crncol='crn', usercol='email', assignmentcol='CASSIGNMENTNAME'):
+    """Map sensordata to users and assignments based on studentProjectUuids.
 
-    uuids = uuids.rename(columns={'project uuid': 'studentProjectUuid', 'user uuid': 'userUuid', \
-                                  'assignment name': 'assignment', 'email': 'userName'}) \
-        .drop(columns=['project id', 'course', 'uri']) \
-        .set_index(keys=['userUuid', 'studentProjectUuid']) \
-        .query('CRN in @crns')
+    Args:
+        sensordata (pd.DataFrame): A DataFrame containing sensordata
+        sdpath (str): Path to raw sensordata (CSV). Either this or `sensordata`
+                      must be provided.
+        uuids (pd.DataFrame): A DataFrame containined uuids
+        uuidpath (str): Path to UUID file. The file is expected to contain columns
+                        ['studentProjectUuid', {crncol}, {usercol}, {assignmentcol}]
+                        at least. Either this or uuids must be provided.
+        crnfilter (str): A CRN to filter UUIDs on
+        crncol (str): Name of the column containing course CRNs
+        assignmentcol (str): Name of the column containing assignment names. Defaults to
+                             'CASSIGNMENTNAME'. This will get renamed to 'assignment'.
+        usercol (str): Name of the column containing user information. This will get
+                       renamed to userName, and domains will be removed from emails.
+    Returns:
+       A `pd.DataFrame` containing the result of a left join on sensordata and uuids.
+    """
+    # check required params
+    if sensordata is None and sdpath is None:
+        raise ValueError('Either sensordata or sdpath must be provided. Got None for both.')
+    if uuids is None and uuidpath is None:
+        raise ValueError('Either uuids or uuidpath must be provided. Got None for both.')
 
-    uuids['userName'] = uuids['userName'].apply(lambda u: u.split('@')[0] if u != '' else u)
+    # read sensordata
+    if sensordata is None:
+        sensordata = pd.read_csv(sdpath, low_memory=False)
 
-    debug = debug.set_index(keys=['userUuid', 'studentProjectUuid'])
-    return debug.merge(right=uuids, right_index=True, left_index=True) \
-        .reset_index().set_index(keys=['userName', 'assignment'])
+    # read uuids
+    cols = ['studentProjectUuid', assignmentcol, usercol]
+    if crnfilter:
+        cols.append(crncol)
+    if uuids is None:
+        uuids = pd.read_csv(uuidpath, usecols=cols)
+    uuids = uuids.rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
+    umap = lambda u: u.split('@')[0] if str(u) != 'nan' and u != '' else u
+    uuids['userName'] = uuids['userName'].apply(umap)
+
+    # filter uuids by crn if provided
+    if crnfilter:
+        uuids = uuids[(uuids[crncol].notnull()) & (uuids[crncol].str.contains(crnfilter))]
+        uuids = uuids.drop(columns=[crncol])
+
+    uuids = uuids[['studentProjectUuid', 'assignment', 'userName']] 
+
+    # create oracle
+    oracle = {uuid: (assignment, username) for _, (uuid, assignment, username)
+              in uuids.iterrows()
+              if str(username) != 'nan' and str(assignment) != 'nan'}
+    oracle = pd.DataFrame([(uuid, assignment, username) for uuid, (assignment, username)
+                           in oracle.items()], columns=uuids.columns) \
+               .set_index('studentProjectUuid')
+
+    # join
+    merged = sensordata.join(oracle, on='studentProjectUuid')
+    merged = merged.query('userName.notnull()')
+
+    return merged
+
+def with_edit_sizes(df):
+    """Given a data frame with Edit events containing Current-Sizes, group by
+    Class-Name and return the dataframe with a column called 'edit_size', which
+    contains the size of the edit made to the given file.
+    """
+    edits = df[(~df['Class-Name'].isna()) & (df['Type'] == 'Edit')] \
+            .groupby(['userName', 'Class-Name']) \
+            .apply(__get_edit_sizes)
+    df.loc[df.index.isin(edits.index), 'edit_size'] = edits['edit_size']
+    return df
+
+def __get_edit_sizes(df):
+    df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
+    return df
+

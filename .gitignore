@@ -40,3 +40,6 @@ env/
 
 # IDE stuff
 .vscode
+
+# no logfiles
+*.log
