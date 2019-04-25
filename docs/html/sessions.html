@@ -68,55 +68,30 @@ are separated by a gap of 3 hours without activity.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-work_sessions_from_subsessions">
-<span id="work-sessions"></span><h2>Work sessions<a class="headerlink" href="#module-work_sessions_from_subsessions" title="Permalink to this headline">¶</a></h2>
-<p>Collapses subsessions into work sessions.</p>
-<dl class="docutils">
-<dt>To use:</dt>
-<dd>./work_sessions.py &lt;subsessions file&gt; &lt;outfile&gt;</dd>
-</dl>
+<div class="section" id="module-work_sessions">
+<span id="work-sessions"></span><h2>Work sessions<a class="headerlink" href="#module-work_sessions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="work_sessions_from_subsessions.get_work_sessions">
-<code class="descclassname">work_sessions_from_subsessions.</code><code class="descname">get_work_sessions</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions_from_subsessions.html#get_work_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions_from_subsessions.get_work_sessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Collapses subsession data from infile into work session data in outfile.</p>
-</dd></dl>
-
-<span class="target" id="module-work_sessions_from_raw"></span><p>Gets work session data from raw sensordata.
-Work sessions are separeted by a specified number of
-hours of inactivity (3 by default).</p>
-<dl class="docutils">
-<dt>To use:</dt>
-<dd>from sensordata import worksessions or
-./work_sessions_from_raw.py &lt;infile&gt; &lt;outfile&gt; on the command line</dd>
-</dl>
-<dl class="function">
-<dt id="work_sessions_from_raw.userworksessions">
-<code class="descclassname">work_sessions_from_raw.</code><code class="descname">userworksessions</code><span class="sig-paren">(</span><em>usergroup</em>, <em>threshold=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions_from_raw.html#userworksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions_from_raw.userworksessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acts on sensordata for a single student-project.
-Returns a dataframe of work sessions, where work sessions are
-delimited by <em>threshold</em> hours of inactivity. This is typically called
+<dt id="work_sessions.summarise_worksessions">
+<code class="descclassname">work_sessions.</code><code class="descname">summarise_worksessions</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions.html#summarise_worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions.summarise_worksessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acts on sensordata for a single student-project.</p>
+<p>Returns a dataframe of work sessions, where work sessions are
+delimited by some hours of inactivity. This is typically called
 by <em>worksessions</em> as part of a split-apply-combine procedure.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>usergroup</strong> (<em>DataFrame</em>) – containing all sensordata from the given project</li>
-<li><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – number of hours of inactivity that should separate a work session.
-Defaults to 3.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>DataFrame</em>) – containing all sensordata from the given project</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <em>DataFrame</em> containing the work sessions for the given user on a given assignment.</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <em>DataFrame</em> containing the work sessions for the given user on a given assignment.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="work_sessions_from_raw.worksessions">
-<code class="descclassname">work_sessions_from_raw.</code><code class="descname">worksessions</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions_from_raw.html#worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions_from_raw.worksessions" title="Permalink to this definition">¶</a></dt>
+<dt id="work_sessions.worksessions">
+<code class="descclassname">work_sessions.</code><code class="descname">worksessions</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions.html#worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions.worksessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given raw sensordata for all students, group events for
 individual student-projects and compute work sessions.</p>
 <p>Returns summarised work sessions, which includes start times,
@@ -137,7 +112,7 @@ launches (test and normal).</p>
   <ul>
 <li><a class="reference internal" href="#">Subsessions and work sessions</a><ul>
 <li><a class="reference internal" href="#module-subsessions">Subsessions</a></li>
-<li><a class="reference internal" href="#module-work_sessions_from_subsessions">Work sessions</a></li>
+<li><a class="reference internal" href="#module-work_sessions">Work sessions</a></li>
 </ul>
 </li>
 </ul>

@@ -65,11 +65,61 @@ are specified, the already-filtered file (at edit_path) takes precedence.</p>
 
 <dl class="function">
 <dt id="utils.load_launches">
-<code class="descclassname">utils.</code><code class="descname">load_launches</code><span class="sig-paren">(</span><em>launch_path=None</em>, <em>sensordata_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#load_launches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.load_launches" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">utils.</code><code class="descname">load_launches</code><span class="sig-paren">(</span><em>launch_path=None</em>, <em>sensordata_path=None</em>, <em>newformat=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#load_launches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.load_launches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads raw launch data.</p>
 <p>Convenience method: filters out everything but Launches from raw sensordata,
 or reads launches from an already filtered CSV file. If both are specified,
 the launch_path will be given precedence.</p>
+<p>Newformat info: The new format encodes test success info differently; the old format
+included columns ‘TestSucesses’ (notice the typo) and ‘TestFailures’; the new format
+instead include the column ‘Unit-Name’. The new format also includes ConsoleOutput,
+which was not present earlier. Use the default True for data collected after Fall 2018,
+False for earlier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>launch_path</strong> (<em>str</em>) – Path to file containing already filtered launch data</li>
+<li><strong>sensordata_path</strong> (<em>str</em>) – Path to file containing raw sensordata</li>
+<li><strong>newformat</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Use the new format?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.maptouuids">
+<code class="descclassname">utils.</code><code class="descname">maptouuids</code><span class="sig-paren">(</span><em>sensordata=None</em>, <em>sdpath=None</em>, <em>uuids=None</em>, <em>uuidpath=None</em>, <em>crnfilter=None</em>, <em>crncol='crn'</em>, <em>usercol='email'</em>, <em>assignmentcol='CASSIGNMENTNAME'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#maptouuids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.maptouuids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map sensordata to users and assignments based on studentProjectUuids.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sensordata</strong> (<em>pd.DataFrame</em>) – A DataFrame containing sensordata</li>
+<li><strong>sdpath</strong> (<em>str</em>) – Path to raw sensordata (CSV). Either this or <cite>sensordata</cite>
+must be provided.</li>
+<li><strong>uuids</strong> (<em>pd.DataFrame</em>) – A DataFrame containined uuids</li>
+<li><strong>uuidpath</strong> (<em>str</em>) – Path to UUID file. The file is expected to contain columns
+[‘studentProjectUuid’, {crncol}, {usercol}, {assignmentcol}]
+at least. Either this or uuids must be provided.</li>
+<li><strong>crnfilter</strong> (<em>str</em>) – A CRN to filter UUIDs on</li>
+<li><strong>crncol</strong> (<em>str</em>) – Name of the column containing course CRNs</li>
+<li><strong>assignmentcol</strong> (<em>str</em>) – Name of the column containing assignment names. Defaults to
+‘CASSIGNMENTNAME’. This will get renamed to ‘assignment’.</li>
+<li><strong>usercol</strong> (<em>str</em>) – Name of the column containing user information. This will get
+renamed to userName, and domains will be removed from emails.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <cite>pd.DataFrame</cite> containing the result of a left join on sensordata and uuids.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -77,8 +127,20 @@ the launch_path will be given precedence.</p>
 <code class="descclassname">utils.</code><code class="descname">processline</code><span class="sig-paren">(</span><em>url</em>, <em>fieldnames=None</em>, <em>filtertype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#processline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.processline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a URL, returns a dict object containing the key-value
 pairs from its query params. Filters for a specific Type if specified.</p>
-<p>Keyword arguments:
-filtertype  =   Only return a dict if the query param for Type == filtertype</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>fieldnames</strong> (<em>list</em><em>, </em><em>default=None</em>) – The list of fieldnames to capture. If <cite>None</cite>,
+uses <cite>DEFAULT_FIELDNAMES</cite>.</li>
+<li><strong>filtertype</strong> (<em>bool</em>) – Only return a dict if the query param for Type == filtertype</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -94,6 +156,7 @@ the following default fieldnames:</p>
     <span class="n">time</span><span class="p">,</span>
     <span class="n">Class</span><span class="o">-</span><span class="n">Name</span><span class="p">,</span>
     <span class="n">Unit</span><span class="o">-</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">Unit</span><span class="o">-</span><span class="n">Name</span><span class="p">,</span>
     <span class="n">Type</span><span class="p">,</span>
     <span class="n">Subtype</span><span class="p">,</span>
     <span class="n">Subsubtype</span><span class="p">,</span>
@@ -105,6 +168,16 @@ the following default fieldnames:</p>
 <span class="p">]</span>
 </pre></div>
 </div>
+<p>These fieldnames can be imported as <cite>utils.DEFAULT_FIELDNAMES</cite> and modified
+as needed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.with_edit_sizes">
+<code class="descclassname">utils.</code><code class="descname">with_edit_sizes</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#with_edit_sizes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.with_edit_sizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a data frame with Edit events containing Current-Sizes, group by
+Class-Name and return the dataframe with a column called ‘edit_size’, which
+contains the size of the edit made to the given file.</p>
 </dd></dl>
 
 </div>
