@@ -184,6 +184,7 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
             Current-Size,
             Current-Test-Assertions
         ]
+
     These fieldnames can be imported as `utils.DEFAULT_FIELDNAMES` and modified
     as needed.
     """
