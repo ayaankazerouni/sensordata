@@ -10,8 +10,6 @@ Subsessions
 Work sessions
 -------------
 
-.. automodule:: work_sessions_from_subsessions
-  :members:
-.. automodule:: work_sessions_from_raw
+.. automodule:: work_sessions
   :members:
 
