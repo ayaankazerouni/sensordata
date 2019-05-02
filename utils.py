@@ -140,6 +140,7 @@ def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'
     data = data.set_index(['userName', 'assignment'])
     return data
 
+#: The typical fieldnames included in sensordata events. 
 DEFAULT_FIELDNAMES = [
     'email',
     'CASSIGNMENTNAME',
@@ -166,29 +167,8 @@ def raw_to_csv(inpath, outpath, fieldnames=None):
     rows in CSV format to the specified output file.
 
     If your URLs are DevEventTracker posted events, then you probably want
-    the following default fieldnames:
-
-    .. code-block:: python
-
-        fieldnames = [
-            email,
-            CASSIGNMENTNAME,
-            time,
-            Class-Name,
-            Unit-Type,
-            Unit-Name,
-            Type,
-            Subtype,
-            Subsubtype,
-            onTestCase,
-            Current-Statements,
-            Current-Methods,
-            Current-Size,
-            Current-Test-Assertions
-        ]
-
-    These fieldnames can be imported as `utils.DEFAULT_FIELDNAMES` and modified
-    as needed.
+    the :attr:`DEFAULT_FIELDNAMES`. These fieldnames can be imported  and 
+    modified as needed.
     """
     with open(inpath, 'r') as infile, open(outpath, 'w') as outfile:
         if not fieldnames:
@@ -210,10 +190,13 @@ def processline(url, fieldnames=None, filtertype=None):
     Given a URL, returns a dict object containing the key-value
     pairs from its query params. Filters for a specific Type if specified.
 
-    Keyword arguments:
+    Args: 
         fieldnames (list, default=None): The list of fieldnames to capture. If `None`,
                                          uses `DEFAULT_FIELDNAMES`.
         filtertype (bool): Only return a dict if the query param for Type == filtertype
+
+    Returns:
+        (dict) containing the key-value pairs from the the url's query params.
     """
     if not fieldnames:
         fieldnames = DEFAULT_FIELDNAMES
@@ -347,12 +330,29 @@ def __get_edit_sizes(df):
     df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
     return df
 
-def method_mods_to_edits(df=None, filepath=None):
+def method_mods_to_edits(df=None, filepath=None, testonly=False):
+    """Convert method modification events, as emitted by the
+    project at https://github.com/ayaankazerouni/incremental-testing,
+    to the sensordata format.
+
+    Args:
+        df (pd.DataFrame): A dataframe of method modification events
+        filepath (str): Path to a CSV file containing method modification 
+                        events
+        testonly (bool): Only convert and return changes to test methods?
+
+    Returns:
+        The same DataFrame, possibly with only test changes, with columns
+        in the sensordata format (see :attr:`DEFAULT_FIELDNAMES`).
+    """
     if df is None and filepath is None:
         raise ValueError('Either df or filepath must be specified.')
 
     if df is None:
         df = pd.read_csv(filepath)
+    
+    if testonly:
+        df = df[df['Type'] == 'MODIFY_TESTING_METHOD']
 
     return df.apply(__sensordata_from_method_mod, axis=1)
 
