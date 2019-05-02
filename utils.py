@@ -147,6 +147,8 @@ DEFAULT_FIELDNAMES = [
     'Class-Name',
     'Unit-Type',
     'Unit-Name',
+    'From-Unit-Name',
+    'To-Unit-Name',
     'Type',
     'Subtype',
     'Subsubtype',
@@ -345,3 +347,34 @@ def __get_edit_sizes(df):
     df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
     return df
 
+def method_mods_to_edits(df=None, filepath=None):
+    if df is None and filepath is None:
+        raise ValueError('Either df or filepath must be specified.')
+
+    if df is None:
+        df = pd.read_csv(filepath)
+
+    return df.apply(__sensordata_from_method_mod, axis=1)
+
+def __sensordata_from_method_mod(mod):
+    modtype = mod['Type']
+    method_id = mod['methodId']
+    on_test_case = 0
+    if modtype == 'MODIFY_TESTING_METHOD':
+        on_test_case = 1
+        method_id = mod['testMethodId']
+
+    method_name = method_id.split(',')[1]
+
+    return pd.Series({
+        'userName': mod['userName'],
+        'Type': 'Edit',
+        'Subtype': 'Commit',
+        'Unit-Name': method_name,
+        'studentProjectUuid': mod['project'],
+        'commitHash': mod['commitHash'],
+        'edit_size': mod['modsToMethod'],
+        'assignment': mod['assignment'],
+        'Unit-Type': 'Method',
+        'time': mod['time']
+    })
