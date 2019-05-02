@@ -21,8 +21,8 @@ def countbreakpointsession(sessions):
 def dateparser(d, s=True): 
     """Parse timestamps
 
-    Arguments 
-        s (bool):   `True` if timestamps are in seconds, False otherwise
+    Args: 
+        s (bool): `True` if timestamps are in seconds, False otherwise
     """
     if s:
         return datetime.fromtimestamp(int(float(d)))
