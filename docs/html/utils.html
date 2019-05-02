@@ -47,6 +47,12 @@ subsets of events, converting timestamps, getting a term, etc.</p>
 <dt>To use:</dt>
 <dd>import utils</dd>
 </dl>
+<dl class="data">
+<dt id="utils.DEFAULT_FIELDNAMES">
+<code class="descclassname">utils.</code><code class="descname">DEFAULT_FIELDNAMES</code><em class="property"> = ['email', 'CASSIGNMENTNAME', 'time', 'Class-Name', 'Unit-Type', 'Unit-Name', 'From-Unit-Name', 'To-Unit-Name', 'Type', 'Subtype', 'Subsubtype', 'onTestCase', 'Current-Statements', 'Current-Methods', 'Current-Size', 'Current-Test-Assertions', 'ConsoleOutput']</em><a class="headerlink" href="#utils.DEFAULT_FIELDNAMES" title="Permalink to this definition">¶</a></dt>
+<dd><p>The typical fieldnames included in sensordata events.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="utils.get_term">
 <code class="descclassname">utils.</code><code class="descname">get_term</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#get_term"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.get_term" title="Permalink to this definition">¶</a></dt>
@@ -123,6 +129,32 @@ renamed to userName, and domains will be removed from emails.</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="utils.method_mods_to_edits">
+<code class="descclassname">utils.</code><code class="descname">method_mods_to_edits</code><span class="sig-paren">(</span><em>df=None</em>, <em>filepath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#method_mods_to_edits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.method_mods_to_edits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert method modification events, as emitted by the
+project at <a class="reference external" href="https://github.com/ayaankazerouni/incremental-testing">https://github.com/ayaankazerouni/incremental-testing</a>,
+to the sensordata format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – A dataframe of method modification events</li>
+<li><strong>filepath</strong> (<em>str</em>) – Path to a CSV file containing method modification
+events</li>
+<li><strong>testonly</strong> (<em>bool</em>) – Only convert and return changes to test methods?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The same DataFrame, possibly with only test changes, with columns
+in the sensordata format (see <a class="reference internal" href="#utils.DEFAULT_FIELDNAMES" title="utils.DEFAULT_FIELDNAMES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DEFAULT_FIELDNAMES</span></code></a>).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="utils.processline">
 <code class="descclassname">utils.</code><code class="descname">processline</code><span class="sig-paren">(</span><em>url</em>, <em>fieldnames=None</em>, <em>filtertype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#processline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.processline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a URL, returns a dict object containing the key-value
@@ -131,12 +163,14 @@ pairs from its query params. Filters for a specific Type if specified.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>fieldnames</strong> (<em>list</em><em>, </em><em>default=None</em>) – The list of fieldnames to capture. If <cite>None</cite>,
 uses <cite>DEFAULT_FIELDNAMES</cite>.</li>
 <li><strong>filtertype</strong> (<em>bool</em>) – Only return a dict if the query param for Type == filtertype</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(dict) containing the key-value pairs from the the url’s query params.</p>
 </td>
 </tr>
 </tbody>
@@ -149,27 +183,8 @@ uses <cite>DEFAULT_FIELDNAMES</cite>.</li>
 <dd><p>Given a file of newline separated URLs, writes the URL query params as
 rows in CSV format to the specified output file.</p>
 <p>If your URLs are DevEventTracker posted events, then you probably want
-the following default fieldnames:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fieldnames</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">email</span><span class="p">,</span>
-    <span class="n">CASSIGNMENTNAME</span><span class="p">,</span>
-    <span class="n">time</span><span class="p">,</span>
-    <span class="n">Class</span><span class="o">-</span><span class="n">Name</span><span class="p">,</span>
-    <span class="n">Unit</span><span class="o">-</span><span class="n">Type</span><span class="p">,</span>
-    <span class="n">Unit</span><span class="o">-</span><span class="n">Name</span><span class="p">,</span>
-    <span class="n">Type</span><span class="p">,</span>
-    <span class="n">Subtype</span><span class="p">,</span>
-    <span class="n">Subsubtype</span><span class="p">,</span>
-    <span class="n">onTestCase</span><span class="p">,</span>
-    <span class="n">Current</span><span class="o">-</span><span class="n">Statements</span><span class="p">,</span>
-    <span class="n">Current</span><span class="o">-</span><span class="n">Methods</span><span class="p">,</span>
-    <span class="n">Current</span><span class="o">-</span><span class="n">Size</span><span class="p">,</span>
-    <span class="n">Current</span><span class="o">-</span><span class="n">Test</span><span class="o">-</span><span class="n">Assertions</span>
-<span class="p">]</span>
-</pre></div>
-</div>
-<p>These fieldnames can be imported as <cite>utils.DEFAULT_FIELDNAMES</cite> and modified
-as needed.</p>
+the <a class="reference internal" href="#utils.DEFAULT_FIELDNAMES" title="utils.DEFAULT_FIELDNAMES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DEFAULT_FIELDNAMES</span></code></a>. These fieldnames can be imported  and
+modified as needed.</p>
 </dd></dl>
 
 <dl class="function">

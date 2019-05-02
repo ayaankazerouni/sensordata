@@ -48,13 +48,14 @@
 
 <span class="sd">    Returns a dataframe of work sessions, where work sessions are</span>
 <span class="sd">    delimited by some hours of inactivity. This is typically called</span>
-<span class="sd">    by *worksessions* as part of a split-apply-combine procedure.</span>
+<span class="sd">    by :meth:`worksessions` as part of a split-apply-combine procedure.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        df (DataFrame): containing all sensordata from the given project</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A *DataFrame* containing the work sessions for the given user on a given assignment.</span>
+<span class="sd">        A *DataFrame* containing the work sessions for the given user on a given </span>
+<span class="sd">        assignment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">username</span><span class="p">,</span> <span class="n">ws_id</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">name</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>

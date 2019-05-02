@@ -52,7 +52,7 @@
 <code class="descclassname">subsessions.</code><code class="descname">get_subsessions</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em>, <em>threshold=3</em>, <em>cleaned=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#get_subsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.get_subsessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clusters data into work sessions and subsessions.</p>
 <p>Subsessions are separated by launch events. Work sessions
-are separated by a gap of 3 hours without activity.</p>
+are separated by a gap of <cite>threshold</cite> hours without activity.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -76,14 +76,15 @@ are separated by a gap of 3 hours without activity.</p>
 <dd><p>Acts on sensordata for a single student-project.</p>
 <p>Returns a dataframe of work sessions, where work sessions are
 delimited by some hours of inactivity. This is typically called
-by <em>worksessions</em> as part of a split-apply-combine procedure.</p>
+by <a class="reference internal" href="#work_sessions.worksessions" title="work_sessions.worksessions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">worksessions()</span></code></a> as part of a split-apply-combine procedure.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>DataFrame</em>) – containing all sensordata from the given project</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <em>DataFrame</em> containing the work sessions for the given user on a given assignment.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <em>DataFrame</em> containing the work sessions for the given user on a given
+assignment.</td>
 </tr>
 </tbody>
 </table>

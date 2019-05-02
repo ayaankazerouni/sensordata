@@ -9,13 +9,14 @@ def summarise_worksessions(df):
 
     Returns a dataframe of work sessions, where work sessions are
     delimited by some hours of inactivity. This is typically called
-    by *worksessions* as part of a split-apply-combine procedure.
+    by :meth:`worksessions` as part of a split-apply-combine procedure.
 
     Args:
         df (DataFrame): containing all sensordata from the given project
 
     Returns:
-        A *DataFrame* containing the work sessions for the given user on a given assignment.
+        A *DataFrame* containing the work sessions for the given user on a given 
+        assignment.
     """
     username, ws_id = df.name
     start_time = df['time'].min()

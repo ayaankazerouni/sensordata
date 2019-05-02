@@ -179,6 +179,7 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">data</span></div>
 
+<span class="c1">#: The typical fieldnames included in sensordata events. </span>
 <span class="n">DEFAULT_FIELDNAMES</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;email&#39;</span><span class="p">,</span>
     <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">,</span>
@@ -186,6 +187,8 @@
     <span class="s1">&#39;Class-Name&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Unit-Type&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Unit-Name&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;From-Unit-Name&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;To-Unit-Name&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Subtype&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Subsubtype&#39;</span><span class="p">,</span>
@@ -203,29 +206,8 @@
 <span class="sd">    rows in CSV format to the specified output file.</span>
 
 <span class="sd">    If your URLs are DevEventTracker posted events, then you probably want</span>
-<span class="sd">    the following default fieldnames:</span>
-
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        fieldnames = [</span>
-<span class="sd">            email,</span>
-<span class="sd">            CASSIGNMENTNAME,</span>
-<span class="sd">            time,</span>
-<span class="sd">            Class-Name,</span>
-<span class="sd">            Unit-Type,</span>
-<span class="sd">            Unit-Name,</span>
-<span class="sd">            Type,</span>
-<span class="sd">            Subtype,</span>
-<span class="sd">            Subsubtype,</span>
-<span class="sd">            onTestCase,</span>
-<span class="sd">            Current-Statements,</span>
-<span class="sd">            Current-Methods,</span>
-<span class="sd">            Current-Size,</span>
-<span class="sd">            Current-Test-Assertions</span>
-<span class="sd">        ]</span>
-
-<span class="sd">    These fieldnames can be imported as `utils.DEFAULT_FIELDNAMES` and modified</span>
-<span class="sd">    as needed.</span>
+<span class="sd">    the :attr:`DEFAULT_FIELDNAMES`. These fieldnames can be imported  and </span>
+<span class="sd">    modified as needed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">inpath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fieldnames</span><span class="p">:</span>
@@ -247,10 +229,13 @@
 <span class="sd">    Given a URL, returns a dict object containing the key-value</span>
 <span class="sd">    pairs from its query params. Filters for a specific Type if specified.</span>
 
-<span class="sd">    Keyword arguments:</span>
+<span class="sd">    Args: </span>
 <span class="sd">        fieldnames (list, default=None): The list of fieldnames to capture. If `None`,</span>
 <span class="sd">                                         uses `DEFAULT_FIELDNAMES`.</span>
 <span class="sd">        filtertype (bool): Only return a dict if the query param for Type == filtertype</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict) containing the key-value pairs from the the url&#39;s query params.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fieldnames</span><span class="p">:</span>
         <span class="n">fieldnames</span> <span class="o">=</span> <span class="n">DEFAULT_FIELDNAMES</span>
@@ -384,6 +369,51 @@
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;edit_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Current-Size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
 
+<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../utils.html#utils.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert method modification events, as emitted by the</span>
+<span class="sd">    project at https://github.com/ayaankazerouni/incremental-testing,</span>
+<span class="sd">    to the sensordata format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): A dataframe of method modification events</span>
+<span class="sd">        filepath (str): Path to a CSV file containing method modification </span>
+<span class="sd">                        events</span>
+<span class="sd">        testonly (bool): Only convert and return changes to test methods?</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The same DataFrame, possibly with only test changes, with columns</span>
+<span class="sd">        in the sensordata format (see :attr:`DEFAULT_FIELDNAMES`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Either df or filepath must be specified.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">__sensordata_from_method_mod</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">__sensordata_from_method_mod</span><span class="p">(</span><span class="n">mod</span><span class="p">):</span>
+    <span class="n">modtype</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span>
+    <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;methodId&#39;</span><span class="p">]</span>
+    <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">modtype</span> <span class="o">==</span> <span class="s1">&#39;MODIFY_TESTING_METHOD&#39;</span><span class="p">:</span>
+        <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;testMethodId&#39;</span><span class="p">]</span>
+
+    <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+        <span class="s1">&#39;userName&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="s1">&#39;Commit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Unit-Name&#39;</span><span class="p">:</span> <span class="n">method_name</span><span class="p">,</span>
+        <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;commitHash&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;commitHash&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;edit_size&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;modsToMethod&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;Unit-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Method&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+    <span class="p">})</span>
 </pre></div>
 
           </div>

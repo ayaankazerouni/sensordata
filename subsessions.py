@@ -10,7 +10,7 @@ def get_subsessions(infile, outfile, threshold=3, cleaned=None):
     Clusters data into work sessions and subsessions.
 
     Subsessions are separated by launch events. Work sessions
-    are separated by a gap of 3 hours without activity.
+    are separated by a gap of `threshold` hours without activity.
 
     Args:
         infile (str): path to the input file (CSV)
