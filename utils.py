@@ -330,7 +330,7 @@ def __get_edit_sizes(df):
     df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
     return df
 
-def method_mods_to_edits(df=None, filepath=None):
+def method_mods_to_edits(df=None, filepath=None, testonly=False):
     """Convert method modification events, as emitted by the
     project at https://github.com/ayaankazerouni/incremental-testing,
     to the sensordata format.
