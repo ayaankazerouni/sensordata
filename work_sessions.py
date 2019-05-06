@@ -1,3 +1,9 @@
+"""Splits events into work sessions, which are delimited by
+a certain number of hours of inactivity.
+
+See also:
+    :mod:`subsessions`
+"""
 from datetime import datetime
 import argparse
 import pandas as pd
@@ -53,8 +59,14 @@ def __test_outcomes(te):
         'errors': errors
     })
     
-def __assign_worksessions(df, threshold=1):
-    df['newSession'] = df['time'].diff() > (threshold * 1000 * 3600) # diff > threshold hrs?
+def assign_worksessions(df, threshold=1, milliseconds=True):
+    """Assign work sessions to events, in a column called
+    workSessionId.
+    """
+    delimit_hours = threshold * 3600
+    if milliseconds:
+        delimit_hours = delimit_hours * 1000 
+    df['newSession'] = df['time'].diff() > delimit_hours # diff > threshold hrs?
     df['workSessionId'] = df['newSession'].cumsum().astype('int')
     return df
 
@@ -73,7 +85,7 @@ def worksessions(infile, outfile=None):
 
     print('Read {} events'.format(df.shape[0]))
     
-    df = df.groupby(['userName']).apply(__assign_worksessions) \
+    df = df.groupby(['userName']).apply(assign_worksessions) \
            .groupby(['userName', 'workSessionId']).apply(summarise_worksessions)
 
     return df

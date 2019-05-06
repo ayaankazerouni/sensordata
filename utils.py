@@ -364,6 +364,7 @@ def __sensordata_from_method_mod(mod):
         on_test_case = 1
         method_id = mod['testMethodId']
 
+    class_name = method_id.split(',')[0]
     method_name = method_id.split(',')[1]
 
     return pd.Series({
@@ -371,10 +372,11 @@ def __sensordata_from_method_mod(mod):
         'Type': 'Edit',
         'Subtype': 'Commit',
         'Unit-Name': method_name,
+        'Unit-Type': 'Method',
+        'Class-Name': class_name,
         'studentProjectUuid': mod['project'],
         'commitHash': mod['commitHash'],
         'edit_size': mod['modsToMethod'],
         'assignment': mod['assignment'],
-        'Unit-Type': 'Method',
         'time': mod['time']
     })

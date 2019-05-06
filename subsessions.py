@@ -1,198 +1,108 @@
-#! /usr/bin/env python3
+"""Separates events into subsessions, which are delimited by
+termination events. So all events in a subsession take place
+between consecutive terminations.
 
+See also:
+    :mod:`work_sessions`
+"""
 import csv
 import sys
-import traceback
-import datetime
 
-def get_subsessions(infile, outfile, threshold=3, cleaned=None):
+import pandas as pd
+
+def summarise_subsession(sub):
+    """Summarises events in a subsession in terms of code edits,
+    test edits, and test launch outcomes.
+
+    Must be called as the apply in a split-apply-combine procedure,
+    grouping by users, work sessions, and subsessions.
     """
-    Clusters data into work sessions and subsessions.
+    _, _, subsession_name = sub.name # username, worksession, subsession
 
-    Subsessions are separated by launch events. Work sessions
-    are separated by a gap of `threshold` hours without activity.
+    if sub.empty:
+        return None
 
-    Args:
-        infile (str): path to the input file (CSV)
-        outfile (str): path to the resultant file (CSV)
+    edits = sub[(sub['Type'] == 'Edit') & (~sub['Class-Name'].isna())]
+    test_edits = edits[edits['onTestCase'] == 1]
+    soln_edits = edits[edits['onTestCase'] != 1]
+    
+    try:
+        launchTime = sub.loc[subsession_name, 'time']
+        outcomes = sub.loc[subsession_name, 'Subsubtype']
+        outcomes = outcomes.strip('|').split('|') if outcomes else []
+        failures = outcomes.count('Failure')
+        successes = outcomes.count('Success')
+        errors = len(outcomes) - (failures + successes)
+    except KeyError:
+        # These events happened before the first launch
+        failures, successes, errors = 0, 0, 0
+        launchTime = None
+    
+    edits = (
+        0 if edits.empty 
+        else edits['edit_size'].sum()
+    )
+
+    test_edits = (
+        0 if test_edits.empty
+        else test_edits['edit_size'].sum()
+    )
+
+    soln_edits = (
+        0 if soln_edits.empty
+        else soln_edits['edit_size'].sum()
+    )
+        
+    result = {
+        'launchTime': launchTime,
+        'testEdits': test_edits,
+        'solnEdits': soln_edits,
+        'testFailures': failures,
+        'testSuccesses': successes,
+        'testErrors': errors
+    }
+
+    return pd.Series(result)
+
+def assign_subsessions(userevents):
+    """Assigns `subsessions` to events. A subsession contains 
+    all the work done between two consecutive Termination events.
+
+    Typically called as a part of a split-apply-combine procedure,
+    grouping by users, assignments, and work sessions.
     """
-    print('Getting subsessions...')
-    assignment_field = 'CASSIGNMENTNAME'
-    if cleaned:
-        assignment_field = 'cleaned_assignment'
-    fieldnames = [
-        'projectId',
-        'email',
-        'userId',
-        'CASSIGNMENTNAME',
-        'time',
-        'workSessionId',
-        'editSizeStmts',
-        'testEditSizeStmts',
-        'editSizeMethods',
-        'testEditSizeMethods',
-        'wsStartTime',
-        'launchType'
-    ]
-    with open(infile, 'r') as fin, open(outfile, 'w') as fout:
-        reader = csv.DictReader(fin, delimiter=',')
-        writer = csv.DictWriter(fout, delimiter=',', fieldnames=fieldnames)
+    # Set the 'subsession' column to the index value of each termination
+    userevents.loc[
+        (userevents.Type == 'Termination'), 'subsession'
+    ] = userevents.index[userevents.Type == 'Termination']
 
-        # Write headers first.
-        writer.writerow(dict((fn, fn) for fn in writer.fieldnames))
+    # Forward fill from each termination
+    userevents.subsession = ( 
+        userevents
+        .subsession
+        .fillna(method='ffill')
+        .fillna(-1) # for events that happened before the first launch
+    )
 
-        # Set initial values.
-        prev_launch_type = None
-        ws_id = 0
-        edit_size_stmts = 0
-        edit_size_methods = 0
-        test_edit_size_stmts = 0
-        test_edit_size_methods = 0
-        curr_sizes_stmts = {}
-        curr_sizes_methods = {}
-        test_curr_sizes_stmts = {}
-        test_curr_sizes_methods = {}
-        ws_start_time = None
-        prev_row = None
-
-        for row in reader:
-            # Setting prev values to the first row's values
-            # to start off with. If prev values are set already,
-            # they remain unchanged.
-            ws_start_time = ws_start_time or to_int(row['time'])
-            prev_row = prev_row or row
-
-            if (row['userId'] != prev_row['userId'] or row[assignment_field] != prev_row[assignment_field]):
-
-                to_write = {
-                    'userId': prev_row['userId'],
-                    'projectId': prev_row['projectId'],
-                    'email': prev_row['email'],
-                    'CASSIGNMENTNAME': prev_row[assignment_field],
-                    'time': prev_row['time'],
-                    'workSessionId': ws_id,
-                    'editSizeStmts': edit_size_stmts,
-                    'testEditSizeStmts': test_edit_size_stmts,
-                    'editSizeMethods': edit_size_methods,
-                    'testEditSizeMethods': test_edit_size_methods,
-                    'wsStartTime': ws_start_time,
-                    'launchType': 'N/A'
-                }
-                writer.writerow(to_write)
-
-                # Reset persistent values for next user or assignment.
-                ws_id = 0
-                edit_size_stmts = 0
-                edit_size_methods = 0
-                test_edit_size_stmts = 0
-                test_edit_size_methods = 0
-                curr_sizes_stmts = {}
-                ws_start_time = to_int(row['time'])
-                prev_row = row
-
-            prev_time = datetime.datetime.fromtimestamp(to_int(prev_row['time']) / 1000)
-            curr_time = datetime.datetime.fromtimestamp(to_int(row['time']) / 1000)
-            hours = (curr_time - prev_time).total_seconds() / 3600
-            if (hours < threshold):
-                # Within the same work session, we add up numbers for edit sizes
-                # and keep track of file sizes.
-                if (repr(row['Type']) == repr('Edit')):
-                    if(len(row['Class-Name']) > 0):
-                        # An edit took place, so we're going to store the current
-                        # size of the file (in statements) in a dictionary for
-                        # quick lookup the next time this file is edited.
-                        class_name = repr(row['Class-Name'])
-                        stmts = to_int(row['Current-Statements'])
-                        prev_size_stmts = curr_sizes_stmts.get(class_name, 0)
-
-                        if (to_int(row['onTestCase']) == 1):
-                            test_edit_size_stmts += abs(stmts - prev_size_stmts)
-                        else:
-                            edit_size_stmts += abs(stmts - prev_size_stmts)
-                        curr_sizes_stmts[class_name] = stmts
-                        prev_launch_type = None
-                    if(repr(row['Unit-Type']) == repr('Method')\
-                        and repr(row['Subsubtype']) in [repr('Add'), repr('Remove')]):
-                        if (to_int(row['onTestCase']) == 1):
-                            test_edit_size_methods += 1
-                        else:
-                            edit_size_methods += 1
-                        prev_launch_type = None
-
-                elif (repr(row['Type']) == repr('Launch')):
-                    # A launch occured, so we break into another 'subsession',
-                    # writing out aggregate data and resetting values.
-                    launch_type = row['Subtype']
-                    if (repr(prev_launch_type) != repr(launch_type)):
-                        to_write = {
-                            'userId': row['userId'],
-                            'projectId': row['projectId'],
-                            'email': row['email'],
-                            'CASSIGNMENTNAME': row[assignment_field],
-                            'time': row['time'],
-                            'workSessionId': ws_id,
-                            'editSizeStmts': edit_size_stmts,
-                            'testEditSizeStmts': test_edit_size_stmts,
-                            'editSizeMethods': edit_size_methods,
-                            'testEditSizeMethods': test_edit_size_methods,
-                            'wsStartTime': ws_start_time,
-                            'launchType': launch_type
-                        }
-                        writer.writerow(to_write)
-
-                        edit_size_stmts = 0
-                        edit_size_methods = 0
-                        test_edit_size_stmts = 0
-                        test_edit_size_methods = 0
-
-                    prev_launch_type = launch_type
-            else:
-                # Work session ended, so we write out data for the current subsession, with edits
-                # that are 'not followed by any launch'
-                to_write = {
-                    'userId': prev_row['userId'],
-                    'projectId': prev_row['projectId'],
-                    'email': prev_row['email'],
-                    'CASSIGNMENTNAME': prev_row[assignment_field],
-                    'time': prev_row['time'],
-                    'workSessionId': ws_id,
-                    'editSizeStmts': edit_size_stmts,
-                    'testEditSizeStmts': test_edit_size_stmts,
-                    'editSizeMethods': edit_size_methods,
-                    'testEditSizeMethods': test_edit_size_methods,
-                    'wsStartTime': ws_start_time,
-                    'launchType': 'N/A'
-                }
-                writer.writerow(to_write)
-                ws_id += 1
-                edit_size_stmts = 0
-                test_edit_size_stmts = 0
-                edit_size_methods = 0
-                test_edit_size_methods = 0
-                ws_start_time = row['time']
-
-            prev_row = row
-
-def to_int(num):
-    return int(float(num))
-
+    return userevents
+    
 def main(args):
     infile = args[0]
     outfile = args[1]
     try:
-        if len(args) == 3:
-            get_subsessions(infile, outfile, args[2])
-        else:
-            get_subsessions(infile, outfile)
+        df = pd.read_csv(infile)
+        result = df.groupby(['userName', 'workSessionId']).apply(assign_subsessions) \
+                   .groupby(['userName',' workSessionId', 'subsession']).apply(summarise_subsession)
+        result.to_csv(outfile, index=True)
     except FileNotFoundError as e:
-        print("Error! File '%s' does not exist." % infile)
-    except KeyError as e:
-        traceback.print_exc()
+        print("Error! File '{}' does not exist.".format(infile))
+    except KeyError:
+        print('Please ensure that work session ids were assigned before assigning subsessions.') 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print('Clusters data into work sessions and subsessions.\n\nSubsessions are separated by ' +
-            'launch events. Work sessions are separated by a gap of 3 hours without activity.')
+    if len(sys.argv) < 2:
+        print('Clusters data into subsessions.\n\nSubsessions are separated by ' +
+            'termination events.')
         print('Usage:\n\t./subsessions.py <input_file> <output_file>')
         sys.exit()
     main(sys.argv[1:])

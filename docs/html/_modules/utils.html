@@ -369,7 +369,7 @@
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;edit_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Current-Size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
 
-<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../utils.html#utils.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../utils.html#utils.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testonly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert method modification events, as emitted by the</span>
 <span class="sd">    project at https://github.com/ayaankazerouni/incremental-testing,</span>
 <span class="sd">    to the sensordata format.</span>
@@ -389,6 +389,9 @@
 
     <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">testonly</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MODIFY_TESTING_METHOD&#39;</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">__sensordata_from_method_mod</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
@@ -400,6 +403,7 @@
         <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;testMethodId&#39;</span><span class="p">]</span>
 
+    <span class="n">class_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
@@ -407,11 +411,12 @@
         <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span>
         <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="s1">&#39;Commit&#39;</span><span class="p">,</span>
         <span class="s1">&#39;Unit-Name&#39;</span><span class="p">:</span> <span class="n">method_name</span><span class="p">,</span>
+        <span class="s1">&#39;Unit-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Method&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Class-Name&#39;</span><span class="p">:</span> <span class="n">class_name</span><span class="p">,</span>
         <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span>
         <span class="s1">&#39;commitHash&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;commitHash&#39;</span><span class="p">],</span>
         <span class="s1">&#39;edit_size&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;modsToMethod&#39;</span><span class="p">],</span>
         <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;Unit-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Method&#39;</span><span class="p">,</span>
         <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
     <span class="p">})</span>
 </pre></div>
