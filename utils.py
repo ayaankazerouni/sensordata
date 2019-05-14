@@ -224,23 +224,34 @@ def processline(url, fieldnames=None, filtertype=None):
 
     return kvpairs
 
-def _split_termination(kvpairs):
-    try:
-        if kvpairs['Type'] != 'Termination' or kvpairs['Subtype'] != 'Test':
-            return kvpairs
 
-        tests = kvpairs['Unit-Name'].strip('|').split('|')
-        outcomes = kvpairs['Subsubtype'].strip('|').split('|')
+def split_termination_events(df):
+    flattened = [
+        event 
+        for sublist in df.apply(__split_one_termination, axis=1) 
+        for event in sublist
+    ]
+    return pd.DataFrame(flattened)
+
+def __split_one_termination(t):
+    try:
+        t = t.to_dict()
+        if t['Type'] != 'Termination' or t['Subtype'] != 'Test':
+            return [t]
+
+        tests = t['Unit-Name'].strip('|').split('|')
+        outcomes = t['Subsubtype'].strip('|').split('|')
         expandedevents = []
         for test, outcome in zip(tests, outcomes):
-            newevent = copy.deepcopy(kvpairs)
+            newevent = copy.deepcopy(t)
             newevent['Unit-Name'] = test
             newevent['Subsubtype'] = outcome
+            newevent['Unit-Type'] = 'Method'
             expandedevents.append(newevent)
     except KeyError:
         logging.error('Missing some required keys to split termination event. Need \
             Type, Subtype, and Subsubtype. Doing nothing.')
-        return kvpairs
+        return [t] 
 
     return expandedevents
 
@@ -330,53 +341,3 @@ def __get_edit_sizes(df):
     df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
     return df
 
-def method_mods_to_edits(df=None, filepath=None, testonly=False):
-    """Convert method modification events, as emitted by the
-    project at https://github.com/ayaankazerouni/incremental-testing,
-    to the sensordata format.
-
-    Args:
-        df (pd.DataFrame): A dataframe of method modification events
-        filepath (str): Path to a CSV file containing method modification 
-                        events
-        testonly (bool): Only convert and return changes to test methods?
-
-    Returns:
-        The same DataFrame, possibly with only test changes, with columns
-        in the sensordata format (see :attr:`DEFAULT_FIELDNAMES`).
-    """
-    if df is None and filepath is None:
-        raise ValueError('Either df or filepath must be specified.')
-
-    if df is None:
-        df = pd.read_csv(filepath)
-    
-    if testonly:
-        df = df[df['Type'] == 'MODIFY_TESTING_METHOD']
-
-    return df.apply(__sensordata_from_method_mod, axis=1)
-
-def __sensordata_from_method_mod(mod):
-    modtype = mod['Type']
-    method_id = mod['methodId']
-    on_test_case = 0
-    if modtype == 'MODIFY_TESTING_METHOD':
-        on_test_case = 1
-        method_id = mod['testMethodId']
-
-    class_name = method_id.split(',')[0]
-    method_name = method_id.split(',')[1]
-
-    return pd.Series({
-        'userName': mod['userName'],
-        'Type': 'Edit',
-        'Subtype': 'Commit',
-        'Unit-Name': method_name,
-        'Unit-Type': 'Method',
-        'Class-Name': class_name,
-        'studentProjectUuid': mod['project'],
-        'commitHash': mod['commitHash'],
-        'edit_size': mod['modsToMethod'],
-        'assignment': mod['assignment'],
-        'time': mod['time']
-    })

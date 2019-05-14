@@ -64,24 +64,32 @@ def summarise_subsession(sub):
 
     return pd.Series(result)
 
-def assign_subsessions(userevents):
+def assign_subsessions(userevents, event_type='Termination'):
     """Assigns `subsessions` to events. A subsession contains 
     all the work done between two consecutive Termination events.
 
     Typically called as a part of a split-apply-combine procedure,
     grouping by users, assignments, and work sessions.
+
+    Args:
+        event_type (str, default=Termination): Delimit subsessions by
+                        a specific kind of event. Defaults to termination
+                        events.
+    Returns:
+        A DataFrame with a `subsession` column. The column should be
+        treated as a nominal factor.
     """
-    # Set the 'subsession' column to the index value of each termination
+    # Set the 'subsession' column to the index value of each delimiting event
     userevents.loc[
-        (userevents.Type == 'Termination'), 'subsession'
-    ] = userevents.index[userevents.Type == 'Termination']
+        (userevents.Type == event_type), 'subsession'
+    ] = userevents.index[userevents.Type == event_type]
 
     # Forward fill from each termination
     userevents.subsession = ( 
         userevents
         .subsession
         .fillna(method='ffill')
-        .fillna(-1) # for events that happened before the first launch
+        .fillna(-1) # for events that happened before the 1st delimiting event
     )
 
     return userevents
