@@ -165,29 +165,3 @@ def load_time_spent_data(time_path):
     data.set_index(['userName', 'assignment'], inplace=True)
 
     return data
-
-def load_launch_totals(ws_path):
-    """Calculates and loads totals for Normal and Test launches.
-    
-    Operates on work session data. 
-    """
-
-    cols_of_interest = [
-        'email',
-        'CASSIGNMENTNAME',
-        'normalLaunches',
-        'testLaunches'
-    ]
-    data = pd.read_csv(ws_path, usecols=cols_of_interest)
-    data.rename(index=str, columns={'CASSIGNMENTNAME': 'assignment', 'email': 'userName'}, inplace=True)
-    data['userName'].fillna('', inplace=True)
-    data['userName'].unique()
-    data['userName'] = data['userName'].apply(lambda x: x if x == '' else x[:x.index('@')])
-    data = data.groupby(['userName', 'assignment'])[['testLaunches', 'normalLaunches']].sum()
-    data = data.reset_index().set_index(['userName', 'assignment'])
-
-    return data
-
-if __name__ == '__main__':
-    MERGED = consolidate_student_data()
-    MERGED.to_csv(path_or_buf='~/Desktop/consolidated.csv', index=True)

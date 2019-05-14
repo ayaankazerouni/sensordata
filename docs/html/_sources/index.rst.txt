@@ -15,6 +15,7 @@ Documentation
    other
    sessions
    utils
+   as_sensordata
 
 Indices and tables
 ==================

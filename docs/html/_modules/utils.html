@@ -263,23 +263,34 @@
 
     <span class="k">return</span> <span class="n">kvpairs</span></div>
 
-<span class="k">def</span> <span class="nf">_split_termination</span><span class="p">(</span><span class="n">kvpairs</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Termination&#39;</span> <span class="ow">or</span> <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;Subtype&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Test&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">kvpairs</span>
 
-        <span class="n">tests</span> <span class="o">=</span> <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;Unit-Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
-        <span class="n">outcomes</span> <span class="o">=</span> <span class="n">kvpairs</span><span class="p">[</span><span class="s1">&#39;Subsubtype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">split_termination_events</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">flattened</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">event</span> 
+        <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">__split_one_termination</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">sublist</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">__split_one_termination</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Termination&#39;</span> <span class="ow">or</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;Subtype&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Test&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span>
+
+        <span class="n">tests</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;Unit-Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="n">outcomes</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;Subsubtype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
         <span class="n">expandedevents</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">test</span><span class="p">,</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tests</span><span class="p">,</span> <span class="n">outcomes</span><span class="p">):</span>
-            <span class="n">newevent</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">kvpairs</span><span class="p">)</span>
+            <span class="n">newevent</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
             <span class="n">newevent</span><span class="p">[</span><span class="s1">&#39;Unit-Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test</span>
             <span class="n">newevent</span><span class="p">[</span><span class="s1">&#39;Subsubtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outcome</span>
+            <span class="n">newevent</span><span class="p">[</span><span class="s1">&#39;Unit-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Method&#39;</span>
             <span class="n">expandedevents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newevent</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Missing some required keys to split termination event. Need </span><span class="se">\</span>
 <span class="s1">            Type, Subtype, and Subsubtype. Doing nothing.&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">kvpairs</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span> 
 
     <span class="k">return</span> <span class="n">expandedevents</span>
 
@@ -369,56 +380,6 @@
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;edit_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Current-Size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
 
-<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../utils.html#utils.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testonly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert method modification events, as emitted by the</span>
-<span class="sd">    project at https://github.com/ayaankazerouni/incremental-testing,</span>
-<span class="sd">    to the sensordata format.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        df (pd.DataFrame): A dataframe of method modification events</span>
-<span class="sd">        filepath (str): Path to a CSV file containing method modification </span>
-<span class="sd">                        events</span>
-<span class="sd">        testonly (bool): Only convert and return changes to test methods?</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The same DataFrame, possibly with only test changes, with columns</span>
-<span class="sd">        in the sensordata format (see :attr:`DEFAULT_FIELDNAMES`).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Either df or filepath must be specified.&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">testonly</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MODIFY_TESTING_METHOD&#39;</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">__sensordata_from_method_mod</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
-
-<span class="k">def</span> <span class="nf">__sensordata_from_method_mod</span><span class="p">(</span><span class="n">mod</span><span class="p">):</span>
-    <span class="n">modtype</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span>
-    <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;methodId&#39;</span><span class="p">]</span>
-    <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">modtype</span> <span class="o">==</span> <span class="s1">&#39;MODIFY_TESTING_METHOD&#39;</span><span class="p">:</span>
-        <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;testMethodId&#39;</span><span class="p">]</span>
-
-    <span class="n">class_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
-        <span class="s1">&#39;userName&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="s1">&#39;Commit&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;Unit-Name&#39;</span><span class="p">:</span> <span class="n">method_name</span><span class="p">,</span>
-        <span class="s1">&#39;Unit-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Method&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;Class-Name&#39;</span><span class="p">:</span> <span class="n">class_name</span><span class="p">,</span>
-        <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;commitHash&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;commitHash&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;edit_size&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;modsToMethod&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
-    <span class="p">})</span>
 </pre></div>
 
           </div>

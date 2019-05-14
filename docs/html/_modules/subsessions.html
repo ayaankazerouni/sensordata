@@ -103,24 +103,32 @@
 
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="assign_subsessions"><a class="viewcode-back" href="../sessions.html#subsessions.assign_subsessions">[docs]</a><span class="k">def</span> <span class="nf">assign_subsessions</span><span class="p">(</span><span class="n">userevents</span><span class="p">):</span>
+<div class="viewcode-block" id="assign_subsessions"><a class="viewcode-back" href="../sessions.html#subsessions.assign_subsessions">[docs]</a><span class="k">def</span> <span class="nf">assign_subsessions</span><span class="p">(</span><span class="n">userevents</span><span class="p">,</span> <span class="n">event_type</span><span class="o">=</span><span class="s1">&#39;Termination&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assigns `subsessions` to events. A subsession contains </span>
 <span class="sd">    all the work done between two consecutive Termination events.</span>
 
 <span class="sd">    Typically called as a part of a split-apply-combine procedure,</span>
 <span class="sd">    grouping by users, assignments, and work sessions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        event_type (str, default=Termination): Delimit subsessions by</span>
+<span class="sd">                        a specific kind of event. Defaults to termination</span>
+<span class="sd">                        events.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame with a `subsession` column. The column should be</span>
+<span class="sd">        treated as a nominal factor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Set the &#39;subsession&#39; column to the index value of each termination</span>
+    <span class="c1"># Set the &#39;subsession&#39; column to the index value of each delimiting event</span>
     <span class="n">userevents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-        <span class="p">(</span><span class="n">userevents</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;Termination&#39;</span><span class="p">),</span> <span class="s1">&#39;subsession&#39;</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;Termination&#39;</span><span class="p">]</span>
+        <span class="p">(</span><span class="n">userevents</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="n">event_type</span><span class="p">),</span> <span class="s1">&#39;subsession&#39;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="n">event_type</span><span class="p">]</span>
 
     <span class="c1"># Forward fill from each termination</span>
     <span class="n">userevents</span><span class="o">.</span><span class="n">subsession</span> <span class="o">=</span> <span class="p">(</span> 
         <span class="n">userevents</span>
         <span class="o">.</span><span class="n">subsession</span>
         <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;ffill&#39;</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># for events that happened before the first launch</span>
+        <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># for events that happened before the 1st delimiting event</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">userevents</span></div>

@@ -56,11 +56,24 @@ between consecutive terminations.</p>
 </div>
 <dl class="function">
 <dt id="subsessions.assign_subsessions">
-<code class="descclassname">subsessions.</code><code class="descname">assign_subsessions</code><span class="sig-paren">(</span><em>userevents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#assign_subsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.assign_subsessions" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">subsessions.</code><code class="descname">assign_subsessions</code><span class="sig-paren">(</span><em>userevents</em>, <em>event_type='Termination'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#assign_subsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.assign_subsessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns <cite>subsessions</cite> to events. A subsession contains
 all the work done between two consecutive Termination events.</p>
 <p>Typically called as a part of a split-apply-combine procedure,
 grouping by users, assignments, and work sessions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_type</strong> (<em>str</em><em>, </em><em>default=Termination</em>) – Delimit subsessions by
+a specific kind of event. Defaults to termination
+events.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DataFrame with a <cite>subsession</cite> column. The column should be
+treated as a nominal factor.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

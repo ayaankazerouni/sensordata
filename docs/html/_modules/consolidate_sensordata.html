@@ -204,32 +204,6 @@
     <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
-
-<div class="viewcode-block" id="load_launch_totals"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_launch_totals">[docs]</a><span class="k">def</span> <span class="nf">load_launch_totals</span><span class="p">(</span><span class="n">ws_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates and loads totals for Normal and Test launches.</span>
-<span class="sd">    </span>
-<span class="sd">    Operates on work session data. </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s1">&#39;email&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;normalLaunches&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;testLaunches&#39;</span>
-    <span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ws_path</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;CASSIGNMENTNAME&#39;</span><span class="p">:</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;userName&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span><span class="p">[:</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)])</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])[[</span><span class="s1">&#39;testLaunches&#39;</span><span class="p">,</span> <span class="s1">&#39;normalLaunches&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span>
-
-    <span class="k">return</span> <span class="n">data</span></div>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">MERGED</span> <span class="o">=</span> <span class="n">consolidate_student_data</span><span class="p">()</span>
-    <span class="n">MERGED</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_or_buf</span><span class="o">=</span><span class="s1">&#39;~/Desktop/consolidated.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
           </div>

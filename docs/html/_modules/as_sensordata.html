@@ -1,0 +1,175 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>as_sensordata &#8212; Sensordata  documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for as_sensordata</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Helper methods for converting event data from other sources</span>
+<span class="sd">to the DevEventTracker format. Typically you would do this to allow</span>
+<span class="sd">interpersing different event types (e.g. Submissions, method</span>
+<span class="sd">modifications, etc.) into a larger set of DevEventTracker events. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">consolidate_sensordata</span>
+
+<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../as_sensordata.html#as_sensordata.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testonly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert method modification events, as emitted by the</span>
+<span class="sd">    project at https://github.com/ayaankazerouni/incremental-testing,</span>
+<span class="sd">    to the sensordata format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): A dataframe of method modification events</span>
+<span class="sd">        filepath (str): Path to a CSV file containing method modification </span>
+<span class="sd">                        events</span>
+<span class="sd">        testonly (bool): Only convert and return changes to test methods?</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The same DataFrame, possibly with only test changes, with columns</span>
+<span class="sd">        in the sensordata format (see :attr:`utils.DEFAULT_FIELDNAMES`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Either df or filepath must be specified.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">testonly</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MODIFY_TESTING_METHOD&#39;</span><span class="p">]</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">__sensordata_from_method_mod</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> \
+           <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;Class-Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Unit-Name&#39;</span><span class="p">,</span> <span class="s1">&#39;edit_size&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<span class="k">def</span> <span class="nf">__sensordata_from_method_mod</span><span class="p">(</span><span class="n">mod</span><span class="p">):</span>
+    <span class="n">modtype</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span>
+    <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;methodId&#39;</span><span class="p">]</span>
+    <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">modtype</span> <span class="o">==</span> <span class="s1">&#39;MODIFY_TESTING_METHOD&#39;</span><span class="p">:</span>
+        <span class="n">on_test_case</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">method_id</span> <span class="o">=</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;testMethodId&#39;</span><span class="p">]</span>
+
+    <span class="n">class_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+        <span class="s1">&#39;userName&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="s1">&#39;Commit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Unit-Name&#39;</span><span class="p">:</span> <span class="n">method_name</span><span class="p">,</span>
+        <span class="s1">&#39;Unit-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Method&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Class-Name&#39;</span><span class="p">:</span> <span class="n">class_name</span><span class="p">,</span>
+        <span class="s1">&#39;studentProjectUuid&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;commitHash&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;commitHash&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;edit_size&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;modsToMethod&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+    <span class="p">})</span>
+
+<div class="viewcode-block" id="submissions_to_sensordata"><a class="viewcode-back" href="../as_sensordata.html#as_sensordata.submissions_to_sensordata">[docs]</a><span class="k">def</span> <span class="nf">submissions_to_sensordata</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">submissionpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert submissions to the DevEventTracker format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): A DataFrame of submissions, as returned by :meth:`consolidate_sensordata.load_submission_data`</span>
+<span class="sd">        submissionpath (str): A path to a CSV containing submission information</span>
+<span class="sd">        kwargs (dict): Other keyword arguments passed to :meth:`consolidate_sensordata.load_submission_data`</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        The submissions in the same format as DevEventTracker data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">submissionpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Either df or submissionpath must be specified.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">onlyfinal</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;onlyfinal&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">pluscols</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pluscols&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">consolidate_sensordata</span><span class="o">.</span><span class="n">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="o">=</span><span class="n">submissionpath</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="n">onlyfinal</span><span class="p">,</span> 
+                                                         <span class="n">pluscols</span><span class="o">=</span><span class="n">pluscols</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">__sensordata_from_sub</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">__sensordata_from_sub</span><span class="p">(</span><span class="n">sub</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+        <span class="s1">&#39;userName&#39;</span><span class="p">:</span> <span class="n">sub</span><span class="p">[</span><span class="s1">&#39;userName&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Submission&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Subtype&#39;</span><span class="p">:</span> <span class="n">sub</span><span class="p">[</span><span class="s1">&#39;submissionNo&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="n">sub</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">sub</span><span class="p">[</span><span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">sub</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;elementsCovered&#39;</span><span class="p">:</span> <span class="n">sub</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span>
+    <span class="p">})</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Sensordata  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ayaan Kazerouni.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

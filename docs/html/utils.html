@@ -16,6 +16,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Convert events to the DevEventTracker format" href="as_sensordata.html" />
     <link rel="prev" title="Subsessions and work sessions" href="sessions.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -27,6 +28,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="as_sensordata.html" title="Convert events to the DevEventTracker format"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sessions.html" title="Subsessions and work sessions"
              accesskey="P">previous</a> |</li>
@@ -129,32 +133,6 @@ renamed to userName, and domains will be removed from emails.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="utils.method_mods_to_edits">
-<code class="descclassname">utils.</code><code class="descname">method_mods_to_edits</code><span class="sig-paren">(</span><em>df=None</em>, <em>filepath=None</em>, <em>testonly=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#method_mods_to_edits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.method_mods_to_edits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert method modification events, as emitted by the
-project at <a class="reference external" href="https://github.com/ayaankazerouni/incremental-testing">https://github.com/ayaankazerouni/incremental-testing</a>,
-to the sensordata format.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> (<em>pd.DataFrame</em>) – A dataframe of method modification events</li>
-<li><strong>filepath</strong> (<em>str</em>) – Path to a CSV file containing method modification
-events</li>
-<li><strong>testonly</strong> (<em>bool</em>) – Only convert and return changes to test methods?</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The same DataFrame, possibly with only test changes, with columns
-in the sensordata format (see <a class="reference internal" href="#utils.DEFAULT_FIELDNAMES" title="utils.DEFAULT_FIELDNAMES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DEFAULT_FIELDNAMES</span></code></a>).</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="utils.processline">
 <code class="descclassname">utils.</code><code class="descname">processline</code><span class="sig-paren">(</span><em>url</em>, <em>fieldnames=None</em>, <em>filtertype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#processline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.processline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a URL, returns a dict object containing the key-value
@@ -206,6 +184,9 @@ contains the size of the edit made to the given file.</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="sessions.html"
                         title="previous chapter">Subsessions and work sessions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="as_sensordata.html"
+                        title="next chapter">Convert events to the DevEventTracker format</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -238,6 +219,9 @@ contains the size of the edit made to the given file.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="as_sensordata.html" title="Convert events to the DevEventTracker format"
+             >next</a> |</li>
         <li class="right" >
           <a href="sessions.html" title="Subsessions and work sessions"
              >previous</a> |</li>
