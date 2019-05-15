@@ -57,7 +57,8 @@ def __sensordata_from_method_mod(mod):
         'commitHash': mod['commitHash'],
         'edit_size': mod['modsToMethod'],
         'assignment': mod['assignment'],
-        'time': mod['time']
+        'time': mod['time'],
+        'onTestCase': on_test_case
     })
 
 def submissions_to_sensordata(df=None, submissionpath=None, **kwargs):

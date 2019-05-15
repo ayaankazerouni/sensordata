@@ -56,6 +56,14 @@
 <span class="sd">        time_path (str): String path, None for default, or False to omit</span>
 <span class="sd">        launch_totals_path (str): String path to work_session data, None for default, or False to omit </span>
 <span class="sd">        repo_mining_path (str): String path, None for default, or False to omit </span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame containing a row for each student-project, with metrics as columns.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        :mod:`early_often`</span>
+<span class="sd">        :mod:`incremental_checking`</span>
+<span class="sd">        :mod:`time_spent`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">webcat_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">webcat_path</span> <span class="o">=</span> <span class="s1">&#39;data/fall-2016/web-cat-students-with-sensordata.csv&#39;</span>

@@ -16,8 +16,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Utility functions" href="utils.html" />
-    <link rel="prev" title="Misc functions" href="other.html" /> 
+    <link rel="next" title="Common functions" href="utils.html" />
+    <link rel="prev" title="Eclipse Debugger Usage" href="debugging.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -29,10 +29,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utils.html" title="Utility functions"
+          <a href="utils.html" title="Common functions"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="other.html" title="Misc functions"
+          <a href="debugging.html" title="Eclipse Debugger Usage"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Sensordata  documentation</a> &#187;</li> 
       </ul>
@@ -48,8 +48,8 @@
 <div class="section" id="module-subsessions">
 <span id="subsessions"></span><h2>Subsessions<a class="headerlink" href="#module-subsessions" title="Permalink to this headline">¶</a></h2>
 <p>Separates events into subsessions, which are delimited by
-termination events. So all events in a subsession take place
-between consecutive terminations.</p>
+a specified event Type. So all events in a subsession take place
+between consecutive events of the specified Type.</p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="#module-work_sessions" title="work_sessions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">work_sessions</span></code></a></p>
@@ -65,7 +65,7 @@ grouping by users, assignments, and work sessions.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_type</strong> (<em>str</em><em>, </em><em>default=Termination</em>) – Delimit subsessions by
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_type</strong> (<em>str</em><em>, </em><em>default='Termination'</em>) – Delimit subsessions by
 a specific kind of event. Defaults to termination
 events.</td>
 </tr>
@@ -83,6 +83,12 @@ treated as a nominal factor.</td>
 test edits, and test launch outcomes.</p>
 <p>Must be called as the apply in a split-apply-combine procedure,
 grouping by users, work sessions, and subsessions.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This method assumes that subsessions are delimited by
+<cite>Type=Termination</cite> events, and that <a class="reference internal" href="#module-work_sessions" title="work_sessions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">work_sessions</span></code></a> have already
+been computed.</p>
+</div>
 </dd></dl>
 
 </div>
@@ -150,11 +156,11 @@ launches (test and normal).</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="other.html"
-                        title="previous chapter">Misc functions</a></p>
+  <p class="topless"><a href="debugging.html"
+                        title="previous chapter">Eclipse Debugger Usage</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="utils.html"
-                        title="next chapter">Utility functions</a></p>
+                        title="next chapter">Common functions</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -188,10 +194,10 @@ launches (test and normal).</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utils.html" title="Utility functions"
+          <a href="utils.html" title="Common functions"
              >next</a> |</li>
         <li class="right" >
-          <a href="other.html" title="Misc functions"
+          <a href="debugging.html" title="Eclipse Debugger Usage"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Sensordata  documentation</a> &#187;</li> 
       </ul>

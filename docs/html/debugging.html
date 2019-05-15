@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Manipulating Eclipse debugger usage data &#8212; Sensordata  documentation</title>
+    <title>Eclipse Debugger Usage &#8212; Sensordata  documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Early/Often Index" href="early_often.html" />
-    <link rel="prev" title="Consolidating metrics" href="consolidate_sensordata.html" /> 
+    <link rel="next" title="Subsessions and work sessions" href="sessions.html" />
+    <link rel="prev" title="Early/Often Index" href="early_often.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -29,10 +29,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="early_often.html" title="Early/Often Index"
+          <a href="sessions.html" title="Subsessions and work sessions"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="consolidate_sensordata.html" title="Consolidating metrics"
+          <a href="early_often.html" title="Early/Often Index"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Sensordata  documentation</a> &#187;</li> 
       </ul>
@@ -44,12 +44,25 @@
           <div class="body" role="main">
             
   <div class="section" id="module-debugging">
-<span id="manipulating-eclipse-debugger-usage-data"></span><h1>Manipulating Eclipse debugger usage data<a class="headerlink" href="#module-debugging" title="Permalink to this headline">¶</a></h1>
+<span id="eclipse-debugger-usage"></span><h1>Eclipse Debugger Usage<a class="headerlink" href="#module-debugging" title="Permalink to this headline">¶</a></h1>
 <p>Methods for wrangling Eclipse debugger event data.</p>
 <dl class="function">
 <dt id="debugging.collapsesessions">
 <code class="descclassname">debugging.</code><code class="descname">collapsesessions</code><span class="sig-paren">(</span><em>sessions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/debugging.html#collapsesessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#debugging.collapsesessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summarise debugger session summaries.</p>
+<dd><p>Summarise debugger session summaries.
+Reduces all debugger sessions to a single line per student
+project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sessions</strong> (<em>pd.DataFrame</em>) – Summarised debugger sessions, as returned by <a class="reference internal" href="#debugging.sessionsummary" title="debugging.sessionsummary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sessionsummary()</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DataFrame with a single line per project, giving a coarse-grained overview
+of debugger usage.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -85,22 +98,49 @@ from the specified file.</p>
 <dl class="function">
 <dt id="debugging.sessionsummary">
 <code class="descclassname">debugging.</code><code class="descname">sessionsummary</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/debugging.html#sessionsummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#debugging.sessionsummary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a summary for a single debug session.</p>
-<p>Includes the start time, end time, and number of breakpoints and steps.</p>
+<dd><p>Get a summary for a single debug session. A debug session is bounded by a
+<cite>Type=Debug</cite> events, with <cite>Subtype=Start</cite> at the beginning and <cite>Subtype=Terminate</cite>
+at the end.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<em>pd.DataFrame</em>) – Events that took place within a single debugger session</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DataFrame that includes the start time, end time, and number of breakpoints step
+over/into events that occured during the session.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="debugging.timespentdebugging">
 <code class="descclassname">debugging.</code><code class="descname">timespentdebugging</code><span class="sig-paren">(</span><em>sessions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/debugging.html#timespentdebugging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#debugging.timespentdebugging" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a list of summarised debugger sessions, get the number of minutes spent
+<dd><p>Given summarised debugger sessions, get the number of minutes spent
 using the Eclipse debugger.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sessions</strong> (<em>pd.DataFrame</em>) – Debugger sessions as returned by <a class="reference internal" href="#debugging.sessionsummary" title="debugging.sessionsummary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sessionsummary()</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DataFrame containing <cite>totalTime</cite>, <cite>avgTime</cite>, and <cite>medianTime</cite> spent in Eclipse
+debugger sessions.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="debugging.userdebugsessions">
 <code class="descclassname">debugging.</code><code class="descname">userdebugsessions</code><span class="sig-paren">(</span><em>userevents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/debugging.html#userdebugsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#debugging.userdebugsessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given all Debug events from a student on a project,
-organise them into debug sessions and summarise.</p>
+<dd><p>Given all Debug events from a student on a project, organise them into debug
+sessions and summarise.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#debugging.sessionsummary" title="debugging.sessionsummary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sessionsummary()</span></code></a></p>
+</div>
 </dd></dl>
 
 </div>
@@ -112,11 +152,11 @@ organise them into debug sessions and summarise.</p>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="consolidate_sensordata.html"
-                        title="previous chapter">Consolidating metrics</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="early_often.html"
-                        title="next chapter">Early/Often Index</a></p>
+                        title="previous chapter">Early/Often Index</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sessions.html"
+                        title="next chapter">Subsessions and work sessions</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -150,10 +190,10 @@ organise them into debug sessions and summarise.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="early_often.html" title="Early/Often Index"
+          <a href="sessions.html" title="Subsessions and work sessions"
              >next</a> |</li>
         <li class="right" >
-          <a href="consolidate_sensordata.html" title="Consolidating metrics"
+          <a href="early_often.html" title="Early/Often Index"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Sensordata  documentation</a> &#187;</li> 
       </ul>

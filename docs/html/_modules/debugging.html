@@ -38,7 +38,6 @@
             
   <h1>Source code for debugging</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Methods for wrangling Eclipse debugger event data.&quot;&quot;&quot;</span>
-
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
@@ -69,8 +68,15 @@
         <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="timespentdebugging"><a class="viewcode-back" href="../debugging.html#debugging.timespentdebugging">[docs]</a><span class="k">def</span> <span class="nf">timespentdebugging</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Given a list of summarised debugger sessions, get the number of minutes spent </span>
+    <span class="sd">&quot;&quot;&quot;Given summarised debugger sessions, get the number of minutes spent </span>
 <span class="sd">    using the Eclipse debugger.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sessions (pd.DataFrame): Debugger sessions as returned by :meth:`sessionsummary`</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame containing `totalTime`, `avgTime`, and `medianTime` spent in Eclipse</span>
+<span class="sd">        debugger sessions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
             <span class="s1">&#39;totalTime&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]),</span>
@@ -80,9 +86,16 @@
 
 
 <div class="viewcode-block" id="sessionsummary"><a class="viewcode-back" href="../debugging.html#debugging.sessionsummary">[docs]</a><span class="k">def</span> <span class="nf">sessionsummary</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get a summary for a single debug session.</span>
-
-<span class="sd">    Includes the start time, end time, and number of breakpoints and steps.</span>
+    <span class="sd">&quot;&quot;&quot;Get a summary for a single debug session. A debug session is bounded by a </span>
+<span class="sd">    `Type=Debug` events, with `Subtype=Start` at the beginning and `Subtype=Terminate`</span>
+<span class="sd">    at the end.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        session (pd.DataFrame): Events that took place within a single debugger session</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame that includes the start time, end time, and number of breakpoints step</span>
+<span class="sd">        over/into events that occured during the session.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;Subtype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
@@ -109,8 +122,11 @@
 
 
 <div class="viewcode-block" id="userdebugsessions"><a class="viewcode-back" href="../debugging.html#debugging.userdebugsessions">[docs]</a><span class="k">def</span> <span class="nf">userdebugsessions</span><span class="p">(</span><span class="n">userevents</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Given all Debug events from a student on a project, </span>
-<span class="sd">    organise them into debug sessions and summarise. </span>
+    <span class="sd">&quot;&quot;&quot;Given all Debug events from a student on a project, organise them into debug </span>
+<span class="sd">    sessions and summarise.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        :meth:`sessionsummary`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">userevents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">]</span>
     <span class="n">userevents</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="p">(</span>
@@ -164,7 +180,17 @@
     <span class="k">return</span> <span class="n">sessions</span></div>
 
 <div class="viewcode-block" id="collapsesessions"><a class="viewcode-back" href="../debugging.html#debugging.collapsesessions">[docs]</a><span class="k">def</span> <span class="nf">collapsesessions</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Summarise debugger session summaries.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Summarise debugger session summaries.</span>
+<span class="sd">    Reduces all debugger sessions to a single line per student</span>
+<span class="sd">    project.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sessions (pd.DataFrame): Summarised debugger sessions, as returned by :meth:`sessionsummary`</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame with a single line per project, giving a coarse-grained overview</span>
+<span class="sd">        of debugger usage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># get counts</span>
     <span class="n">counts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span> <span class="s1">&#39;debugSessionCount&#39;</span><span class="p">:</span> <span class="n">sessions</span> \
                             <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span> \

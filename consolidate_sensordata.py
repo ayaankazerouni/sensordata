@@ -17,6 +17,14 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
         time_path (str): String path, None for default, or False to omit
         launch_totals_path (str): String path to work_session data, None for default, or False to omit 
         repo_mining_path (str): String path, None for default, or False to omit 
+
+    Returns:
+        A DataFrame containing a row for each student-project, with metrics as columns.
+
+    See also:
+        :mod:`early_often`
+        :mod:`incremental_checking`
+        :mod:`time_spent`
     """
     if webcat_path is None:
         webcat_path = 'data/fall-2016/web-cat-students-with-sensordata.csv'

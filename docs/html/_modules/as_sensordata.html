@@ -45,7 +45,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">consolidate_sensordata</span>
 
-<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../as_sensordata.html#as_sensordata.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testonly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="method_mods_to_edits"><a class="viewcode-back" href="../utils.html#as_sensordata.method_mods_to_edits">[docs]</a><span class="k">def</span> <span class="nf">method_mods_to_edits</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testonly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert method modification events, as emitted by the</span>
 <span class="sd">    project at https://github.com/ayaankazerouni/incremental-testing,</span>
 <span class="sd">    to the sensordata format.</span>
@@ -96,10 +96,11 @@
         <span class="s1">&#39;commitHash&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;commitHash&#39;</span><span class="p">],</span>
         <span class="s1">&#39;edit_size&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;modsToMethod&#39;</span><span class="p">],</span>
         <span class="s1">&#39;assignment&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">mod</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;onTestCase&#39;</span><span class="p">:</span> <span class="n">on_test_case</span>
     <span class="p">})</span>
 
-<div class="viewcode-block" id="submissions_to_sensordata"><a class="viewcode-back" href="../as_sensordata.html#as_sensordata.submissions_to_sensordata">[docs]</a><span class="k">def</span> <span class="nf">submissions_to_sensordata</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">submissionpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="submissions_to_sensordata"><a class="viewcode-back" href="../utils.html#as_sensordata.submissions_to_sensordata">[docs]</a><span class="k">def</span> <span class="nf">submissions_to_sensordata</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">submissionpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert submissions to the DevEventTracker format.</span>
 
 <span class="sd">    Args:</span>

@@ -38,13 +38,12 @@
             
   <h1>Source code for subsessions</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Separates events into subsessions, which are delimited by</span>
-<span class="sd">termination events. So all events in a subsession take place</span>
-<span class="sd">between consecutive terminations.</span>
+<span class="sd">a specified event Type. So all events in a subsession take place</span>
+<span class="sd">between consecutive events of the specified Type.</span>
 
 <span class="sd">See also:</span>
 <span class="sd">    :mod:`work_sessions`</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -55,6 +54,11 @@
 
 <span class="sd">    Must be called as the apply in a split-apply-combine procedure,</span>
 <span class="sd">    grouping by users, work sessions, and subsessions.</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        This method assumes that subsessions are delimited by</span>
+<span class="sd">        `Type=Termination` events, and that :mod:`work_sessions` have already</span>
+<span class="sd">        been computed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">subsession_name</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">name</span> <span class="c1"># username, worksession, subsession</span>
 
@@ -111,7 +115,7 @@
 <span class="sd">    grouping by users, assignments, and work sessions.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        event_type (str, default=Termination): Delimit subsessions by</span>
+<span class="sd">        event_type (str, default=&#39;Termination&#39;): Delimit subsessions by</span>
 <span class="sd">                        a specific kind of event. Defaults to termination</span>
 <span class="sd">                        events.</span>
 <span class="sd">    Returns:</span>
