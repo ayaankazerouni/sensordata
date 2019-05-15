@@ -2,7 +2,7 @@
 subsets of events, converting timestamps, getting a term, etc.
 
 To use:
-    import utils
+    `import utils`
 """
 import re
 import csv

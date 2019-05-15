@@ -1,5 +1,5 @@
-Manipulating Eclipse debugger usage data
-========================================
+Eclipse Debugger Usage 
+======================
 
 .. automodule:: debugging
   :members:

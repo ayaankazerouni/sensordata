@@ -1,5 +1,4 @@
 """Methods for wrangling Eclipse debugger event data."""
-
 import time
 from datetime import datetime
 
@@ -30,8 +29,15 @@ def dateparser(d, s=True):
         return datetime.fromtimestamp(int(float(d / 1000)))
 
 def timespentdebugging(sessions):
-    """Given a list of summarised debugger sessions, get the number of minutes spent 
+    """Given summarised debugger sessions, get the number of minutes spent 
     using the Eclipse debugger.
+
+    Args:
+        sessions (pd.DataFrame): Debugger sessions as returned by :meth:`sessionsummary`
+
+    Returns:
+        A DataFrame containing `totalTime`, `avgTime`, and `medianTime` spent in Eclipse
+        debugger sessions.
     """
     return pd.Series({
             'totalTime': np.sum(sessions['length']),
@@ -41,9 +47,16 @@ def timespentdebugging(sessions):
 
 
 def sessionsummary(session):
-    """Get a summary for a single debug session.
-
-    Includes the start time, end time, and number of breakpoints and steps.
+    """Get a summary for a single debug session. A debug session is bounded by a 
+    `Type=Debug` events, with `Subtype=Start` at the beginning and `Subtype=Terminate`
+    at the end.
+    
+    Args:
+        session (pd.DataFrame): Events that took place within a single debugger session
+    
+    Returns:
+        A DataFrame that includes the start time, end time, and number of breakpoints step
+        over/into events that occured during the session.
     """
     if len(session) > 0:
         counts = session['Subtype'].value_counts()
@@ -70,8 +83,11 @@ def sessionsummary(session):
 
 
 def userdebugsessions(userevents):
-    """Given all Debug events from a student on a project, 
-    organise them into debug sessions and summarise. 
+    """Given all Debug events from a student on a project, organise them into debug 
+    sessions and summarise.
+
+    See also:
+        :meth:`sessionsummary`
     """
     userevents.loc[userevents.Subtype == 'Terminate', 'session'] = userevents.index[userevents.Subtype == 'Terminate']
     userevents.session = (
@@ -125,7 +141,17 @@ def getdebugsessions(debuggerusepath=None, sessionspath=None):
     return sessions
 
 def collapsesessions(sessions):
-    """Summarise debugger session summaries."""
+    """Summarise debugger session summaries.
+    Reduces all debugger sessions to a single line per student
+    project.
+
+    Args:
+        sessions (pd.DataFrame): Summarised debugger sessions, as returned by :meth:`sessionsummary`
+
+    Returns:
+        A DataFrame with a single line per project, giving a coarse-grained overview
+        of debugger usage.
+    """
     # get counts
     counts = pd.DataFrame({ 'debugSessionCount': sessions \
                             .groupby(['userName', 'assignment']) \

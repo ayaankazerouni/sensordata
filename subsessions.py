@@ -1,11 +1,10 @@
 """Separates events into subsessions, which are delimited by
-termination events. So all events in a subsession take place
-between consecutive terminations.
+a specified event Type. So all events in a subsession take place
+between consecutive events of the specified Type.
 
 See also:
     :mod:`work_sessions`
 """
-import csv
 import sys
 
 import pandas as pd
@@ -16,6 +15,11 @@ def summarise_subsession(sub):
 
     Must be called as the apply in a split-apply-combine procedure,
     grouping by users, work sessions, and subsessions.
+    
+    Note:
+        This method assumes that subsessions are delimited by
+        `Type=Termination` events, and that :mod:`work_sessions` have already
+        been computed.
     """
     _, _, subsession_name = sub.name # username, worksession, subsession
 
@@ -72,7 +76,7 @@ def assign_subsessions(userevents, event_type='Termination'):
     grouping by users, assignments, and work sessions.
 
     Args:
-        event_type (str, default=Termination): Delimit subsessions by
+        event_type (str, default='Termination'): Delimit subsessions by
                         a specific kind of event. Defaults to termination
                         events.
     Returns:
