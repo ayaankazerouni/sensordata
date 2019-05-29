@@ -55,5 +55,19 @@
       "milestone3": 1480633200000,
       "earlyBonus": 1481065200000
     }
-  }
+  },
+  "fall2018": {
+    "assignment1": {
+      "dueTime": 1536980400000
+    },
+    "assignment2": {
+      "dueTime": 1539230340000
+    },
+    "assignment3": {
+      "dueTime": 1541131140000 
+    },
+    "assignment4": {
+      "dueTime": 1544112000000
+    }
+  } 
 }

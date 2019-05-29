@@ -68,17 +68,23 @@ def summarise_subsession(sub):
 
     return pd.Series(result)
 
-def assign_subsessions(userevents, event_type='Termination'):
+def assign_subsessions(userevents, event_type='Termination', forward=True):
     """Assigns `subsessions` to events. A subsession contains 
-    all the work done between two consecutive Termination events.
+    all the work done after or before an event of interest, until
+    another event of interest is reached.
+
+    By default subsessions are computing in the forward direction,
+    e.g., all the work done *after* a Launch is grouped together. This
+    affects whether "orphan" events will be at the head or tail of the
+    event stream.
 
     Typically called as a part of a split-apply-combine procedure,
     grouping by users, assignments, and work sessions.
 
     Args:
-        event_type (str, default='Termination'): Delimit subsessions by
-                        a specific kind of event. Defaults to termination
-                        events.
+        event_type (str): Delimit subsessions by a specific kind of 
+            event; defaults to termination events.
+        forward (bool): Compute subsessions forward or backward?
     Returns:
         A DataFrame with a `subsession` column. The column should be
         treated as a nominal factor.
@@ -89,11 +95,12 @@ def assign_subsessions(userevents, event_type='Termination'):
     ] = userevents.index[userevents.Type == event_type]
 
     # Forward fill from each termination
+    direction = 'ffill' if forward else 'bfill'
     userevents.subsession = ( 
         userevents
         .subsession
-        .fillna(method='ffill')
-        .fillna(-1) # for events that happened before the 1st delimiting event
+        .fillna(method=direction)
+        .fillna(-1) # for events that happened before the 1st delimiting event (or after the last)
     )
 
     return userevents
