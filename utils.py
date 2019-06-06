@@ -259,6 +259,19 @@ def __split_one_termination(t):
 
     return expandedevents
 
+def test_outcomes(te):
+    """Parse outcomes for the specified test termination."""
+    outcomes = te['Subsubtype'].strip('|').split('|')
+    failures = outcomes.count('Failure')
+    successes = outcomes.count('Success')
+    errors = len(outcomes) - (failures + successes)
+
+    return pd.Series({
+        'successes': successes,
+        'failures': failures,
+        'errors': errors
+    })
+
 def _shouldwritekey(key, fieldnames):
     if not fieldnames:
         return True
@@ -304,7 +317,7 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
         sensordata = pd.read_csv(sdpath, low_memory=False)
 
     # read uuids
-    cols = ['userUuid', assignmentcol, usercol]
+    cols = ['userUuid', 'studentProjectUuid', assignmentcol, usercol]
     if crnfilter:
         cols.append(crncol)
     if uuids is None:
@@ -322,26 +335,48 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
         uuids = uuids.drop(columns=[crncol])
 
     # create user oracle
-    uuids = (
+    users = (
             uuids.loc[:, ['userUuid', 'userName']]
                  .drop_duplicates(subset=['userUuid', 'userName'])
                  .set_index('userUuid')
     )
 
-    # only map to assignments if we have reliable due_date data
-    if due_dates:
-        sensordata.loc[:, 'assignment'] = (
-                sensordata['time'].apply(__assignment_from_timestamp, due_dates=due_dates)
-        )
-
     # join
-    merged = sensordata.join(uuids, on='userUuid')
+    merged = sensordata.join(users, on='userUuid')
     merged = merged.query('userName.notnull()')
+    del sensordata
+
+    # create assignment oracle
+    assignments = (
+            uuids.loc[:, ['studentProjectUuid', 'assignment']]
+                 .drop_duplicates(subset=['studentProjectUuid', 'assignment'])
+                 .set_index('studentProjectUuid')
+    )
+    conflicts = uuids.groupby('studentProjectUuid').apply(lambda g: len(g['assignment'].unique()) > 1)
+    conflicts = list(conflicts[conflicts].index)
+    
+    with_conflicts = merged.loc[merged['studentProjectUuid'].isin(conflicts)]
+    without_conflicts = merged.loc[~merged['studentProjectUuid'].isin(conflicts)]
+    
+    without_conflicts = without_conflicts.join(assignments, on='studentProjectUuid')
+
+    # for uuids with conflicting assignments, map based on timestamps
+    if due_dates:
+        with_conflicts.loc[:, 'assignment'] = (
+                with_conflicts.apply(__assignment_from_timestamp, due_dates=due_dates, axis=1)
+        )
+    
+    merged = pd.concat([with_conflicts, without_conflicts], ignore_index=True, sort=False) \
+               .sort_values(by=['userName', 'assignment', 'time'])
+
 
     return merged
 
-def __assignment_from_timestamp(t, due_dates, offset=pd.Timedelta(1, 'w')):
-    t = pd.to_datetime(t, unit='ms')
+def __assignment_from_timestamp(event, due_dates, offset=pd.Timedelta(1, 'w')):
+    try:
+        t = pd.to_datetime(event['time'], unit='ms')
+    except ValueError:
+        t = pd.Timestamp(event['time'])
 
     for idx, dd in enumerate(due_dates, start=1):
         if t < dd + offset:
@@ -349,13 +384,13 @@ def __assignment_from_timestamp(t, due_dates, offset=pd.Timedelta(1, 'w')):
 
     return None
 
-def with_edit_sizes(df):
+def with_edit_sizes(df, groupby=['userName', 'Class-Name']):
     """Given a data frame with Edit events containing Current-Sizes, group by
     Class-Name and return the dataframe with a column called 'edit_size', which
     contains the size of the edit made to the given file.
     """
     edits = df[(~df['Class-Name'].isna()) & (df['Type'] == 'Edit')] \
-            .groupby(['userName', 'Class-Name']) \
+            .groupby(groupby) \
             .apply(__get_edit_sizes)
     df.loc[df.index.isin(edits.index), 'edit_size'] = edits['edit_size']
     return df

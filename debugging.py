@@ -1,5 +1,4 @@
 """Methods for wrangling Eclipse debugger event data."""
-import time
 from datetime import datetime
 
 import numpy as np

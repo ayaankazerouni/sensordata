@@ -213,3 +213,4 @@ def load_time_spent_data(time_path):
     data.set_index(['userName', 'assignment'], inplace=True)
 
     return data
+
