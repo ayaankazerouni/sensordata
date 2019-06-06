@@ -38,11 +38,11 @@
             
   <h1>Source code for consolidate_sensordata</h1><div class="highlight"><pre>
 <span></span><span class="ch">#! /usr/bin/env python3</span>
-
 <span class="sd">&quot;&quot;&quot;Import and consolidate incremental development metrics from several sources.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 
 <div class="viewcode-block" id="consolidate_student_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.consolidate_student_data">[docs]</a><span class="k">def</span> <span class="nf">consolidate_student_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raw_inc_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -103,7 +103,7 @@
 
     <span class="k">return</span> <span class="n">merged</span></div>
 
-<div class="viewcode-block" id="load_submission_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_submission_data">[docs]</a><span class="k">def</span> <span class="nf">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pluscols</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="load_submission_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_submission_data">[docs]</a><span class="k">def</span> <span class="nf">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pluscols</span><span class="o">=</span><span class="p">[],</span> <span class="n">keepassignments</span><span class="o">=</span><span class="p">[]):</span>
     <span class="sd">&quot;&quot;&quot;Loads submission data from webcat_path, which points at a</span>
 <span class="sd">    CSV file containing submission data from a Web-CAT server.</span>
 <span class="sd">     </span>
@@ -117,6 +117,11 @@
 <span class="sd">            Defaults to True</span>
 <span class="sd">        pluscols (list, optional): Columns to load from raw CSV in addition to correctness, code</span>
 <span class="sd">            coverage, and submission time data. Defaults to an empty list</span>
+<span class="sd">        keepassignments (list, optional): Assignment names to load submissions for. If empty, load</span>
+<span class="sd">            submissions for all assignments</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame containing submission results for each student on each assignment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cols_of_interest</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;userName&#39;</span><span class="p">,</span>
@@ -134,28 +139,63 @@
         <span class="n">usecols</span><span class="o">=</span><span class="n">cols_of_interest</span><span class="p">,</span> \
         <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dueDateRaw&#39;</span><span class="p">,</span> <span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">],</span> \
         <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;submissionNo&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">keepassignments</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;assignment in @keepassignments&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;submissionNo&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">onlyfinal</span><span class="p">:</span>
         <span class="c1"># get the last submission from each user on each project</span>
         <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;userName&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># calculate reftest percentages and discretised project grades</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;max.score.correctness&#39;</span><span class="p">]</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">0.98</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;max.score.correctness&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">0.98</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;elementsCovered&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;score.correctness&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># calculate submission time outcomes </span>
     <span class="n">hours_from_deadline</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dueDateRaw&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;submissionTimeRaw&#39;</span><span class="p">])</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hours_from_deadline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">diff</span><span class="p">:</span> <span class="n">diff</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;onTimeSubmission&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">h</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">h</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hours_from_deadline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">diff</span><span class="p">:</span> <span class="n">diff</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;onTimeSubmission&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;finishedHoursFromDeadline&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">h</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">h</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="load_submission_dists"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_submission_dists">[docs]</a><span class="k">def</span> <span class="nf">load_submission_dists</span><span class="p">(</span><span class="n">webcat_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a description of each students distribution of submission scores for</span>
+<span class="sd">    each assignment, as a four number summary (quartiles).</span>
+<span class="sd">    </span>
+<span class="sd">    Each student has a variable number of submissions, and each receives score between</span>
+<span class="sd">    0 and 1. Typically our median final score is high (around 92%), indicating that students</span>
+<span class="sd">    eventually &quot;get there&quot; in terms of project completion. The distribution of scores for an</span>
+<span class="sd">    assignment is more informative.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        webcat_path (str): Path to a CSV file containing Web-CAT submission results</span>
+<span class="sd">        **kwargs: Keyword-arguments passed to :meth:`load_submission_data`</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame containing four columns (quartiles) for each submission.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        :meth:`load_submission_data`</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        If `onlyfinal` is specified in \*\*kwargs, it will be ignored and forced to **False**. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;onlyfinal&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="c1"># Can&#39;t get a distribution from one submission  </span>
+        <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;onlyfinal&#39;</span><span class="p">]</span>
+
+    <span class="n">submissions</span> <span class="o">=</span> <span class="n">load_submission_data</span><span class="p">(</span><span class="n">webcat_path</span><span class="o">=</span><span class="n">webcat_path</span><span class="p">,</span> <span class="n">onlyfinal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">submissions</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;Q1&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;Q2&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Q3&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;Q4&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+    <span class="p">]})</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;score&#39;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="load_raw_inc_data"><a class="viewcode-back" href="../consolidate_sensordata.html#consolidate_sensordata.load_raw_inc_data">[docs]</a><span class="k">def</span> <span class="nf">load_raw_inc_data</span><span class="p">(</span><span class="n">raw_inc_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads early/often metrics for code editing and launching.</span>
@@ -212,6 +252,7 @@
     <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;userName&#39;</span><span class="p">,</span> <span class="s1">&#39;assignment&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
 </pre></div>
 
           </div>

@@ -38,7 +38,6 @@
             
   <h1>Source code for debugging</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Methods for wrangling Eclipse debugger event data.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -128,7 +127,9 @@
 <span class="sd">    See also:</span>
 <span class="sd">        :meth:`sessionsummary`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">userevents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">]</span>
+    <span class="n">userevents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">userevents</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">userevents</span><span class="o">.</span><span class="n">Subtype</span> <span class="o">==</span> <span class="s1">&#39;Terminate&#39;</span><span class="p">]</span>
     <span class="n">userevents</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">userevents</span><span class="o">.</span><span class="n">session</span>
         <span class="c1"># fill backwards from termination</span>

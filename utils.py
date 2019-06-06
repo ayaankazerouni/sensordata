@@ -11,6 +11,7 @@ import logging
 import datetime
 from urllib import parse
 
+import numpy as np
 import pandas as pd
 
 logging.basicConfig(filename='sensordata-utils.log', filemode='w', level=logging.WARN)
@@ -238,22 +239,38 @@ def __split_one_termination(t):
         t = t.to_dict()
         if t['Type'] != 'Termination' or t['Subtype'] != 'Test':
             return [t]
-
-        tests = t['Unit-Name'].strip('|').split('|')
-        outcomes = t['Subsubtype'].strip('|').split('|')
-        expandedevents = []
-        for test, outcome in zip(tests, outcomes):
-            newevent = copy.deepcopy(t)
-            newevent['Unit-Name'] = test
-            newevent['Subsubtype'] = outcome
-            newevent['Unit-Type'] = 'Method'
-            expandedevents.append(newevent)
+        
+        try:
+            tests = t['Unit-Name'].strip('|').split('|')
+            outcomes = t['Subsubtype'].strip('|').split('|')
+            expandedevents = []
+            for test, outcome in zip(tests, outcomes):
+                newevent = copy.deepcopy(t)
+                newevent['Unit-Name'] = test
+                newevent['Subsubtype'] = outcome
+                newevent['Unit-Type'] = 'Method'
+                expandedevents.append(newevent)
+        except AttributeError:
+            return [t]
     except KeyError:
         logging.error('Missing some required keys to split termination event. Need \
             Type, Subtype, and Subsubtype. Doing nothing.')
         return [t] 
 
     return expandedevents
+
+def test_outcomes(te):
+    """Parse outcomes for the specified test termination."""
+    outcomes = te['Subsubtype'].strip('|').split('|')
+    failures = outcomes.count('Failure')
+    successes = outcomes.count('Success')
+    errors = len(outcomes) - (failures + successes)
+
+    return pd.Series({
+        'successes': successes,
+        'failures': failures,
+        'errors': errors
+    })
 
 def _shouldwritekey(key, fieldnames):
     if not fieldnames:
@@ -265,7 +282,7 @@ def _shouldwritekey(key, fieldnames):
     return False
 
 def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilter=None,
-               crncol='crn', usercol='email', assignmentcol='CASSIGNMENTNAME'):
+               crncol='crn', usercol='email', assignmentcol='CASSIGNMENTNAME', due_dates=None):
     """Map sensordata to users and assignments based on studentProjectUuids.
 
     Args:
@@ -282,6 +299,10 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
                              'CASSIGNMENTNAME'. This will get renamed to 'assignment'.
         usercol (str): Name of the column containing user information. This will get
                        renamed to userName, and domains will be removed from emails.
+        due_dates (list): A list of `pd.Timestamp` values indicating due dates of assignments.
+                          Use these timestamps as a heuristic identifier of which assignment
+                          the events are being generated for. If omitted, the resulting
+                          dataframe will have no **assignment** column.
     Returns:
        A `pd.DataFrame` containing the result of a left join on sensordata and uuids.
     """
@@ -296,12 +317,15 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
         sensordata = pd.read_csv(sdpath, low_memory=False)
 
     # read uuids
-    cols = ['studentProjectUuid', assignmentcol, usercol]
+    cols = ['userUuid', 'studentProjectUuid', assignmentcol, usercol]
     if crnfilter:
         cols.append(crncol)
     if uuids is None:
         uuids = pd.read_csv(uuidpath, usecols=cols)
-    uuids = uuids.rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
+    uuids = (
+        uuids.rename(columns={usercol: 'userName', assignmentcol: 'assignment'})
+             .sort_values(by=['userName', 'assignment'], ascending=[1, 1])
+    )
     umap = lambda u: u.split('@')[0] if str(u) != 'nan' and u != '' else u
     uuids['userName'] = uuids['userName'].apply(umap)
 
@@ -310,29 +334,65 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
         uuids = uuids[(uuids[crncol].notnull()) & (uuids[crncol].str.contains(crnfilter))]
         uuids = uuids.drop(columns=[crncol])
 
-    uuids = uuids[['studentProjectUuid', 'assignment', 'userName']] 
-
-    # create oracle
-    oracle = {uuid: (assignment, username) for _, (uuid, assignment, username)
-              in uuids.iterrows()
-              if str(username) != 'nan' and str(assignment) != 'nan'}
-    oracle = pd.DataFrame([(uuid, assignment, username) for uuid, (assignment, username)
-                           in oracle.items()], columns=uuids.columns) \
-               .set_index('studentProjectUuid')
+    # create user oracle
+    users = (
+            uuids.loc[:, ['userUuid', 'userName']]
+                 .drop_duplicates(subset=['userUuid', 'userName'])
+                 .set_index('userUuid')
+    )
 
     # join
-    merged = sensordata.join(oracle, on='studentProjectUuid')
+    merged = sensordata.join(users, on='userUuid')
     merged = merged.query('userName.notnull()')
+    del sensordata
+
+    # create assignment oracle
+    assignments = (
+            uuids.loc[:, ['studentProjectUuid', 'assignment']]
+                 .drop_duplicates(subset=['studentProjectUuid', 'assignment'])
+                 .set_index('studentProjectUuid')
+    )
+    conflicts = uuids.groupby('studentProjectUuid').apply(lambda g: len(g['assignment'].unique()) > 1)
+    conflicts = list(conflicts[conflicts].index)
+    
+    with_conflicts = merged.loc[merged['studentProjectUuid'].isin(conflicts)]
+    without_conflicts = merged.loc[~merged['studentProjectUuid'].isin(conflicts)]
+    
+    without_conflicts = without_conflicts.join(assignments, on='studentProjectUuid')
+
+    # for uuids with conflicting assignments, map based on timestamps
+    if due_dates:
+        with_conflicts.loc[:, 'assignment'] = (
+                with_conflicts.apply(__assignment_from_timestamp, due_dates=due_dates, axis=1)
+        )
+    
+    merged = pd.concat([with_conflicts, without_conflicts], ignore_index=True, sort=False) \
+               .sort_values(by=['userName', 'assignment', 'time'])
+
 
     return merged
 
-def with_edit_sizes(df):
+def __assignment_from_timestamp(event, due_dates, offset=None):
+    offset = pd.Timedelta(1, 'w') if offset is None else offset
+
+    try:
+        t = pd.to_datetime(event['time'], unit='ms')
+    except ValueError:
+        t = pd.Timestamp(event['time'])
+
+    for idx, dd in enumerate(due_dates, start=1):
+        if t < dd + offset:
+            return 'Project {}'.format(idx)
+
+    return None
+
+def with_edit_sizes(df, groupby=['userName', 'Class-Name']):
     """Given a data frame with Edit events containing Current-Sizes, group by
     Class-Name and return the dataframe with a column called 'edit_size', which
     contains the size of the edit made to the given file.
     """
     edits = df[(~df['Class-Name'].isna()) & (df['Type'] == 'Edit')] \
-            .groupby(['userName', 'Class-Name']) \
+            .groupby(groupby) \
             .apply(__get_edit_sizes)
     df.loc[df.index.isin(edits.index), 'edit_size'] = edits['edit_size']
     return df

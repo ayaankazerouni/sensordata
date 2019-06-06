@@ -65,7 +65,8 @@ def submissions_to_sensordata(df=None, submissionpath=None, **kwargs):
     """Convert submissions to the DevEventTracker format.
 
     Args:
-        df (pd.DataFrame): A DataFrame of submissions, as returned by :meth:`consolidate_sensordata.load_submission_data`
+        df (pd.DataFrame): A DataFrame of submissions, as returned 
+            by :meth:`consolidate_sensordata.load_submission_data`
         submissionpath (str): A path to a CSV containing submission information
         kwargs (dict): Other keyword arguments passed to :meth:`consolidate_sensordata.load_submission_data`
     Returns:

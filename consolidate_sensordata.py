@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
-
 """Import and consolidate incremental development metrics from several sources."""
 
 import datetime
 import pandas as pd
+import numpy as np
 import argparse
 
 def consolidate_student_data(webcat_path=False, raw_inc_path=False,
@@ -64,7 +64,7 @@ def consolidate_student_data(webcat_path=False, raw_inc_path=False,
 
     return merged
 
-def load_submission_data(webcat_path, onlyfinal=True, pluscols=[]):
+def load_submission_data(webcat_path, onlyfinal=True, pluscols=[], keepassignments=[]):
     """Loads submission data from webcat_path, which points at a
     CSV file containing submission data from a Web-CAT server.
      
@@ -78,6 +78,11 @@ def load_submission_data(webcat_path, onlyfinal=True, pluscols=[]):
             Defaults to True
         pluscols (list, optional): Columns to load from raw CSV in addition to correctness, code
             coverage, and submission time data. Defaults to an empty list
+        keepassignments (list, optional): Assignment names to load submissions for. If empty, load
+            submissions for all assignments
+
+    Returns:
+        A DataFrame containing submission results for each student on each assignment.
     """
     cols_of_interest = [
         'userName',
@@ -95,28 +100,63 @@ def load_submission_data(webcat_path, onlyfinal=True, pluscols=[]):
         usecols=cols_of_interest, \
         parse_dates=['dueDateRaw', 'submissionTimeRaw'], \
         date_parser=date_parser)
-    data.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0], inplace=True)
+    if keepassignments:
+        data = data.query('assignment in @keepassignments')
+    data = data.sort_values(by=['assignment', 'userName', 'submissionNo'], ascending=[1,1,0])
 
     if onlyfinal:
         # get the last submission from each user on each project
         data.drop_duplicates(subset=['assignment', 'userName'], keep='first', inplace=True)
 
     # calculate reftest percentages and discretised project grades
-    data['score.correctness'] = data['score.correctness'] / data['max.score.correctness']
-    data['elementsCovered'] = (data['elementsCovered'] / data['elements']) / 0.98
-    data['elementsCovered'] = data['elementsCovered'].apply(lambda x: x if x <= 1 else 1)
-    data['score'] = data['score.correctness'] / data['elementsCovered']
-    data['score'] = data['score'].apply(lambda x: x if x <= 1 else 1)
+    data.loc[:, 'score.correctness'] = data['score.correctness'] / data['max.score.correctness']
+    data.loc[:, 'elementsCovered'] = (data['elementsCovered'] / data['elements']) / 0.98
+    data.loc[:, 'elementsCovered'] = data['elementsCovered'].apply(lambda x: x if x <= 1 else 1)
+    data.loc[:, 'score'] = data['score.correctness'] / data['elementsCovered']
+    data.loc[:, 'score'] = data['score'].apply(lambda x: x if x <= 1 else 1)
 
     data.drop(columns=['score.correctness'], inplace=True)
 
     # calculate submission time outcomes 
     hours_from_deadline = (data['dueDateRaw'] - data['submissionTimeRaw'])
-    data['finishedHoursFromDeadline'] = hours_from_deadline.apply(lambda diff: diff.total_seconds() / 3600)
-    data['onTimeSubmission'] = data['finishedHoursFromDeadline'].apply(lambda h: 1 if h >= 0 else 0)
+    data.loc[:, 'finishedHoursFromDeadline'] = hours_from_deadline.apply(lambda diff: diff.total_seconds() / 3600)
+    data.loc[:, 'onTimeSubmission'] = data['finishedHoursFromDeadline'].apply(lambda h: 1 if h >= 0 else 0)
 
     data.set_index(['userName', 'assignment'], inplace=True)
     return data
+
+def load_submission_dists(webcat_path, **kwargs):
+    """Return a description of each students distribution of submission scores for
+    each assignment, as a four number summary (quartiles).
+    
+    Each student has a variable number of submissions, and each receives score between
+    0 and 1. Typically our median final score is high (around 92%), indicating that students
+    eventually "get there" in terms of project completion. The distribution of scores for an
+    assignment is more informative.
+
+    Args:
+        webcat_path (str): Path to a CSV file containing Web-CAT submission results
+        **kwargs: Keyword-arguments passed to :meth:`load_submission_data`
+
+    Returns:
+        A DataFrame containing four columns (quartiles) for each submission.
+
+    See also:
+        :meth:`load_submission_data`
+
+    Note:
+        If `onlyfinal` is specified in \*\*kwargs, it will be ignored and forced to **False**. 
+    """
+    if 'onlyfinal' in kwargs: # Can't get a distribution from one submission  
+        del kwargs['onlyfinal']
+
+    submissions = load_submission_data(webcat_path=webcat_path, onlyfinal=False, **kwargs)
+    return submissions.groupby(['userName', 'assignment']).agg({'score': [
+        ('Q1', lambda s: np.quantile(s, q=0.25)),
+        ('Q2', np.median),
+        ('Q3', lambda s: np.quantile(s, q=0.75)),
+        ('Q4', np.max)
+    ]}).loc[:, 'score']
 
 def load_raw_inc_data(raw_inc_path):
     """Loads early/often metrics for code editing and launching.
@@ -173,3 +213,4 @@ def load_time_spent_data(time_path):
     data.set_index(['userName', 'assignment'], inplace=True)
 
     return data
+

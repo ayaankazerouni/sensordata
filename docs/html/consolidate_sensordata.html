@@ -82,7 +82,7 @@ to a CSV file that contains already-calculated values.</p>
 
 <dl class="function">
 <dt id="consolidate_sensordata.load_submission_data">
-<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_data</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>onlyfinal=True</em>, <em>pluscols=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_data" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_data</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>onlyfinal=True</em>, <em>pluscols=[]</em>, <em>keepassignments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads submission data from webcat_path, which points at a
 CSV file containing submission data from a Web-CAT server.</p>
 <p>Submission data is modified so that score.correctness only represents
@@ -92,17 +92,56 @@ from students’ own tests.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>webcat_path</strong> (<em>str</em>) – Path to web-cat submission data.</li>
 <li><strong>onlyfinal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return only the last submission for each student-project?
 Defaults to True</li>
 <li><strong>pluscols</strong> (<em>list</em><em>, </em><em>optional</em>) – Columns to load from raw CSV in addition to correctness, code
 coverage, and submission time data. Defaults to an empty list</li>
+<li><strong>keepassignments</strong> (<em>list</em><em>, </em><em>optional</em>) – Assignment names to load submissions for. If empty, load
+submissions for all assignments</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A DataFrame containing submission results for each student on each assignment.</p>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="consolidate_sensordata.load_submission_dists">
+<code class="descclassname">consolidate_sensordata.</code><code class="descname">load_submission_dists</code><span class="sig-paren">(</span><em>webcat_path</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consolidate_sensordata.html#load_submission_dists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consolidate_sensordata.load_submission_dists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a description of each students distribution of submission scores for
+each assignment, as a four number summary (quartiles).</p>
+<p>Each student has a variable number of submissions, and each receives score between
+0 and 1. Typically our median final score is high (around 92%), indicating that students
+eventually “get there” in terms of project completion. The distribution of scores for an
+assignment is more informative.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>webcat_path</strong> (<em>str</em>) – Path to a CSV file containing Web-CAT submission results</li>
+<li><strong>**kwargs</strong> – Keyword-arguments passed to <a class="reference internal" href="#consolidate_sensordata.load_submission_data" title="consolidate_sensordata.load_submission_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_submission_data()</span></code></a></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A DataFrame containing four columns (quartiles) for each submission.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#consolidate_sensordata.load_submission_data" title="consolidate_sensordata.load_submission_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_submission_data()</span></code></a></p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If <cite>onlyfinal</cite> is specified in **kwargs, it will be ignored and forced to <strong>False</strong>.</p>
+</div>
 </dd></dl>
 
 <dl class="function">

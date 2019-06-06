@@ -104,7 +104,7 @@ False for earlier.</p>
 
 <dl class="function">
 <dt id="utils.maptouuids">
-<code class="descclassname">utils.</code><code class="descname">maptouuids</code><span class="sig-paren">(</span><em>sensordata=None</em>, <em>sdpath=None</em>, <em>uuids=None</em>, <em>uuidpath=None</em>, <em>crnfilter=None</em>, <em>crncol='crn'</em>, <em>usercol='email'</em>, <em>assignmentcol='CASSIGNMENTNAME'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#maptouuids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.maptouuids" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">utils.</code><code class="descname">maptouuids</code><span class="sig-paren">(</span><em>sensordata=None</em>, <em>sdpath=None</em>, <em>uuids=None</em>, <em>uuidpath=None</em>, <em>crnfilter=None</em>, <em>crncol='crn'</em>, <em>usercol='email'</em>, <em>assignmentcol='CASSIGNMENTNAME'</em>, <em>due_dates=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#maptouuids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.maptouuids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Map sensordata to users and assignments based on studentProjectUuids.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -124,6 +124,10 @@ at least. Either this or uuids must be provided.</li>
 ‘CASSIGNMENTNAME’. This will get renamed to ‘assignment’.</li>
 <li><strong>usercol</strong> (<em>str</em>) – Name of the column containing user information. This will get
 renamed to userName, and domains will be removed from emails.</li>
+<li><strong>due_dates</strong> (<em>list</em>) – A list of <cite>pd.Timestamp</cite> values indicating due dates of assignments.
+Use these timestamps as a heuristic identifier of which assignment
+the events are being generated for. If omitted, the resulting
+dataframe will have no <strong>assignment</strong> column.</li>
 </ul>
 </td>
 </tr>
@@ -168,8 +172,14 @@ modified as needed.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="utils.test_outcomes">
+<code class="descclassname">utils.</code><code class="descname">test_outcomes</code><span class="sig-paren">(</span><em>te</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#test_outcomes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.test_outcomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse outcomes for the specified test termination.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="utils.with_edit_sizes">
-<code class="descclassname">utils.</code><code class="descname">with_edit_sizes</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#with_edit_sizes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.with_edit_sizes" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">utils.</code><code class="descname">with_edit_sizes</code><span class="sig-paren">(</span><em>df, groupby=['userName', 'Class-Name']</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#with_edit_sizes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.with_edit_sizes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a data frame with Edit events containing Current-Sizes, group by
 Class-Name and return the dataframe with a column called ‘edit_size’, which
 contains the size of the edit made to the given file.</p>
@@ -217,7 +227,8 @@ in the sensordata format (see <a class="reference internal" href="#utils.DEFAULT
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> (<em>pd.DataFrame</em>) – A DataFrame of submissions, as returned by <a class="reference internal" href="consolidate_sensordata.html#consolidate_sensordata.load_submission_data" title="consolidate_sensordata.load_submission_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">consolidate_sensordata.load_submission_data()</span></code></a></li>
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – A DataFrame of submissions, as returned
+by <a class="reference internal" href="consolidate_sensordata.html#consolidate_sensordata.load_submission_data" title="consolidate_sensordata.load_submission_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">consolidate_sensordata.load_submission_data()</span></code></a></li>
 <li><strong>submissionpath</strong> (<em>str</em>) – A path to a CSV containing submission information</li>
 <li><strong>kwargs</strong> (<em>dict</em>) – Other keyword arguments passed to <a class="reference internal" href="consolidate_sensordata.html#consolidate_sensordata.load_submission_data" title="consolidate_sensordata.load_submission_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">consolidate_sensordata.load_submission_data()</span></code></a></li>
 </ul>

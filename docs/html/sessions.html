@@ -43,101 +43,73 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="subsessions-and-work-sessions">
-<h1>Subsessions and work sessions<a class="headerlink" href="#subsessions-and-work-sessions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-subsessions">
-<span id="subsessions"></span><h2>Subsessions<a class="headerlink" href="#module-subsessions" title="Permalink to this headline">¶</a></h2>
-<p>Separates events into subsessions, which are delimited by
-a specified event Type. So all events in a subsession take place
-between consecutive events of the specified Type.</p>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="#module-work_sessions" title="work_sessions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">work_sessions</span></code></a></p>
-</div>
+  <div class="section" id="module-sessions">
+<span id="subsessions-and-work-sessions"></span><h1>Subsessions and work sessions<a class="headerlink" href="#module-sessions" title="Permalink to this headline">¶</a></h1>
+<p>Splits events into sessions based on different delimiting
+criteria.</p>
+<dl class="docutils">
+<dt>Worksessions:</dt>
+<dd>These are delimited by a certain amount of time of inactivity.
+See <a class="reference internal" href="#sessions.assign_worksessions" title="sessions.assign_worksessions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assign_worksessions()</span></code></a></dd>
+<dt>Subsessions:</dt>
+<dd>These are delimited by events of interest.
+See <a class="reference internal" href="#sessions.assign_subsessions" title="sessions.assign_subsessions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assign_subsessions()</span></code></a></dd>
+</dl>
 <dl class="function">
-<dt id="subsessions.assign_subsessions">
-<code class="descclassname">subsessions.</code><code class="descname">assign_subsessions</code><span class="sig-paren">(</span><em>userevents</em>, <em>event_type='Termination'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#assign_subsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.assign_subsessions" title="Permalink to this definition">¶</a></dt>
+<dt id="sessions.assign_subsessions">
+<code class="descclassname">sessions.</code><code class="descname">assign_subsessions</code><span class="sig-paren">(</span><em>userevents</em>, <em>event_type=('Termination'</em>, <em>'Test')</em>, <em>forward=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sessions.html#assign_subsessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sessions.assign_subsessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns <cite>subsessions</cite> to events. A subsession contains
-all the work done between two consecutive Termination events.</p>
+all the work done after or before an event of interest, until
+another event of interest is reached.</p>
+<p>By default subsessions are computing in the forward direction,
+e.g., all the work done <em>after</em> a Launch is grouped together. This
+affects whether “orphan” events will be at the head or tail of the
+event stream.</p>
 <p>Typically called as a part of a split-apply-combine procedure,
 grouping by users, assignments, and work sessions.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_type</strong> (<em>str</em><em>, </em><em>default='Termination'</em>) – Delimit subsessions by
-a specific kind of event. Defaults to termination
-events.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>event_type</strong> (<em>tuple</em><em>, </em><em>list of tuples</em><em>, or </em><em>str</em>) – Delimit subsessions by a specific kind of
+event; defaults to test termination events. If a list, delimits subsessions
+by all the specified event Types. Tuples are interpreted as (Type, Subtype)
+filters, joined by an AND. Filters in a list are put together using ORs.</li>
+<li><strong>forward</strong> (<em>bool</em>) – Compute subsessions forward or backward?</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A DataFrame with a <cite>subsession</cite> column. The column should be
-treated as a nominal factor.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A DataFrame with a <cite>subsession</cite> column. The column should be
+treated as a nominal factor.</p>
+</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="subsessions.summarise_subsession">
-<code class="descclassname">subsessions.</code><code class="descname">summarise_subsession</code><span class="sig-paren">(</span><em>sub</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subsessions.html#summarise_subsession"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#subsessions.summarise_subsession" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summarises events in a subsession in terms of code edits,
-test edits, and test launch outcomes.</p>
-<p>Must be called as the apply in a split-apply-combine procedure,
-grouping by users, work sessions, and subsessions.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This method assumes that subsessions are delimited by
-<cite>Type=Termination</cite> events, and that <a class="reference internal" href="#module-work_sessions" title="work_sessions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">work_sessions</span></code></a> have already
-been computed.</p>
+<p class="rubric">Examples</p>
+<dl class="docutils">
+<dt>In this example, the subsession delimiting events are:</dt>
+<dd><ul class="first last simple">
+<li>Test terminations <cite>Type==’Termination’ and Subtype==’Test’</cite></li>
+<li>Debugger start events <cite>Type==’Debug’ and Subtype==’Start’</cite></li>
+<li>Submissions <cite>Type==’Submission’</cite></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;userName&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">sessions</span><span class="o">.</span><span class="n">assign_subsessions</span><span class="p">,</span> <span class="n">event_type</span><span class="o">=</span><span class="p">[</span>
+     <span class="p">(</span><span class="s1">&#39;Termination&#39;</span><span class="p">,</span> <span class="s1">&#39;Test&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Debug&#39;</span><span class="p">,</span> <span class="s1">&#39;Start&#39;</span><span class="p">),</span> <span class="s1">&#39;Submission&#39;</span>
+<span class="p">])</span>
+</pre></div>
 </div>
 </dd></dl>
 
-</div>
-<div class="section" id="module-work_sessions">
-<span id="work-sessions"></span><h2>Work sessions<a class="headerlink" href="#module-work_sessions" title="Permalink to this headline">¶</a></h2>
-<p>Splits events into work sessions, which are delimited by
-a certain number of hours of inactivity.</p>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="#module-subsessions" title="subsessions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">subsessions</span></code></a></p>
-</div>
 <dl class="function">
-<dt id="work_sessions.assign_worksessions">
-<code class="descclassname">work_sessions.</code><code class="descname">assign_worksessions</code><span class="sig-paren">(</span><em>df</em>, <em>threshold=1</em>, <em>milliseconds=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions.html#assign_worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions.assign_worksessions" title="Permalink to this definition">¶</a></dt>
+<dt id="sessions.assign_worksessions">
+<code class="descclassname">sessions.</code><code class="descname">assign_worksessions</code><span class="sig-paren">(</span><em>df</em>, <em>threshold=1</em>, <em>milliseconds=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sessions.html#assign_worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sessions.assign_worksessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign work sessions to events, in a column called
 workSessionId.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="work_sessions.summarise_worksessions">
-<code class="descclassname">work_sessions.</code><code class="descname">summarise_worksessions</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions.html#summarise_worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions.summarise_worksessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acts on sensordata for a single student-project.</p>
-<p>Returns a dataframe of work sessions, where work sessions are
-delimited by some hours of inactivity. This is typically called
-by <a class="reference internal" href="#work_sessions.worksessions" title="work_sessions.worksessions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">worksessions()</span></code></a> as part of a split-apply-combine procedure.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>DataFrame</em>) – containing all sensordata from the given project</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <em>DataFrame</em> containing the work sessions for the given user on a given
-assignment.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="work_sessions.worksessions">
-<code class="descclassname">work_sessions.</code><code class="descname">worksessions</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/work_sessions.html#worksessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#work_sessions.worksessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given raw sensordata for all students, group events for
-individual student-projects and compute work sessions.</p>
-<p>Returns summarised work sessions, which includes start times,
-end times, the number of edits (test and normal) and the number of
-launches (test and normal).</p>
-</dd></dl>
-
-</div>
 </div>
 
 
@@ -146,15 +118,6 @@ launches (test and normal).</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Subsessions and work sessions</a><ul>
-<li><a class="reference internal" href="#module-subsessions">Subsessions</a></li>
-<li><a class="reference internal" href="#module-work_sessions">Work sessions</a></li>
-</ul>
-</li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="debugging.html"
                         title="previous chapter">Eclipse Debugger Usage</a></p>
