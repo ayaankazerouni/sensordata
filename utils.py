@@ -372,7 +372,9 @@ def maptouuids(sensordata=None, sdpath=None, uuids=None, uuidpath=None, crnfilte
 
     return merged
 
-def __assignment_from_timestamp(event, due_dates, offset=pd.Timedelta(1, 'w')):
+def __assignment_from_timestamp(event, due_dates, offset=None):
+    offset = pd.Timedelta(1, 'w') if offset is None else offset
+
     try:
         t = pd.to_datetime(event['time'], unit='ms')
     except ValueError:
