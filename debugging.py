@@ -88,7 +88,9 @@ def userdebugsessions(userevents):
     See also:
         :meth:`sessionsummary`
     """
-    userevents.loc[userevents.Subtype == 'Terminate', 'session'] = userevents.index[userevents.Subtype == 'Terminate']
+    userevents.loc[
+        userevents.Subtype == 'Terminate', 'session'
+    ] = userevents.index[userevents.Subtype == 'Terminate']
     userevents.session = (
         userevents.session
         # fill backwards from termination

@@ -25,7 +25,7 @@ def assign_worksessions(df, threshold=1, milliseconds=True):
     df['workSessionId'] = df['newSession'].cumsum().astype('int')
     return df
 
-def assign_subsessions(userevents, event_type='Termination', forward=True):
+def assign_subsessions(userevents, event_type=('Termination', 'Test'), forward=True):
     """Assigns `subsessions` to events. A subsession contains 
     all the work done after or before an event of interest, until
     another event of interest is reached.
@@ -39,25 +39,52 @@ def assign_subsessions(userevents, event_type='Termination', forward=True):
     grouping by users, assignments, and work sessions.
 
     Args:
-        event_type (list or str): Delimit subsessions by a specific kind of 
-            event; defaults to termination events. If a list, delimits subsessions
-            by all the specified event Types.
+        event_type (tuple, list of tuples, or str): Delimit subsessions by a specific kind of 
+            event; defaults to test termination events. If a list, delimits subsessions
+            by all the specified event Types. Tuples are interpreted as (Type, Subtype)
+            filters, joined by an AND. Filters in a list are put together using ORs.
         forward (bool): Compute subsessions forward or backward?
     Returns:
         A DataFrame with a `subsession` column. The column should be
         treated as a nominal factor.
+
+    Examples:
+        In this example, the subsession delimiting events are:
+            * Test terminations `Type=='Termination' and Subtype=='Test'`
+            * Debugger start events `Type=='Debug' and Subtype=='Start'`
+            * Submissions `Type=='Submission'`
+
+        .. code-block:: python
+           
+           df.groupby('userName').apply(sessions.assign_subsessions, event_type=[
+                ('Termination', 'Test'), ('Debug', 'Start'), 'Submission'
+           ])
     """
     # Need events in chronological order to assign subsessions 
     userevents = userevents.sort_values(by=['time'], ascending=[1])
 
+    # validate event_type
+
     if isinstance(event_type, str):
+        event_type = (event_type, None)
         event_type = [event_type]
     
-    # mark each relevant event as a subsession delimiter
-    userevents.loc[
-        (userevents.Type.isin(event_type)), 'subsession'
-    ] = userevents.index[userevents.Type.isin(event_type)]
-
+    conditions = [] 
+    for item in event_type:
+        if ((isinstance(item, tuple) and len(item) == 1) or
+                isinstance(item, str)):
+            item = (item, None)
+        conditions.append(item) 
+    
+    for typ, subtyp in conditions:
+        if subtyp is None:
+            cond = userevents['Type'] == typ
+        else:
+            cond = (userevents['Type'] == typ) & (userevents['Subtype'] == subtyp)
+        userevents.loc[
+            cond, 'subsession'
+        ] = userevents.index[cond]
+        
     # Forward fill from each termination
     direction = 'ffill' if forward else 'bfill'
     userevents.subsession = ( 
