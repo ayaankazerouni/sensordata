@@ -95,5 +95,5 @@ def assign_subsessions(userevents, event_type=('Termination', 'Test'), forward=T
     )
     userevents.loc[:, 'subsession'] = userevents['subsession'].astype(int)
 
-    return userevents.drop(columns=['userName'])
+    return userevents
 

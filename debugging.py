@@ -147,7 +147,8 @@ def collapsesessions(sessions):
     project.
 
     Args:
-        sessions (pd.DataFrame): Summarised debugger sessions, as returned by :meth:`sessionsummary`
+        sessions (pd.DataFrame): Summarised debugger sessions, as returned 
+                                 by :meth:`sessionsummary`
 
     Returns:
         A DataFrame with a single line per project, giving a coarse-grained overview

@@ -381,6 +381,7 @@ def __assignment_from_timestamp(event, due_dates, offset=None):
         t = pd.Timestamp(event['time'])
 
     for idx, dd in enumerate(due_dates, start=1):
+        dd = pd.to_datetime(dd, unit='ms')
         if t < dd + offset:
             return 'Project {}'.format(idx)
 
