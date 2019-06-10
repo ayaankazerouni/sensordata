@@ -14,7 +14,6 @@ Documentation
    sessions
    utils
    other
-   consolidate_sensordata
 
 Indices and tables
 ==================

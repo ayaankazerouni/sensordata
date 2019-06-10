@@ -14,7 +14,7 @@ To use:
 """
 
 from utils import get_term
-from consolidate_sensordata import load_submission_data
+from load_datasets import load_submission_data
 
 import sys
 import datetime

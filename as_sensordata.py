@@ -4,7 +4,7 @@ interpersing different event types (e.g. Submissions, method
 modifications, etc.) into a larger set of DevEventTracker events. 
 """
 import pandas as pd
-import consolidate_sensordata
+import load_datasets
 
 def method_mods_to_edits(df=None, filepath=None, testonly=False):
     """Convert method modification events, as emitted by the
@@ -66,9 +66,9 @@ def submissions_to_sensordata(df=None, submissionpath=None, **kwargs):
 
     Args:
         df (pd.DataFrame): A DataFrame of submissions, as returned 
-            by :meth:`consolidate_sensordata.load_submission_data`
+            by :meth:`load_datasets.load_submission_data`
         submissionpath (str): A path to a CSV containing submission information
-        kwargs (dict): Other keyword arguments passed to :meth:`consolidate_sensordata.load_submission_data`
+        kwargs (dict): Other keyword arguments passed to :meth:`load_datasets.load_submission_data`
     Returns:
         The submissions in the same format as DevEventTracker data
     """
@@ -78,7 +78,7 @@ def submissions_to_sensordata(df=None, submissionpath=None, **kwargs):
     if df is None:
         onlyfinal = kwargs.get('onlyfinal', True)
         pluscols = kwargs.get('pluscols', [])
-        df = consolidate_sensordata.load_submission_data(webcat_path=submissionpath, onlyfinal=onlyfinal, 
+        df = load_datasets.load_submission_data(webcat_path=submissionpath, onlyfinal=onlyfinal, 
                                                          pluscols=pluscols)
 
     return df.reset_index().apply(__sensordata_from_sub, axis=1)

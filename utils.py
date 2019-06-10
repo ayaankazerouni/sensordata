@@ -16,63 +16,6 @@ import pandas as pd
 
 logging.basicConfig(filename='sensordata-utils.log', filemode='w', level=logging.WARN)
 
-def load_launches(launch_path=None, sensordata_path=None, newformat=True):
-    """Loads raw launch data.
-
-    Convenience method: filters out everything but Launches from raw sensordata,
-    or reads launches from an already filtered CSV file. If both are specified,
-    the launch_path will be given precedence.
-
-    Newformat info: The new format encodes test success info differently; the old format
-    included columns 'TestSucesses' (notice the typo) and 'TestFailures'; the new format
-    instead include the column 'Unit-Name'. The new format also includes ConsoleOutput,
-    which was not present earlier. Use the default True for data collected after Fall 2018,
-    False for earlier.
-
-    Args:
-        launch_path (str): Path to file containing already filtered launch data
-        sensordata_path (str): Path to file containing raw sensordata
-        newformat (bool, default=True): Use the new format?
-    """
-    errormessage = "Either launch_path or sensordata_path must be specified and non-empty."
-    if not launch_path and not sensordata_path:
-        raise ValueError(errormessage)
-
-    if launch_path:
-        try:
-            launches = pd.read_csv(launch_path) # no need to do any formatting, either
-            return launches
-        except FileNotFoundError:
-            if not sensordata_path:
-                raise ValueError(errormessage)
-
-    dtypes = {
-        'email': str,
-        'CASSIGNMENTNAME': str,
-        'time': float,
-        'Type': str,
-        'Subtype': str,
-        'Subsubtype': str,
-    }
-    if newformat:
-        dtypes['Unit-Name'] = str
-        dtypes['ConsoleOutput'] = str
-    else:
-        dtypes['TestSucesses'] = str
-        dtypes['TestFailures'] = str
-
-    # pylint: disable=unused-variable
-    eventtypes = ['Launch', 'Termination']
-    data = pd.read_csv(sensordata_path, dtype=dtypes, usecols=dtypes.keys()) \
-             .query('Type in @eventtypes') \
-             .rename(columns={
-                 'email': 'userName',
-                 'CASSIGNMENTNAME': 'assignment'
-             })
-    data.userName = data.userName.apply(lambda u: u.split('@')[0])
-    data = data.set_index(['userName', 'assignment'])
-    return data
-
 def get_term(timestamp):
     """Returns a term id based on a timestamp in seconds. If the provided
     timestamp is in milliseconds this method will truncate the timestamp to seconds.
@@ -97,49 +40,6 @@ def get_term(timestamp):
         return 'spring%d' % year
 
     return None
-
-def load_edits(edit_path=None, sensordata_path=None, assignment_col='assignment'):
-    """Loads edit events that took place on a source file.
-
-    This convenience method filters out Edit events from raw sensordata, or
-    reads an already filtered CSV file. If both edit_path and sensordata_path
-    are specified, the already-filtered file (at edit_path) takes precedence.
-    """
-    if not edit_path and not sensordata_path:
-        raise ValueError("Either edit_path or sensordata_path must be specified and non-empty")
-
-    if edit_path:
-        try:
-            edits = pd.read_csv(edit_path) # no formatting needed
-            return edits
-        except FileNotFoundError:
-            if not sensordata_path:
-                raise ValueError("edit_path is invalid and sensordata_path not specified.")
-
-    # edit_path was invalid, so we need to get edit events from all sensordata
-    dtypes = {
-        'email': str,
-        assignment_col: str,
-        'time': int,
-        'Class-Name': object,
-        'Unit-Type': object,
-        'Type': object,
-        'Subtype': object,
-        'Subsubtype': object,
-        'onTestCase': object,
-        'Current-Statements': object,
-        'Current-Methods': object,
-        'Current-Size': object,
-        'Current-Test-Assertions': object
-    }
-    data = pd.read_csv(sensordata_path, dtype=dtypes, usecols=dtypes.keys())
-    data = data[(data['Type'] == 'Edit') & (data['Class-Name'] != '')]
-    data = data.fillna('') \
-               .sort_values(by=['email', assignment_col, 'time'], ascending=[1, 1, 1]) \
-               .rename(columns={'email': 'userName', assignment_col: 'assignment'})
-    data['userName'] = data.userName.apply(lambda u: u.split('@')[0])
-    data = data.set_index(['userName', 'assignment'])
-    return data
 
 #: The typical fieldnames included in sensordata events. 
 DEFAULT_FIELDNAMES = [
@@ -225,8 +125,11 @@ def processline(url, fieldnames=None, filtertype=None):
 
     return kvpairs
 
-
 def split_termination_events(df):
+    """Typically, Termination events contain results of several test methods being run at 
+    once. This method takes a DataFrame containing such Termination events and returns it
+    with each one split into its own event (with the same timestamp).
+    """
     flattened = [
         event 
         for sublist in df.apply(__split_one_termination, axis=1) 
