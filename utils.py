@@ -290,18 +290,18 @@ def __assignment_from_timestamp(event, due_dates, offset=None):
 
     return None
 
-def with_edit_sizes(df, groupby=['userName', 'Class-Name']):
+def with_edit_sizes(df, groupby=['userName', 'Class-Name'], sizecol='Current-Size'):
     """Given a data frame with Edit events containing Current-Sizes, group by
     Class-Name and return the dataframe with a column called 'edit_size', which
     contains the size of the edit made to the given file.
     """
     edits = df[(~df['Class-Name'].isna()) & (df['Type'] == 'Edit')] \
             .groupby(groupby) \
-            .apply(__get_edit_sizes)
+            .apply(__get_edit_sizes, sizecol=sizecol)
     df.loc[df.index.isin(edits.index), 'edit_size'] = edits['edit_size']
     return df
 
-def __get_edit_sizes(df):
-    df['edit_size'] = df['Current-Size'].diff().abs().fillna(0)
+def __get_edit_sizes(df, sizecol):
+    df['edit_size'] = df[sizecol].diff().abs().fillna(0)
     return df
 
