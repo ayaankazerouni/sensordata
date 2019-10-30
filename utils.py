@@ -16,7 +16,7 @@ import pandas as pd
 
 logging.basicConfig(filename='sensordata-utils.log', filemode='w', level=logging.WARN)
 
-def get_term(timestamp):
+def get_term(timestamp: float) -> str:
     """Returns a term id based on a timestamp in seconds. If the provided
     timestamp is in milliseconds this method will truncate the timestamp to seconds.
     """
@@ -62,7 +62,7 @@ DEFAULT_FIELDNAMES = [
     'ConsoleOutput'
 ]
 
-def raw_to_csv(inpath, outpath, fieldnames=None):
+def raw_to_csv(inpath: str, outpath: str, fieldnames=None) -> None:
     """
     Given a file of newline separated URLs, writes the URL query params as
     rows in CSV format to the specified output file.

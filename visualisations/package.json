@@ -12,15 +12,15 @@
   "author": "Ayaan Kazerouni",
   "license": "ISC",
   "dependencies": {
-    "d3-svg-legend": "^2.24.1",
+    "d3-svg-legend": "^2.25.6",
     "event-drops": "^0.3.1-alpha4",
     "json-loader": "^0.5.4",
-    "moment": "^2.18.1"
+    "moment": "^2.24.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "webpack": "^2.2.1",
     "webpack-dev-server": ">=3.1.11"
