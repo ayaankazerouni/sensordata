@@ -15,7 +15,7 @@
     "d3-svg-legend": "^2.25.6",
     "event-drops": "^0.3.1-alpha4",
     "json-loader": "^0.5.4",
-    "moment": "^2.24.0"
+    "moment": "^2.29.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
